@@ -1,0 +1,40 @@
+﻿@page "/Admin/Users/Edit/{id:guid}"
+@model BldLeague.Web.Pages.Admin.Users.EditUser
+
+<div class="container mt-2">
+    
+    <h2>Edycja użytkownika</h2>
+    
+    <p class="mb-4">
+        ID: <code>@Model.UpdateUserRequest.UserId</code>
+    </p>
+
+    <form method="post">
+        <input type="hidden" asp-for="UpdateUserRequest.UserId"/>
+
+        <div class="mb-3">
+            <label asp-for="UpdateUserRequest.FullName" class="form-label">Imię i nazwisko</label>
+            <input asp-for="UpdateUserRequest.FullName" class="form-control" placeholder="Podaj pełne imię i nazwisko">
+            <span asp-validation-for="UpdateUserRequest.FullName"class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="UpdateUserRequest.WcaId" class="form-label">WCA ID</label>
+            <input asp-for="UpdateUserRequest.WcaId" class="form-control" placeholder="Podaj WCA ID">
+            <span asp-validation-for="UpdateUserRequest.WcaId"class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="UpdateUserRequest.AvatarImageUrl" class="form-label">Awatar URL</label>
+            <input asp-for="UpdateUserRequest.AvatarImageUrl" class="form-control" placeholder="Podaj link do awatara (opcjonalne)">
+            <span asp-validation-for="UpdateUserRequest.AvatarImageUrl"class="text-danger"></span>
+        </div>
+
+        <div class="form-check mb-3">
+            <input asp-for="UpdateUserRequest.IsAdmin" class="form-check-input" type="checkbox" id="isAdmin">
+            <label class="form-check-label" for="isAdmin">Administrator</label>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Zapisz</button>
+    </form>
+</div>

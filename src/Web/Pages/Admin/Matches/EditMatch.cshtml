@@ -1,0 +1,90 @@
+@page "{id:guid}"
+@model BldLeague.Web.Pages.Admin.Matches.EditMatch
+
+<div class="container mt-4">
+    <h2 class="mb-4">Edytuj mecz</h2>
+
+    @if (Model.MatchDetails != null)
+    {
+        <div class="mb-3">
+            <label class="form-label">ID</label>
+            <code class="d-block">@Model.MatchDetails.Id</code>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-md-3 mb-3">
+                <label class="form-label">Sezon</label>
+                <input class="form-control" value="@Model.MatchDetails.SeasonName" disabled />
+            </div>
+            <div class="col-md-3 mb-3">
+                <label class="form-label">Liga</label>
+                <input class="form-control" value="@Model.MatchDetails.LeagueName" disabled />
+            </div>
+            <div class="col-md-3 mb-3">
+                <label class="form-label">Kolejka</label>
+                <input class="form-control" value="@Model.MatchDetails.RoundName" disabled />
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Zawodnik A</label>
+                <input class="form-control" value="@Model.MatchDetails.UserAFullName" disabled />
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Zawodnik B</label>
+                <input class="form-control" value="@(Model.MatchDetails.UserBFullName ?? "--")" disabled />
+            </div>
+        </div>
+    }
+
+    <form method="post">
+        <input type="hidden" asp-for="EditMatchRequest.MatchId" />
+
+        <hr class="my-4" />
+
+        <div class="row">
+            <!-- SOLVES: PLAYER A -->
+            <div class="col-md-6">
+                <h5>Wyniki – Zawodnik A</h5>
+
+                @for (int i = 0; i < Model.EditMatchRequest.UserASolves.Count; i++)
+                {
+                    <div class="mb-3">
+                        <label class="form-label">Solve @(i + 1)</label>
+                        <input asp-for="EditMatchRequest.UserASolves[i].Result"
+                               class="form-control"
+                               placeholder="np. 12.34 lub DNF" />
+                        <span asp-validation-for="EditMatchRequest.UserASolves[i].Result"
+                              class="text-danger"></span>
+                    </div>
+                }
+            </div>
+
+            <!-- SOLVES: PLAYER B (hidden for bye matches) -->
+            @if (Model.MatchDetails?.UserBFullName != null)
+            {
+                <div class="col-md-6">
+                    <h5>Wyniki – Zawodnik B</h5>
+
+                    @for (int i = 0; i < Model.EditMatchRequest.UserBSolves.Count; i++)
+                    {
+                        <div class="mb-3">
+                            <label class="form-label">Solve @(i + 1)</label>
+                            <input asp-for="EditMatchRequest.UserBSolves[i].Result"
+                                   class="form-control"
+                                   placeholder="np. 12.34 lub DNF" />
+                            <span asp-validation-for="EditMatchRequest.UserBSolves[i].Result"
+                                  class="text-danger"></span>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+
+        <div class="mt-4">
+            <button type="submit" class="btn btn-primary">Zapisz</button>
+            <a asp-page="/Admin/Matches/AllMatches" class="btn btn-secondary ms-2">Anuluj</a>
+        </div>
+    </form>
+</div>

@@ -1,0 +1,23 @@
+﻿@page "/Admin/Leagues/Edit/{id:guid}"
+@model BldLeague.Web.Pages.Admin.Leagues.EditLeague
+
+<div class="container mt-2">
+
+    <h2>Edycja ligi</h2>
+
+    <p class="mb-4">
+        ID: <code>@Model.UpdateLeagueRequest.LeagueId</code>
+    </p>
+
+    <form method="post">
+        <input type="hidden" asp-for="UpdateLeagueRequest.LeagueId"/>
+
+        <div class="mb-3">
+            <label asp-for="UpdateLeagueRequest.LeagueIdentifier" class="form-label">Identyfikator ligi</label>
+            <input asp-for="UpdateLeagueRequest.LeagueIdentifier" class="form-control" placeholder="Podaj identyfikator ligi (np. A, B)">
+            <span asp-validation-for="UpdateLeagueRequest.LeagueIdentifier" class="text-danger"></span>
+        </div>
+        
+        <button type="submit" class="btn btn-primary">Zapisz</button>
+    </form>
+</div>

@@ -1,0 +1,11 @@
+﻿@page
+@model BldLeague.Web.Pages.Account.AccessDenied
+
+<h2>Brak dostępu</h2>
+
+<p>Nie masz uprawnień, aby uzyskać dostęp do tej strony.</p>
+
+@if (!User.Identity?.IsAuthenticated ?? false)
+{
+    <p>Proszę się <a asp-page="/Account/Login">zalogować</a>, aby kontynuować.</p>
+}

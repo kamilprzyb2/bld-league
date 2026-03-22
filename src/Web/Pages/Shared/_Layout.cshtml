@@ -1,0 +1,183 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>3BLD League</title>
+    <script type="importmap"></script>
+    <link rel="icon" type="image/x-icon" href="~/favicon.ico"/>
+    <link rel="icon" type="image/png" sizes="32x32" href="~/favicon-32x32.png"/>
+    <link rel="icon" type="image/png" sizes="16x16" href="~/favicon-16x16.png"/>
+    <link rel="apple-touch-icon" sizes="180x180" href="~/apple-touch-icon.png"/>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true"/>
+    <link rel="stylesheet" href="~/Web.styles.css" asp-append-version="true"/>
+
+    <!-- Page-specific CSS -->
+    @await RenderSectionAsync("Styles", required: false)
+
+    <script>
+        (function () {
+            const savedTheme = localStorage.getItem("bs-theme") || "light";
+            document.documentElement.setAttribute("data-bs-theme", savedTheme);
+        })();
+    </script>
+</head>
+<body>
+<header>
+    <nav class="navbar navbar-expand-sm navbar-toggleable-sm border-bottom box-shadow mb-1">
+        <div class="container">
+            <a class="navbar-brand" asp-area="" asp-page="/Index">3BLD League</a>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse"
+                    aria-controls="navbarSupportedContent"
+                    aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+
+                <!-- Left links -->
+                <ul class="navbar-nav">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button"
+                           data-bs-toggle="dropdown" aria-expanded="false">
+                            Wyniki <i class="bi bi-chevron-down nav-chevron"></i>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" asp-area="" asp-page="/Leagues/ViewLeague">Ligi</a></li>
+                            <li><a class="dropdown-item" asp-area="" asp-page="/Rounds/ViewRound">Kolejki</a></li>
+                            <li><a class="dropdown-item" asp-area="" asp-page="/Matches/MatchList">Mecze</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button"
+                           data-bs-toggle="dropdown" aria-expanded="false">
+                            Informacje <i class="bi bi-chevron-down nav-chevron"></i>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" asp-area="" asp-page="/About/Guidelines">Zasady</a></li>
+                            <li><a class="dropdown-item" asp-area="" asp-page="/About/About">O projekcie</a></li>
+                            <li><a class="dropdown-item" asp-area="" asp-page="/About/Privacy">Polityka prywatności</a></li>
+                        </ul>
+                    </li>
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button"
+                               data-bs-toggle="dropdown" aria-expanded="false">
+                                Zarządzanie <i class="bi bi-chevron-down nav-chevron"></i>
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" asp-area="" asp-page="/Admin/Users/AllUsers">Użytkownicy</a></li>
+                                <li><a class="dropdown-item" asp-area="" asp-page="/Admin/Leagues/AllLeagues">Ligi</a></li>
+                                <li><a class="dropdown-item" asp-area="" asp-page="/Admin/Seasons/AllSeasons">Sezony</a></li>
+                                <li><a class="dropdown-item" asp-area="" asp-page="/Admin/Rounds/AllRounds">Kolejki</a></li>
+                                <li><a class="dropdown-item" asp-area="" asp-page="/Admin/LeagueSeasons/AllLeagueSeasons">Ligo-sezony</a></li>
+                                <li><a class="dropdown-item" asp-area="" asp-page="/Admin/Matches/AllMatches">Mecze</a></li>
+                            </ul>
+                        </li>
+                    }
+                </ul>
+
+                <!-- Right: user info + dark mode -->
+                <ul class="navbar-nav d-flex align-items-center">
+                    @if (User.Identity?.IsAuthenticated ?? false)
+                    {
+                        <li class="nav-item dropdown">
+                            <a class="nav-link d-flex align-items-center" href="#" id="userDropdown" role="button"
+                               data-bs-toggle="dropdown" aria-expanded="false">
+                                <img src="@User.FindFirst("thumbnail")?.Value"
+                                     alt="Avatar"
+                                     style="width:32px;height:32px;margin-right:0.5rem;" />
+                                <span>@User.Identity.Name</span>
+                            </a>
+
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                                <li>
+                                    <form method="post" asp-page="/Account/Logout" class="m-0">
+                                        <button type="submit" class="dropdown-item text-danger px-3">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16" style="margin-right: 0.5rem;">
+                                                <path fill-rule="evenodd" d="M10 12.5a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 .5.5v2a.5.5 0 0 0 1 0v-2A1.5 1.5 0 0 0 9.5 2h-8A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h8a1.5 1.5 0 0 0 1.5-1.5v-2a.5.5 0 0 0-1 0v2z"/>
+                                                <path fill-rule="evenodd" d="M15.854 8.354a.5.5 0 0 0 0-.708l-3-3a.5.5 0 0 0-.708.708L14.293 7.5H5.5a.5.5 0 0 0 0 1h8.793l-2.147 2.146a.5.5 0 0 0 .708.708l3-3z"/>
+                                            </svg>
+                                            Wyloguj się
+                                        </button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </li>
+                    }
+                    else
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link" asp-page="/Account/Login">Zaloguj się</a>
+                        </li>
+                    }
+
+                    <!-- Dark mode switch -->
+                    <li class="nav-item ms-3">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="darkModeSwitch" checked>
+                            <label class="form-check-label" for="darkModeSwitch">Dark Mode</label>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+</header>
+<div class="container">
+    <main role="main" class="pb-3">
+        @if (TempData["SuccessMessage"] is string msg)
+        {
+            <div class="alert alert-success">
+                @msg
+            </div>
+        }
+        @if (TempData["ErrorMessage"] is string errorMsg)
+        {
+            <div class="alert alert-danger">
+                @errorMsg
+            </div>
+        }
+        @RenderBody()
+    </main>
+</div>
+
+<footer class="border-top footer text-muted">
+    <div class="container">
+        &copy; @DateTime.Now.Year - 3BLD League - <a asp-page="/About/Privacy">Polityka prywatności</a>
+    </div>
+</footer>
+
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+<script src="~/js/site.js" asp-append-version="true"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', (event) => {
+        const htmlElement = document.documentElement;
+        const switchElement = document.getElementById('darkModeSwitch');
+
+        // Set the default theme to dark if no setting is found in local storage
+        const currentTheme = localStorage.getItem('bsTheme') || 'dark';
+        htmlElement.setAttribute('data-bs-theme', currentTheme);
+        switchElement.checked = currentTheme === 'dark';
+
+        switchElement.addEventListener('change', function () {
+            if (this.checked) {
+                htmlElement.setAttribute('data-bs-theme', 'dark');
+                localStorage.setItem('bsTheme', 'dark');
+            } else {
+                htmlElement.setAttribute('data-bs-theme', 'light');
+                localStorage.setItem('bsTheme', 'light');
+            }
+        });
+    });
+</script>
+
+@await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

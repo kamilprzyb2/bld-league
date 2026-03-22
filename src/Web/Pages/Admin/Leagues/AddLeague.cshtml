@@ -1,0 +1,15 @@
+﻿@page "/Admin/Leagues/Add"
+@model BldLeague.Web.Pages.Admin.Leagues.AddLeague
+
+<div class="container mt-2">
+    <h2>Utwórz ligę</h2>
+    <form method="post">
+        <div class="mb-3">
+            <label asp-for="CreateLeagueRequest.LeagueIdentifier" class="form-label">Identyfikator ligi</label>
+            <input asp-for="CreateLeagueRequest.LeagueIdentifier" class="form-control" placeholder="Podaj identyfikator ligi (np. A, B)">
+            <span asp-validation-for="CreateLeagueRequest.LeagueIdentifier" class="text-danger"></span>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Utwórz</button>
+    </form>
+</div>

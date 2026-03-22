@@ -1,0 +1,105 @@
+@page "/Rounds"
+@using BldLeague.Application.Queries.Rounds.GetAllBySeasonId
+@using BldLeague.Application.Queries.Seasons.GetAll
+@model BldLeague.Web.Pages.Rounds.ViewRound
+
+<div class="container mt-2">
+    <h2>Kolejki</h2>
+    <form method="get" class="row g-3 align-items-center">
+
+        <div class="col-auto d-flex align-items-center">
+            <select asp-for="SeasonId"
+                    asp-items="@(new SelectList(Model.Seasons, nameof(SeasonSummaryDto.Id), nameof(SeasonSummaryDto.SeasonName)))"
+                    class="form-select"
+                    onchange="this.form.submit()">
+            </select>
+        </div>
+
+        <div class="col-auto d-flex align-items-center">
+            <select asp-for="RoundNumber"
+                    asp-items="@(new SelectList(Model.Rounds, nameof(RoundSummaryDto.RoundNumber), nameof(RoundSummaryDto.RoundName)))"
+                    class="form-select"
+                    onchange="this.form.submit()">
+            </select>
+        </div>
+
+        @if (Model.RoundDetail != null)
+        {
+            <div class="col-auto d-flex align-items-center gap-3">
+                <p class="mb-0">@Model.RoundDetail.StartDate - @Model.RoundDetail.EndDate</p>
+                @if (Model.RoundDetail.Scrambles.Any())
+                {
+                    <button class="btn btn-outline-secondary btn-sm"
+                            type="button"
+                            data-bs-toggle="collapse"
+                            data-bs-target="#scrambleSection">
+                        Pokaż scramble
+                    </button>
+                }
+            </div>
+        }
+
+    </form>
+
+    @if (Model.RoundDetail != null && Model.RoundDetail.Scrambles.Any())
+    {
+        <div class="collapse mt-3" id="scrambleSection">
+            <ol>
+                @foreach (var notation in Model.RoundDetail.Scrambles)
+                {
+                    <li class="font-monospace">@notation</li>
+                }
+            </ol>
+        </div>
+    }
+
+    <hr class="my-4" />
+
+    @if (Model.RoundDetail != null)
+    {
+        <table class="table table-hover align-middle">
+            <thead class="table">
+                <tr>
+                    <th scope="col" class="text-center">Pozycja</th>
+                    <th scope="col">Zawodnik</th>
+                    <th scope="col" class="d-none d-md-table-cell">Liga</th>
+                    <th scope="col">Best</th>
+                    <th scope="col">Ao5</th>
+                    <th scope="col" class="d-none d-md-table-cell">A1</th>
+                    <th scope="col" class="d-none d-md-table-cell">A2</th>
+                    <th scope="col" class="d-none d-md-table-cell">A3</th>
+                    <th scope="col" class="d-none d-md-table-cell">A4</th>
+                    <th scope="col" class="d-none d-md-table-cell">A5</th>
+                    <th scope="col" class="text-center">Punkty</th>
+                </tr>
+            </thead>
+            <tbody>
+            @if (Model.RoundDetail.Standings.Any())
+            {
+                foreach (var standing in Model.RoundDetail.Standings)
+                {
+                    <tr>
+                        <td class="text-center">@standing.Place</td>
+                        <td>@standing.UserFullName</td>
+                        <td class="d-none d-md-table-cell">@standing.LeagueIdentifier</td>
+                        <td class="fw-bold">@standing.Best</td>
+                        <td>@standing.Average</td>
+                        <td class="d-none d-md-table-cell">@standing.Solve1</td>
+                        <td class="d-none d-md-table-cell">@standing.Solve2</td>
+                        <td class="d-none d-md-table-cell">@standing.Solve3</td>
+                        <td class="d-none d-md-table-cell">@standing.Solve4</td>
+                        <td class="d-none d-md-table-cell">@standing.Solve5</td>
+                        <td class="text-center">@standing.Points</td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="11" class="text-center">Brak danych.</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    }
+</div>

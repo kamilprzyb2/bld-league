@@ -1,0 +1,23 @@
+@page "/Admin/Seasons/{id:guid}/Edit"
+@model BldLeague.Web.Pages.Admin.Seasons.EditSeason
+
+<div class="container mt-2">
+    <h2>Edycja sezonu</h2>
+    <form method="post" class="mx-auto" style="max-width: 400px;">
+        <input type="hidden" asp-for="EditSeasonRequest.SeasonId" />
+
+        <div class="mb-3">
+            <label class="form-label">ID</label>
+            <code class="d-block">@Model.EditSeasonRequest.SeasonId</code>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="EditSeasonRequest.SeasonNumber" class="form-label">Numer sezonu</label>
+            <input asp-for="EditSeasonRequest.SeasonNumber" type="number" class="form-control" />
+            <span asp-validation-for="EditSeasonRequest.SeasonNumber" class="text-danger"></span>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Zapisz</button>
+        <a asp-page="/Admin/Seasons/AllSeasons" class="btn btn-outline-secondary ms-2">Anuluj</a>
+    </form>
+</div>

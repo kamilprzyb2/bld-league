@@ -1,0 +1,92 @@
+@page "/Admin/Leagues"
+@model BldLeague.Web.Pages.Admin.Leagues.AllLeagues
+
+<div class="container mt-2">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <h2 class="mb-0">Lista lig</h2>
+        <div class="d-flex gap-2">
+            <a asp-page="/Admin/Leagues/AllLeagues" asp-page-handler="ExportCsv" class="btn btn-outline-secondary">Export CSV</a>
+            <button class="btn btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#importForm">Import CSV</button>
+            <a asp-page="/Admin/Leagues/AddLeague" class="btn btn-primary">Utwórz ligę</a>
+        </div>
+    </div>
+
+    <div class="collapse mb-3" id="importForm">
+        <div class="card card-body">
+            <form method="post" asp-page-handler="ImportCsv" enctype="multipart/form-data">
+                <div class="mb-2">
+                    <label class="form-label">Plik CSV (nagłówki: League Identifier)</label>
+                    <input type="file" name="file" accept=".csv" class="form-control" required />
+                </div>
+                <button type="submit" class="btn btn-warning">Importuj</button>
+            </form>
+        </div>
+    </div>
+
+    @if (Model.ImportResult != null)
+    {
+        <div class="alert @(Model.ImportResult.HasErrors ? "alert-danger" : "alert-success") mb-3">
+            <strong>@(Model.ImportResult.HasErrors ? "Import nieudany" : "Import zakończony pomyślnie")</strong>
+            — @Model.ImportResult.SuccessCount sukcesów, @Model.ImportResult.ErrorCount błędów
+        </div>
+        <div class="table-responsive mb-3">
+            <table class="table table-sm">
+                <thead><tr><th>Wiersz</th><th>Status</th><th>Komunikat</th></tr></thead>
+                <tbody>
+                @foreach (var row in Model.ImportResult.RowResults)
+                {
+                    <tr class="@(row.Success ? "table-success" : "table-danger")">
+                        <td>@row.RowNumber</td>
+                        <td>@(row.Success ? "OK" : "Błąd")</td>
+                        <td>@row.Message</td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    }
+
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead class="table">
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">Liga</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            @if (Model.Leagues.Any())
+            {
+                int index = 1;
+                foreach (var league in Model.Leagues)
+                {
+                    <tr>
+                        <th scope="row">@index</th>
+                        <td>@league.LeagueName</td>
+                        <td>
+                            <a class="btn btn-sm btn-primary"
+                               asp-page="/Admin/Leagues/EditLeague"
+                               asp-route-id="@league.Id">
+                                Edytuj
+                            </a>
+                            <form method="post" asp-page-handler="Delete" class="d-inline"
+                                  onsubmit="return confirm('Czy na pewno chcesz usunąć ligę @league.LeagueName?\nWszystkie powiązane ligo-sezony i mecze zostaną skasowane.')">
+                                <input type="hidden" name="DeleteLeagueId" value="@league.Id" />
+                                <button type="submit" class="btn btn-sm btn-danger">Usuń</button>
+                            </form>
+                        </td>
+                    </tr>
+                    index++;
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="3" class="text-center">Nie znaleziono żadnej ligi.</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+</div>

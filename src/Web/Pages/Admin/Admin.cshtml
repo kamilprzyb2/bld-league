@@ -1,0 +1,72 @@
+﻿@page "/Admin"
+@model BldLeague.Web.Pages.Admin.Admin
+
+<div class="container mt-2">
+    <h2>Panel administracyjny</h2>
+    <div class="table-responsive">
+    <table class="table table-hover align-middle">
+        <tbody>
+        <tr>
+            <td>Użytkownicy</td>
+            <td>
+                
+                <a class="btn btn-sm btn-primary"
+                   asp-page="/Admin/Users/AllUsers">
+                    Zarządzaj
+                </a>
+            </td>
+        </tr>
+        <tr>
+            <td>Ligi</td>
+            <td>
+
+                <a class="btn btn-sm btn-primary"
+                   asp-page="/Admin/Leagues/AllLeagues">
+                    Zarządzaj
+                </a>
+            </td>
+        </tr>
+        <tr>
+            <td>Sezony</td>
+            <td>
+
+                <a class="btn btn-sm btn-primary"
+                   asp-page="/Admin/Seasons/AllSeasons">
+                    Zarządzaj
+                </a>
+            </td>
+        </tr>
+        <tr>
+            <td>Kolejki</td>
+            <td>
+
+                <a class="btn btn-sm btn-primary"
+                   asp-page="/Admin/Rounds/AllRounds">
+                    Zarządzaj
+                </a>
+            </td>
+        </tr>
+        <tr>
+            <td>Liga-sezony</td>
+            <td>
+
+                <a class="btn btn-sm btn-primary"
+                   asp-page="/Admin/LeagueSeasons/AllLeagueSeasons">
+                    Zarządzaj
+                </a>
+            </td>
+        </tr>
+        <tr>
+            <td>Mecze</td>
+            <td>
+
+                <a class="btn btn-sm btn-primary"
+                   asp-page="/Admin/Matches/AllMatches">
+                    Zarządzaj
+                </a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+    </div>
+</div>

@@ -1,0 +1,188 @@
+@page "/Admin/Matches"
+@model BldLeague.Web.Pages.Admin.Matches.AllMatches
+
+<div class="container mt-2">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <h2 class="mb-0">Lista meczów</h2>
+        <div class="d-flex gap-2">
+            <a id="export-link" asp-page="/Admin/Matches/AllMatches" asp-page-handler="ExportCsv"
+               class="btn btn-outline-secondary">Export CSV</a>
+            <button class="btn btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#importForm">Import CSV</button>
+            <a asp-page="/Admin/Matches/AddMatch" class="btn btn-primary">Dodaj mecz</a>
+        </div>
+    </div>
+
+    <div class="collapse mb-3" id="importForm">
+        <div class="card card-body">
+            <form method="post" asp-page-handler="ImportCsv" enctype="multipart/form-data">
+                <div class="mb-2">
+                    <label class="form-label">Plik CSV (nagłówki: Season, League, Round, WCA ID A, WCA ID B, Solve A1–A5, Solve B1–B5)</label>
+                    <input type="file" name="file" accept=".csv" class="form-control" required />
+                </div>
+                <button type="submit" class="btn btn-warning">Importuj</button>
+            </form>
+        </div>
+    </div>
+
+    @if (Model.ImportResult != null)
+    {
+        <div class="alert @(Model.ImportResult.HasErrors ? "alert-danger" : "alert-success") mb-3">
+            <strong>@(Model.ImportResult.HasErrors ? "Import nieudany" : "Import zakończony pomyślnie")</strong>
+            — @Model.ImportResult.SuccessCount sukcesów, @Model.ImportResult.ErrorCount błędów
+        </div>
+        <div class="table-responsive mb-3">
+            <table class="table table-sm">
+                <thead><tr><th>Wiersz</th><th>Status</th><th>Komunikat</th></tr></thead>
+                <tbody>
+                @foreach (var row in Model.ImportResult.RowResults)
+                {
+                    <tr class="@(row.Success ? "table-success" : "table-danger")">
+                        <td>@row.RowNumber</td>
+                        <td>@(row.Success ? "OK" : "Błąd")</td>
+                        <td>@row.Message</td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    }
+
+    <div class="row g-2 align-items-end mb-3">
+        <div class="col-auto">
+            <label class="form-label mb-1">Sezon</label>
+            <select id="filter-season" class="form-select form-select-sm">
+                <option value="">Wszystkie</option>
+            </select>
+        </div>
+        <div class="col-auto">
+            <label class="form-label mb-1">Liga</label>
+            <select id="filter-league" class="form-select form-select-sm">
+                <option value="">Wszystkie</option>
+            </select>
+        </div>
+        <div class="col-auto">
+            <label class="form-label mb-1">Kolejka</label>
+            <select id="filter-round" class="form-select form-select-sm">
+                <option value="">Wszystkie</option>
+            </select>
+        </div>
+        <div class="col-auto">
+            <button id="filter-reset" type="button" class="btn btn-sm btn-outline-secondary">Resetuj</button>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-hover align-middle js-table-pager">
+            <thead class="table">
+            <tr>
+                <th scope="col">Sezon</th>
+                <th scope="col">Liga</th>
+                <th scope="col">Kolejka</th>
+                <th scope="col" class="text-end pe-3">Zawodnik A</th>
+                <th scope="col" class="text-center">Wynik A</th>
+                <th scope="col" class="text-center" data-no-sort>:</th>
+                <th scope="col" class="text-center">Wynik B</th>
+                <th scope="col">Zawodnik B</th>
+                <th scope="col" data-no-sort>Akcje</th>
+            </tr>
+            </thead>
+            <tbody id="matches-body">
+            @if (Model.Matches.Any())
+            {
+                foreach (var match in Model.Matches)
+                {
+                    <tr data-season="@match.SeasonNumber"
+                        data-league="@match.LeagueIdentifier"
+                        data-round="@match.RoundNumber">
+                        <td>@match.SeasonNumber</td>
+                        <td>@match.LeagueIdentifier</td>
+                        <td>@match.RoundNumber</td>
+                        <td class="text-end">@match.UserAFullName</td>
+                        <td class="text-center">@match.UserAScore</td>
+                        <td class="text-center">:</td>
+                        <td class="text-center">@(match.UserBFullName == null ? "--" : match.UserBScore)</td>
+                        <td>@(match.UserBFullName ?? "--")</td>
+                        <td class="d-flex">
+                            <a class="btn btn-sm btn-primary me-2"
+                               asp-page="/Admin/Matches/EditMatch"
+                               asp-route-id="@match.Id">
+                                Edytuj
+                            </a>
+                            <form method="post" asp-page-handler="RemoveMatch"
+                                  onsubmit="return confirm('Czy na pewno chcesz usunąć mecz?')">
+                                <input type="hidden" name="RemoveMatchId" value="@match.Id"/>
+                                <button type="submit" class="btn btn-sm btn-danger">Usuń</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="9" class="text-center">Nie znaleziono żadnego meczu.</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<partial name="_TableSortPager" />
+
+<script>
+(function () {
+    const rows = Array.from(document.querySelectorAll('#matches-body tr[data-season]'));
+    const selSeason = document.getElementById('filter-season');
+    const selLeague = document.getElementById('filter-league');
+    const selRound = document.getElementById('filter-round');
+    const resetBtn = document.getElementById('filter-reset');
+    const exportLink = document.getElementById('export-link');
+    const baseExportHref = exportLink.href;
+
+    function addOptions(sel, values) {
+        values.forEach(v => {
+            const o = document.createElement('option');
+            o.value = v;
+            o.textContent = v;
+            sel.appendChild(o);
+        });
+    }
+
+    const seasons = [...new Set(rows.map(r => r.dataset.season))].sort((a, b) => b - a);
+    const leagues = [...new Set(rows.map(r => r.dataset.league))].sort();
+    const rounds  = [...new Set(rows.map(r => r.dataset.round))].sort((a, b) => a - b);
+    addOptions(selSeason, seasons);
+    addOptions(selLeague, leagues);
+    addOptions(selRound, rounds);
+
+    const table = document.querySelector('table.js-table-pager');
+
+    function applyFilter() {
+        const s = selSeason.value, l = selLeague.value, r = selRound.value;
+        rows.forEach(row => {
+            const visible = (!s || row.dataset.season === s)
+                         && (!l || row.dataset.league === l)
+                         && (!r || row.dataset.round === r);
+            row.classList.toggle('filtered-out', !visible);
+            if (!visible) row.style.display = 'none';
+        });
+        table.dispatchEvent(new Event('tablefilter'));
+        const url = new URL(baseExportHref);
+        s ? url.searchParams.set('seasonNumber', s)       : url.searchParams.delete('seasonNumber');
+        l ? url.searchParams.set('leagueIdentifier', l)   : url.searchParams.delete('leagueIdentifier');
+        r ? url.searchParams.set('roundNumber', r)         : url.searchParams.delete('roundNumber');
+        exportLink.href = url.toString();
+    }
+
+    selSeason.addEventListener('change', applyFilter);
+    selLeague.addEventListener('change', applyFilter);
+    selRound.addEventListener('change', applyFilter);
+    resetBtn.addEventListener('click', function () {
+        selSeason.value = '';
+        selLeague.value = '';
+        selRound.value = '';
+        applyFilter();
+    });
+})();
+</script>

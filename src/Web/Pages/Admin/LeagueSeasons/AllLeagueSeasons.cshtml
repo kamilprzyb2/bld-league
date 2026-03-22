@@ -1,0 +1,144 @@
+@page "/Admin/LeagueSeasons"
+@model BldLeague.Web.Pages.Admin.LeagueSeasons.AllLeagueSeasons
+
+<div class="container mt-2">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <h2 class="mb-0">Lista liga-sezonów</h2>
+        <div class="d-flex gap-2">
+            <a asp-page="/Admin/LeagueSeasons/AllLeagueSeasons" asp-page-handler="ExportCsv" class="btn btn-outline-secondary">Export CSV</a>
+            <button class="btn btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#importForm">Import CSV</button>
+            <a asp-page="/Admin/LeagueSeasons/AddLeagueSeason" class="btn btn-primary">Dodaj liga-sezon</a>
+        </div>
+    </div>
+
+    <div class="collapse mb-3" id="importForm">
+        <div class="card card-body">
+            <form method="post" asp-page-handler="ImportCsv" enctype="multipart/form-data">
+                <div class="mb-2">
+                    <label class="form-label">Plik CSV (nagłówki: Season Number, League Identifier[, WCA ID, ...])</label>
+                    <input type="file" name="file" accept=".csv" class="form-control" required />
+                </div>
+                <button type="submit" class="btn btn-warning">Importuj</button>
+            </form>
+        </div>
+    </div>
+
+    @if (Model.ImportResult != null)
+    {
+        <div class="alert @(Model.ImportResult.HasErrors ? "alert-danger" : "alert-success") mb-3">
+            <strong>@(Model.ImportResult.HasErrors ? "Import nieudany" : "Import zakończony pomyślnie")</strong>
+            — @Model.ImportResult.SuccessCount sukcesów, @Model.ImportResult.ErrorCount błędów
+        </div>
+        <div class="table-responsive mb-3">
+            <table class="table table-sm">
+                <thead><tr><th>Wiersz</th><th>Status</th><th>Komunikat</th></tr></thead>
+                <tbody>
+                @foreach (var row in Model.ImportResult.RowResults)
+                {
+                    <tr class="@(row.Success ? "table-success" : "table-danger")">
+                        <td>@row.RowNumber</td>
+                        <td>@(row.Success ? "OK" : "Błąd")</td>
+                        <td>@row.Message</td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    }
+
+    <div class="row g-2 align-items-end mb-3">
+        <div class="col-auto">
+            <label class="form-label mb-1">Sezon</label>
+            <select id="filter-season" class="form-select form-select-sm">
+                <option value="">Wszystkie</option>
+            </select>
+        </div>
+        <div class="col-auto">
+            <button id="filter-reset" type="button" class="btn btn-sm btn-outline-secondary">Resetuj</button>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-hover align-middle js-table-pager">
+            <thead class="table">
+            <tr>
+                <th scope="col">Sezon</th>
+                <th scope="col">Liga</th>
+                <th scope="col">Uczestnicy</th>
+                <th scope="col">Akcje</th>
+            </tr>
+            </thead>
+            <tbody id="leagueseasons-body">
+            @if (Model.LeagueSeasons.Any())
+            {
+                foreach (var ls in Model.LeagueSeasons)
+                {
+                    <tr data-season="@ls.SeasonNumber">
+                        <td>@ls.SeasonNumber</td>
+                        <td>@ls.LeagueName</td>
+                        <td>@ls.UserCount</td>
+                        <td class="d-flex flex-wrap gap-1">
+                            <a class="btn btn-sm btn-primary"
+                               asp-page="/Admin/LeagueSeasons/EditLeagueSeason"
+                               asp-route-id="@ls.LeagueSeasonId">
+                                Zarządzaj
+                            </a>
+                            <form method="post" asp-page-handler="RefreshStandings">
+                                <input type="hidden" name="RefreshStandingsLeagueSeasonId" value="@ls.LeagueSeasonId"/>
+                                <button type="submit" class="btn btn-sm btn-success">Przelicz klasyfikację</button>
+                            </form>
+                            <form method="post" asp-page-handler="Delete" class="d-inline"
+                                  onsubmit="return confirm('Czy na pewno chcesz usunąć liga-sezon @ls.SeasonName – @ls.LeagueName?\nWszystkie mecze i wyniki zostaną skasowane.')">
+                                <input type="hidden" name="DeleteLeagueSeasonId" value="@ls.LeagueSeasonId" />
+                                <button type="submit" class="btn btn-sm btn-danger">Usuń</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="4" class="text-center">Nie znaleziono żadnego liga-sezonu.</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<partial name="_TableSortPager" />
+
+<script>
+(function () {
+    const rows = Array.from(document.querySelectorAll('#leagueseasons-body tr[data-season]'));
+    const selSeason = document.getElementById('filter-season');
+    const resetBtn = document.getElementById('filter-reset');
+
+    const seasons = [...new Set(rows.map(r => r.dataset.season))].sort((a, b) => b - a);
+    seasons.forEach(v => {
+        const o = document.createElement('option');
+        o.value = v;
+        o.textContent = v;
+        selSeason.appendChild(o);
+    });
+
+    const table = document.querySelector('table.js-table-pager');
+
+    function applyFilter() {
+        const s = selSeason.value;
+        rows.forEach(row => {
+            const visible = !s || row.dataset.season === s;
+            row.classList.toggle('filtered-out', !visible);
+            row.style.display = visible ? '' : 'none';
+        });
+        table.dispatchEvent(new Event('tablefilter'));
+    }
+
+    selSeason.addEventListener('change', applyFilter);
+    resetBtn.addEventListener('click', function () {
+        selSeason.value = '';
+        applyFilter();
+    });
+})();
+</script>

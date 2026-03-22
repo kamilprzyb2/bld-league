@@ -1,0 +1,116 @@
+﻿@page "/Admin/Users"
+@model BldLeague.Web.Pages.Admin.Users.AllUsers
+<div class="container mt-2">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <h2 class="mb-0">Lista użytkowników</h2>
+        <div class="d-flex gap-2">
+            <a asp-page="/Admin/Users/AllUsers" asp-page-handler="ExportCsv" class="btn btn-outline-secondary">Export CSV</a>
+            <button class="btn btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#importForm">Import CSV</button>
+            <a asp-page="/Admin/Users/AddUser" class="btn btn-primary">Dodaj użytkownika</a>
+        </div>
+    </div>
+    <div class="collapse mb-3" id="importForm">
+        <div class="card card-body">
+            <form method="post" asp-page-handler="ImportCsv" enctype="multipart/form-data">
+                <div class="mb-2">
+                    <label class="form-label">Plik CSV (nagłówki: Full Name, WCA ID, Admin, Avatar URL, Avatar Thumbnail URL)</label>
+                    <input type="file" name="file" accept=".csv" class="form-control" required />
+                </div>
+                <button type="submit" class="btn btn-warning">Importuj</button>
+            </form>
+        </div>
+    </div>
+
+    @if (Model.ImportResult != null)
+    {
+        <div class="alert @(Model.ImportResult.HasErrors ? "alert-danger" : "alert-success") mb-3">
+            <strong>@(Model.ImportResult.HasErrors ? "Import nieudany" : "Import zakończony pomyślnie")</strong>
+            — @Model.ImportResult.SuccessCount sukcesów, @Model.ImportResult.ErrorCount błędów
+        </div>
+        <div class="table-responsive mb-3">
+            <table class="table table-sm">
+                <thead><tr><th>Wiersz</th><th>Status</th><th>Komunikat</th></tr></thead>
+                <tbody>
+                @foreach (var row in Model.ImportResult.RowResults)
+                {
+                    <tr class="@(row.Success ? "table-success" : "table-danger")">
+                        <td>@row.RowNumber</td>
+                        <td>@(row.Success ? "OK" : "Błąd")</td>
+                        <td>@row.Message</td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    }
+
+    <div class="mb-3">
+        <input type="text" id="filter-name" class="form-control form-control-sm" placeholder="Filtruj po imieniu i nazwisku…" />
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-hover align-middle js-table-pager">
+            <thead class="table">
+            <tr>
+                <th scope="col">Imię i nazwisko</th>
+                <th scope="col">WCA ID</th>
+                <th scope="col" class="d-none d-md-table-cell">Rola</th>
+                <th data-no-sort></th>
+            </tr>
+            </thead>
+            <tbody>
+            @if (Model.Users.Any())
+            {
+                foreach (var user in Model.Users)
+                {
+                    <tr>
+                        <td>@user.FullName</td>
+                        <td>@user.WcaId</td>
+                        <td class="d-none d-md-table-cell">@(user.IsAdmin ? "Administrator" : "Użytkownik")</td>
+                        <td>
+                            <a class="btn btn-sm btn-primary"
+                               asp-page="/Admin/Users/EditUser"
+                               asp-route-id="@user.Id">
+                                Edytuj
+                            </a>
+                            <form method="post" asp-page-handler="Delete" class="d-inline"
+                                  onsubmit="return confirm('Czy na pewno chcesz usunąć użytkownika @user.FullName?\nWszystkie powiązane mecze i wyniki zostaną skasowane.')">
+                                <input type="hidden" name="DeleteUserId" value="@user.Id" />
+                                <button type="submit" class="btn btn-sm btn-danger">Usuń</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="4" class="text-center">Nie znaleziono użytkowników.</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+<partial name="_TableSortPager" />
+
+<script>
+(function () {
+    var input = document.getElementById('filter-name');
+    var tbody = document.querySelector('table.js-table-pager tbody');
+    var table = document.querySelector('table.js-table-pager');
+
+    input.addEventListener('input', function () {
+        var q = input.value.trim().toLowerCase();
+        Array.from(tbody.querySelectorAll('tr')).forEach(function (row) {
+            var name = (row.cells[0] ? row.cells[0].textContent : '').toLowerCase();
+            var hide = q && !name.includes(q);
+            row.classList.toggle('filtered-out', hide);
+            row.style.display = hide ? 'none' : '';
+        });
+        table.dispatchEvent(new Event('tablefilter'));
+    });
+})();
+</script>

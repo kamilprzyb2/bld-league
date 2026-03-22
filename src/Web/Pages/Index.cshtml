@@ -1,0 +1,93 @@
+﻿@page
+@model IndexModel
+<div class="row align-items-center py-5 mb-2">
+    <div class="col-md-7">
+        <h1 class="display-4 fw-bold mb-2">3BLD League</h1>
+        <p class="lead text-muted mb-4">
+            Polska liga 3x3 Blindfolded — klasyfikacje, wyniki i rankingi w jednym miejscu.
+        </p>
+        <div class="d-flex gap-2">
+            <a href="https://www.facebook.com/groups/217625975464662"
+               class="btn btn-primary" target="_blank" rel="noopener noreferrer">
+                <i class="bi bi-facebook me-1"></i> BLD Polska
+            </a>
+            <a href="https://github.com/kamilprzyb2/bld-league"
+               class="btn btn-outline-secondary" target="_blank" rel="noopener noreferrer">
+                <i class="bi bi-github me-1"></i> GitHub
+            </a>
+        </div>
+    </div>
+    <div class="col-md-5 text-center d-none d-md-block">
+        <img src="images/blder_head.png" alt="Speedcuber wearing a blindfold icon" width="256" />
+    </div>
+</div>
+
+<hr class="mb-4">
+
+<div class="row g-3">
+    <div class="col-12 col-sm-6 col-md-4">
+        <a asp-page="/Leagues/ViewLeague" class="text-decoration-none">
+            <div class="card h-100 border-0 shadow-sm p-3">
+                <div class="d-flex align-items-center gap-3">
+                    <i class="bi bi-trophy fs-2 text-warning"></i>
+                    <div>
+                        <div class="fw-semibold">Ligi</div>
+                        <div class="text-muted small">Aktualna klasyfikacja</div>
+                    </div>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-12 col-sm-6 col-md-4">
+        <a asp-page="/Rounds/ViewRound" class="text-decoration-none">
+            <div class="card h-100 border-0 shadow-sm p-3">
+                <div class="d-flex align-items-center gap-3">
+                    <i class="bi bi-calendar3 fs-2 text-primary"></i>
+                    <div>
+                        <div class="fw-semibold">Kolejki</div>
+                        <div class="text-muted small">Rundy sezonu</div>
+                    </div>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-12 col-sm-6 col-md-4">
+        <a asp-page="/Matches/MatchList" class="text-decoration-none">
+            <div class="card h-100 border-0 shadow-sm p-3">
+                <div class="d-flex align-items-center gap-3">
+                    <i class="bi bi-stopwatch fs-2 text-danger"></i>
+                    <div>
+                        <div class="fw-semibold">Mecze</div>
+                        <div class="text-muted small">Wyniki 1v1</div>
+                    </div>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-12 col-sm-6 col-md-4">
+        <a asp-page="/About/Guidelines" class="text-decoration-none">
+            <div class="card h-100 border-0 shadow-sm p-3">
+                <div class="d-flex align-items-center gap-3">
+                    <i class="bi bi-book fs-2 text-success"></i>
+                    <div>
+                        <div class="fw-semibold">Zasady</div>
+                        <div class="text-muted small">Format rozgrywek</div>
+                    </div>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-12 col-sm-6 col-md-4">
+        <a asp-page="/About/About" class="text-decoration-none">
+            <div class="card h-100 border-0 shadow-sm p-3">
+                <div class="d-flex align-items-center gap-3">
+                    <i class="bi bi-info-circle fs-2 text-secondary"></i>
+                    <div>
+                        <div class="fw-semibold">O projekcie</div>
+                        <div class="text-muted small">Autorzy i informacje</div>
+                    </div>
+                </div>
+            </div>
+        </a>
+    </div>
+</div>

@@ -1,0 +1,117 @@
+<script>
+(function () {
+    function initTable(table) {
+        var tbody = table.querySelector('tbody');
+        var headers = Array.from(table.querySelectorAll('thead th'));
+        var currentPage = 1;
+        var sortCol = -1;
+        var sortAsc = true;
+
+        headers.forEach(function (th, idx) {
+            if (th.hasAttribute('data-no-sort')) return;
+            th.style.cursor = 'pointer';
+            th.dataset.label = th.textContent.trim();
+            th.addEventListener('click', function () {
+                if (sortCol === idx) sortAsc = !sortAsc;
+                else { sortCol = idx; sortAsc = true; }
+                currentPage = 1;
+                render();
+            });
+        });
+
+        var wrapper = document.createElement('div');
+        wrapper.className = 'd-flex justify-content-between align-items-center mt-2 flex-wrap gap-2';
+        table.parentNode.insertBefore(wrapper, table.nextSibling);
+
+        var pageSizeEl = document.createElement('select');
+        pageSizeEl.className = 'form-select form-select-sm w-auto';
+        [10, 25, 50, 100].forEach(function (n) {
+            var opt = document.createElement('option');
+            opt.value = n;
+            opt.textContent = n + ' na stronę';
+            if (n === 10) opt.selected = true;
+            pageSizeEl.appendChild(opt);
+        });
+        pageSizeEl.addEventListener('change', function () { currentPage = 1; render(); });
+
+        var infoEl = document.createElement('span');
+        infoEl.className = 'text-muted small';
+
+        var paginationEl = document.createElement('ul');
+        paginationEl.className = 'pagination pagination-sm mb-0';
+
+        wrapper.appendChild(pageSizeEl);
+        wrapper.appendChild(infoEl);
+        wrapper.appendChild(paginationEl);
+
+        table.addEventListener('tablefilter', function () { currentPage = 1; render(); });
+
+        function render() {
+            var rows = Array.from(tbody.querySelectorAll('tr:not(.filtered-out)'));
+
+            if (sortCol >= 0) {
+                rows.sort(function (a, b) {
+                    var aText = (a.cells[sortCol] ? a.cells[sortCol].textContent : '').trim();
+                    var bText = (b.cells[sortCol] ? b.cells[sortCol].textContent : '').trim();
+                    var aNum = parseFloat(aText);
+                    var bNum = parseFloat(bText);
+                    var cmp = (!isNaN(aNum) && !isNaN(bNum))
+                        ? aNum - bNum
+                        : aText.localeCompare(bText, 'pl');
+                    return sortAsc ? cmp : -cmp;
+                });
+                rows.forEach(function (r) { tbody.appendChild(r); });
+            }
+
+            headers.forEach(function (th, idx) {
+                if (th.hasAttribute('data-no-sort') || !th.dataset.label) return;
+                th.textContent = th.dataset.label + (sortCol === idx ? (sortAsc ? ' ▲' : ' ▼') : '');
+            });
+
+            var ps = parseInt(pageSizeEl.value);
+            var total = rows.length;
+            var totalPages = Math.max(1, Math.ceil(total / ps));
+            if (currentPage > totalPages) currentPage = totalPages;
+
+            rows.forEach(function (row, i) {
+                row.style.display = (Math.floor(i / ps) + 1 === currentPage) ? '' : 'none';
+            });
+
+            var start = (currentPage - 1) * ps + 1;
+            var end = Math.min(currentPage * ps, total);
+            infoEl.textContent = total > 0 ? (start + '–' + end + ' z ' + total) : '';
+
+            paginationEl.innerHTML = '';
+            function addBtn(label, page, disabled, active) {
+                var li = document.createElement('li');
+                li.className = 'page-item' + (disabled ? ' disabled' : '') + (active ? ' active' : '');
+                var a = document.createElement('a');
+                a.className = 'page-link';
+                a.href = '#';
+                a.innerHTML = label;
+                if (!disabled && !active) {
+                    (function (p) {
+                        a.addEventListener('click', function (e) { e.preventDefault(); currentPage = p; render(); });
+                    })(page);
+                }
+                li.appendChild(a);
+                paginationEl.appendChild(li);
+            }
+
+            addBtn('&laquo;', 1, currentPage === 1);
+            addBtn('&lsaquo;', currentPage - 1, currentPage === 1);
+            var startPage = Math.max(1, currentPage - 2);
+            var endPage = Math.min(totalPages, startPage + 4);
+            for (var p = startPage; p <= endPage; p++) addBtn(p, p, false, p === currentPage);
+            addBtn('&rsaquo;', currentPage + 1, currentPage === totalPages);
+            addBtn('&raquo;', totalPages, currentPage === totalPages);
+        }
+
+        render();
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('table.js-table-pager').forEach(initTable);
+    });
+})();
+</script>

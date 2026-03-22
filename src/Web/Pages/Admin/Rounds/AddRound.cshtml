@@ -1,0 +1,39 @@
+@page "/Admin/Rounds/Add"
+@model BldLeague.Web.Pages.Admin.Rounds.AddRound
+
+<div class="container mt-2">
+    <h2>Nowa kolejka</h2>
+    <form method="post" class="mx-auto" style="max-width: 400px;">
+        <div class="mb-3">
+            <label asp-for="CreateRoundRequest.SeasonId" class="form-label">Sezon</label>
+            <select asp-for="CreateRoundRequest.SeasonId" class="form-select">
+                @foreach (var season in Model.Seasons)
+                {
+                    <option value="@season.Id">@season.SeasonName</option>
+                }
+            </select>
+            <span asp-validation-for="CreateRoundRequest.SeasonId" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="CreateRoundRequest.RoundNumber" class="form-label">Numer kolejki</label>
+            <input asp-for="CreateRoundRequest.RoundNumber" type="text" class="form-control" placeholder="Podaj numer kolejki">
+            <span asp-validation-for="CreateRoundRequest.RoundNumber" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="CreateRoundRequest.StartDate" class="form-label">Data początkowa</label>
+            <input asp-for="CreateRoundRequest.StartDate" type="date" class="form-control">
+            <span asp-validation-for="CreateRoundRequest.StartDate" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="CreateRoundRequest.EndDate" class="form-label">Data końcowa</label>
+            <input asp-for="CreateRoundRequest.EndDate" type="date" class="form-control">
+            <span asp-validation-for="CreateRoundRequest.EndDate" class="text-danger"></span>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Dodaj</button>
+        <a asp-page="/Admin/Rounds/AllRounds" class="btn btn-outline-secondary ms-2">Anuluj</a>
+    </form>
+</div>

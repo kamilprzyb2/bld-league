@@ -1,0 +1,211 @@
+﻿@page "/Admin/Matches/Add"
+@using BldLeague.Application.Queries.LeagueSeasons.GetAll
+@using BldLeague.Application.Queries.Rounds.GetAllBySeasonId
+@using BldLeague.Application.Queries.Seasons.GetAll
+@using BldLeague.Application.Queries.Users.GetAll
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@model BldLeague.Web.Pages.Admin.Matches.AddMatch
+
+@{
+
+}
+
+<div class="container mt-4">
+    <h2 class="mb-4">Dodaj mecz</h2>
+
+    <form method="post">
+        <div class="row">
+            <div class="col-md-4 mb-3">
+                <label asp-for="SeasonId" class="form-label">Sezon</label>
+                <select id="seasonSelect" 
+                        asp-for="SeasonId"
+                        asp-items="@(new SelectList(Model.Seasons, nameof(SeasonSummaryDto.Id), nameof(SeasonSummaryDto.SeasonName)))"
+                        class="form-select">
+                    <option value="@Guid.Empty">-- Wybierz --</option>
+                </select>
+            </div>
+
+            <div class="col-md-4 mb-3">
+                <label asp-for="CreateMatchRequest.LeagueSeasonId" class="form-label">Liga</label>
+                <select id="leagueSelect" 
+                        asp-for="CreateMatchRequest.LeagueSeasonId"
+                        asp-items="@(
+                                   new SelectList(Model.LeagueSeasons, 
+                                       nameof(LeagueSeasonDto.LeagueSeasonId), 
+                                       nameof(LeagueSeasonDto.LeagueName)))"
+                        class="form-select"
+                        disabled="@(Model.LeagueSeasons.Count == 0)">
+                    <option value="@Guid.Empty">-- Wybierz sezon --</option>
+                </select>
+                <span asp-validation-for="CreateMatchRequest.LeagueSeasonId" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-4 mb-3">
+                <label asp-for="CreateMatchRequest.RoundId" class="form-label">Kolejka</label>
+                <select id="roundSelect"
+                        asp-for="CreateMatchRequest.RoundId"
+                        asp-items="@(
+                                   new SelectList(Model.Rounds,
+                                       nameof(RoundSummaryDto.Id),
+                                       nameof(RoundSummaryDto.RoundName)))"
+                        class="form-select"
+                        disabled="@(Model.Rounds.Count == 0)">
+                    <option value="@Guid.Empty">-- Wybierz sezon --</option>
+                </select>
+                <span asp-validation-for="CreateMatchRequest.RoundId" class="text-danger"></span>
+            </div>
+        </div>
+
+        <hr />
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Zawodnik A</label>
+                <select id="userA" 
+                        asp-for="CreateMatchRequest.UserAId" 
+                        asp-items="@(
+                                   new SelectList(Model.Users,
+                                       nameof(UserSummaryDto.Id),
+                                       nameof(UserSummaryDto.FullName)))"
+                        class="form-select user-dropdown" 
+                        disabled="@(Model.Users.Count == 0)">
+                    <option value="@Guid.Empty">-- Wybierz sezon i ligę --</option>
+                </select>
+                <span asp-validation-for="CreateMatchRequest.UserAId" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Zawodnik B</label>
+                <select id="userB" 
+                        asp-for="CreateMatchRequest.UserBId" 
+                        asp-items="@(
+                                   new SelectList(Model.Users,
+                                       nameof(UserSummaryDto.Id),
+                                       nameof(UserSummaryDto.FullName)))"
+                        class="form-select user-dropdown" 
+                        disabled="@(Model.Users.Count == 0)">
+                    <option value="@Guid.Empty">-- Wybierz sezon i ligę --</option>
+                </select>
+                <span asp-validation-for="CreateMatchRequest.UserBId" class="text-danger"></span>
+            </div>
+        </div>
+
+        <hr class="my-4" />
+
+        <div class="row">
+            <!-- SOLVES: PLAYER A -->
+            <div class="col-md-6">
+                <h5>Wyniki – Zawodnik A</h5>
+
+                @for (int i = 0; i < Model.CreateMatchRequest.UserASolves.Count; i++)
+                {
+                    <div class="mb-3">
+                        <label class="form-label">Solve @(i + 1)</label>
+                        <input asp-for="CreateMatchRequest.UserASolves[i].Result"
+                               class="form-control"
+                               placeholder="np. 12.34 lub DNF" />
+
+                        <span asp-validation-for="CreateMatchRequest.UserASolves[i].Result"
+                              class="text-danger"></span>
+                    </div>
+                }
+            </div>
+
+            <!-- SOLVES: PLAYER B -->
+            <div class="col-md-6">
+                <h5>Wyniki – Zawodnik B</h5>
+
+                @for (int i = 0; i < Model.CreateMatchRequest.UserBSolves.Count; i++)
+                {
+                    <div class="mb-3">
+                        <label class="form-label">Solve @(i + 1)</label>
+                        <input asp-for="CreateMatchRequest.UserBSolves[i].Result"
+                               class="form-control"
+                               placeholder="np. 12.34 lub DNF" />
+
+                        <span asp-validation-for="CreateMatchRequest.UserBSolves[i].Result"
+                              class="text-danger"></span>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="mt-4">
+            <button type="submit" class="btn btn-primary">Zapisz</button>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+        
+        const seasonEl = document.getElementById('seasonSelect');
+        const leagueEl = document.getElementById('leagueSelect');
+        const roundEl = document.getElementById('roundSelect');
+        const userDropdowns = document.querySelectorAll('.user-dropdown');
+
+        seasonEl.addEventListener('change', function() {
+            const seasonId = this.value;
+
+            if (!seasonId) {
+                resetSelect(leagueEl, '-- Najpierw wybierz sezon --');
+                resetSelect(roundEl, '-- Najpierw wybierz sezon --');
+                return;
+            }
+            
+            // Fetch Leagues
+            fetch(`?handler=Leagues&seasonId=${seasonId}`)
+                .then(response => response.json())
+                .then(data => {
+                    populateSelect(leagueEl, data, '-- Wybierz --');
+                    leagueEl.disabled = false;
+                });
+
+            // Fetch Rounds
+            fetch(`?handler=Rounds&seasonId=${seasonId}`)
+                .then(response => response.json())
+                .then(data => {
+                    populateSelect(roundEl, data, '-- Wybierz --');
+                    roundEl.disabled = false;
+                });
+            
+        });
+
+        leagueEl.addEventListener('change', function() {
+            const leagueSeasonId = this.value;
+
+            if (!leagueSeasonId){
+                userDropdowns.forEach(dropdown => {
+                    resetSelect(dropdown, '-- Wybierz sezon i ligę --');
+                });
+                return;
+            }
+            
+            // Fetch Users
+            fetch(`?handler=Users&leagueSeasonId=${leagueSeasonId}`)
+                .then(response => response.json())
+                .then(data => {
+                    userDropdowns.forEach(dropdown => {
+                        populateSelect(dropdown, data, 'Select User');
+                        dropdown.disabled = false;
+                    });
+                });
+        });
+        
+        function populateSelect(el, data, defaultText) {
+            el.innerHTML = `<option value="@Guid.Empty">-- ${defaultText} --</option>`;
+            data.forEach(item => {
+                const opt = document.createElement('option');
+                opt.value = item.value;
+                opt.textContent = item.text;
+                el.appendChild(opt);
+            });
+        }
+
+        function resetSelect(el, text) {
+            el.innerHTML = `<option value="@Guid.Empty">${text}</option>`;
+            el.disabled = true;
+        }
+    
+    </script>
+}

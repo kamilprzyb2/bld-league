@@ -1,0 +1,98 @@
+@page "/Matches/{id:guid}"
+@using BldLeague.Domain.Entities
+@model BldLeague.Web.Pages.Matches.ViewMatch
+
+<div class="container mt-2">
+    <h2>Mecz@(Model.MatchDetails != null ? $" {Model.MatchDetails.MatchName}" : "")</h2>
+
+    @if (Model.MatchDetails == null)
+    {
+        <p>Nie znaleziono meczu.</p>
+    }
+    else
+    {
+        <div class="d-flex align-items-center gap-3">
+            <p class="mb-0">@Model.MatchDetails.SeasonName @Model.MatchDetails.LeagueName @Model.MatchDetails.RoundName</p>
+            <a asp-page="/Matches/MatchList"
+               asp-route-SeasonId="@Model.MatchDetails.SeasonId"
+               asp-route-LeagueId="@Model.MatchDetails.LeagueId"
+               asp-route-RoundNumber="@Model.MatchDetails.RoundNumber"
+               class="btn btn-sm btn-primary">Powrót</a>
+        </div>
+
+        <hr class="my-4" />
+
+        <div>
+            <table class="table table-hover align-middle">
+                <thead class="table">
+                <tr>
+                    <th scope="col"></th>
+                    <th scope="col" class="text-center">@Model.MatchDetails.UserAFullName</th>
+                    @if (!string.IsNullOrEmpty(Model.MatchDetails.UserBFullName))
+                    {
+                        <th scope="col" class="text-center">@Model.MatchDetails.UserBFullName</th>
+                    }
+                    <th scope="col" class="d-none d-md-table-cell">Scramble</th>
+                </tr>
+                </thead>
+                <tbody>
+                @for (var i = 0; i < Match.SOLVES_PER_MATCH; i++)
+                {
+                    var scramble = Model.MatchDetails.Scrambles[i];
+                    <tr>
+                        <td class="text-center">@(i+1).</td>
+                        <td class="text-center">@Model.MatchDetails.SolvesUserA[i]</td>
+                        @if (!string.IsNullOrEmpty(Model.MatchDetails.UserBFullName))
+                        {
+                            <td class="text-center">@Model.MatchDetails.SolvesUserB[i]</td>
+                        }
+                        <td class="d-none d-md-table-cell font-monospace">
+                            @if (scramble != null)
+                            {
+                                @scramble
+                            }
+                            else
+                            {
+                                <span class="text-muted fst-italic">nie znaleziono scrambla</span>
+                            }
+                        </td>
+                    </tr>
+                }
+                <tr>
+                    <td class="text-center">Best</td>
+                    <td class="fw-bold text-center">@Model.MatchDetails.UserABest</td>
+                    @if (!string.IsNullOrEmpty(Model.MatchDetails.UserBFullName))
+                    {
+                        <td class="fw-bold text-center">@Model.MatchDetails.UserBBest</td>
+                    }
+                    <td class="d-none d-md-table-cell"></td>
+                </tr>
+                <tr>
+                    <td class="text-center">Ao5</td>
+                    <td class="fw-bold text-center">@Model.MatchDetails.UserAAverage</td>
+                    @if (!string.IsNullOrEmpty(Model.MatchDetails.UserBFullName))
+                    {
+                        <td class="fw-bold text-center">@Model.MatchDetails.UserBAverage</td>
+                    }
+                    <td class="d-none d-md-table-cell"></td>
+                </tr>
+                <tr>
+                    <td class="text-center">Wynik</td>
+                    @if (!string.IsNullOrEmpty(Model.MatchDetails.UserBFullName))
+                    {
+                        <td class="fw-bold text-center">@Model.MatchDetails.UserAScore</td>
+                        <td class="fw-bold text-center">@Model.MatchDetails.UserBScore</td>
+                    }
+                    else
+                    {
+                        <td class="fw-bold text-center">N/A</td>
+                    }
+                    <td class="d-none d-md-table-cell"></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        }
+
+
+</div>

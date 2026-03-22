@@ -1,0 +1,90 @@
+@page "/Leagues"
+@using BldLeague.Application.Queries.LeagueSeasons.GetAll
+@using BldLeague.Application.Queries.Seasons.GetAll
+@model BldLeague.Web.Pages.Leagues.ViewLeague
+
+<div class="container mt-2">
+    <h2>Ligi</h2>
+    <form method="get" class="row g-3 align-items-center">
+
+        <div class="col-auto d-flex align-items-center">
+            <select asp-for="SeasonId"
+                    asp-items="@(new SelectList(Model.Seasons, nameof(SeasonSummaryDto.Id), nameof(SeasonSummaryDto.SeasonName)))"
+                    class="form-select"
+                    onchange="this.form.submit()">
+            </select>
+        </div>
+
+        <div class="col-auto d-flex align-items-center">
+            <select asp-for="LeagueId"
+                    asp-items="@(new SelectList(Model.LeagueSeasons, nameof(LeagueSeasonDto.LeagueId), nameof(LeagueSeasonDto.LeagueName)))"
+                    class="form-select"
+                    onchange="this.form.submit()">
+            </select>
+        </div>
+
+    </form>
+
+    <hr class="my-4" />
+
+    @if (Model.LeagueSeason != null)
+    {
+        <table class="table table-hover align-middle">
+            <thead class="table">
+            <tr>
+                <th scope="col" class="text-center">Pozycja</th>
+                <th scope="col">Zawodnik</th>
+                <th scope="col" class="text-center d-none d-md-table-cell" data-bs-toggle="tooltip" title="Mecze rozegrane">M</th>
+                <th scope="col" class="text-center d-none d-md-table-cell" data-bs-toggle="tooltip" title="Zwycięstwa">Z</th>
+                <th scope="col" class="text-center d-none d-md-table-cell" data-bs-toggle="tooltip" title="Remisy">R</th>
+                <th scope="col" class="text-center d-none d-md-table-cell" data-bs-toggle="tooltip" title="Porażki">P</th>
+                <th scope="col" class="text-center" data-bs-toggle="tooltip" title="Punkty (1. kryterium)">PKT</th>
+                <th scope="col" class="text-center" data-bs-toggle="tooltip" title="Punkty (2. kryterium)">PKT DK</th>
+                <th scope="col" class="text-center d-none d-md-table-cell" data-bs-toggle="tooltip" title="Punkty meczowe zdobyte">PZ</th>
+                <th scope="col" class="text-center d-none d-md-table-cell" data-bs-toggle="tooltip" title="Punkty meczowe stracone">PS</th>
+                <th scope="col" class="text-center" data-bs-toggle="tooltip" title="różnica punktów meczowych (3. kryterium)">RP</th>
+                <th scope="col" class="text-center" data-bs-toggle="tooltip" title="najlepszy singiel (4. kryterium)">BEST</th>
+            </tr>
+            </thead>
+            <tbody>
+            @if (Model.LeagueSeason.Standings.Any())
+            {
+                foreach (var standing in Model.LeagueSeason.Standings)
+                {
+                    <tr>
+                        <td class="text-center">@standing.Place</td>
+                        <td>@standing.UserFullName</td>
+                        <td class="text-center d-none d-md-table-cell">@standing.MatchesPlayed</td>
+                        <td class="text-center d-none d-md-table-cell">@standing.MatchesWon</td>
+                        <td class="text-center d-none d-md-table-cell">@standing.MatchesTied</td>
+                        <td class="text-center d-none d-md-table-cell">@standing.MatchesLost</td>
+                        <td class="text-center fw-bold">@standing.BigPoints</td>
+                        <td class="text-center">@standing.BonusPoints</td>
+                        <td class="text-center d-none d-md-table-cell">@standing.SmallPointsGained</td>
+                        <td class="text-center d-none d-md-table-cell">@standing.SmallPointsLost</td>
+                        <td class="text-center">@standing.SmallPointsBalance</td>
+                        <td class="text-center">@standing.Best</td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="12" class="text-center">Brak danych.</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+        });
+    </script>
+}

@@ -1,0 +1,48 @@
+@page "/Admin/Rounds/{id:guid}/Edit"
+@using BldLeague.Domain.Entities
+@model BldLeague.Web.Pages.Admin.Rounds.EditRound
+
+<div class="container mt-2">
+    <h2>Edycja kolejki</h2>
+    <form method="post" class="mx-auto" style="max-width: 500px;">
+        <input type="hidden" asp-for="UpdateRoundRequest.Id"/>
+
+        <div class="mb-3">
+            <label class="form-label">ID</label>
+            <code class="d-block">@Model.UpdateRoundRequest.Id</code>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="UpdateRoundRequest.RoundNumber" class="form-label">Numer kolejki</label>
+            <input asp-for="UpdateRoundRequest.RoundNumber" type="text" class="form-control" placeholder="Podaj numer kolejki">
+            <span asp-validation-for="UpdateRoundRequest.RoundNumber" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="UpdateRoundRequest.StartDate" class="form-label">Data początkowa</label>
+            <input asp-for="UpdateRoundRequest.StartDate" type="date" class="form-control">
+            <span asp-validation-for="UpdateRoundRequest.StartDate" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="UpdateRoundRequest.EndDate" class="form-label">Data końcowa</label>
+            <input asp-for="UpdateRoundRequest.EndDate" type="date" class="form-control">
+            <span asp-validation-for="UpdateRoundRequest.EndDate" class="text-danger"></span>
+        </div>
+
+        <hr class="my-4" />
+        <h5>Scramble</h5>
+
+        @for (var i = 0; i < Match.SOLVES_PER_MATCH; i++)
+        {
+            <div class="mb-3">
+                <label class="form-label">Scramble @(i + 1)</label>
+                <textarea name="ScrambleNotations[@i]" class="form-control" rows="2"
+                          placeholder="Zostaw puste, aby usunąć scramble">@Model.ScrambleNotations[i]</textarea>
+            </div>
+        }
+
+        <button type="submit" class="btn btn-primary">Zapisz</button>
+        <a asp-page="/Admin/Rounds/AllRounds" class="btn btn-outline-secondary ms-2">Anuluj</a>
+    </form>
+</div>

@@ -1,0 +1,28 @@
+@page "/Admin/LeagueSeasons/Add"
+@model BldLeague.Web.Pages.Admin.LeagueSeasons.AddLeagueSeason
+@using BldLeague.Application.Queries.Leagues.GetAll
+@using BldLeague.Application.Queries.Seasons.GetAll
+
+<div class="container mt-2">
+    <h2>Nowy liga-sezon</h2>
+    <form method="post" class="mx-auto" style="max-width: 400px;">
+        <div class="mb-3">
+            <label asp-for="CreateLeagueSeasonRequest.SeasonId" class="form-label">Sezon</label>
+            <select asp-for="CreateLeagueSeasonRequest.SeasonId"
+                    asp-items="@(new SelectList(Model.Seasons, nameof(SeasonSummaryDto.Id), nameof(SeasonSummaryDto.SeasonName)))"
+                    class="form-select">
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="CreateLeagueSeasonRequest.LeagueId" class="form-label">Liga</label>
+            <select asp-for="CreateLeagueSeasonRequest.LeagueId"
+                    asp-items="@(new SelectList(Model.Leagues, nameof(LeagueSummaryDto.Id), nameof(LeagueSummaryDto.LeagueName)))"
+                    class="form-select">
+            </select>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Dodaj</button>
+        <a asp-page="/Admin/LeagueSeasons/AllLeagueSeasons" class="btn btn-outline-secondary ms-2">Anuluj</a>
+    </form>
+</div>

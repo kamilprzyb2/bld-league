@@ -1,0 +1,11 @@
+<Project>
+  <!-- Redirect build artifacts outside the bind-mounted workspace when running in a devcontainer.
+       The Windows/WSL2 bind mount doesn't support utimes(), which breaks MSBuild's incremental build tracking.
+       Also exclude the workspace-relative obj/ dir from compilation, since the C# language server
+       (OmniSharp/DevKit) writes generated files there without DEVCONTAINER set. -->
+  <PropertyGroup Condition="'$(DEVCONTAINER)' == 'true'">
+    <BaseIntermediateOutputPath>/home/node/build/obj/$(MSBuildProjectName)/</BaseIntermediateOutputPath>
+    <BaseOutputPath>/home/node/build/bin/$(MSBuildProjectName)/</BaseOutputPath>
+    <DefaultItemExcludes>$(DefaultItemExcludes);obj/**</DefaultItemExcludes>
+  </PropertyGroup>
+</Project>
