@@ -87,6 +87,10 @@ body {
     }
 }
 
+@media (max-width: 767.98px) {
+    tr.js-detail-row { cursor: pointer; }
+}
+
 /* Hide Bootstrap's default caret, use our own chevron icon */
 .navbar .dropdown-toggle::after {
     display: none;
