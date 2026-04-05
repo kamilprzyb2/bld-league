@@ -16,7 +16,7 @@ env:
 jobs:
   branch-created:
     name: Move to In Progress on branch create
-    if: github.actor == 'kamilprzyb2' && github.event_name == 'create' && github.event.ref_type == 'branch'
+    if: github.actor == github.repository_owner && github.event_name == 'create' && github.event.ref_type == 'branch'
     runs-on: ubuntu-latest
     steps:
       - name: Extract issue number from branch name
@@ -45,7 +45,7 @@ jobs:
 
   pr-opened:
     name: Move to Review on PR open
-    if: github.actor == 'kamilprzyb2' && github.event.action == 'opened'
+    if: github.actor == github.repository_owner && github.event.action == 'opened'
     runs-on: ubuntu-latest
     steps:
       - name: Extract issue number from PR body
@@ -75,7 +75,7 @@ jobs:
 
   pr-merged:
     name: Move to Testing on PR merge to staging
-    if: github.actor == 'kamilprzyb2' && github.event.action == 'closed' && github.event.pull_request.merged == true
+    if: github.actor == github.repository_owner && github.event.action == 'closed' && github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     steps:
       - name: Extract issue number from PR body
