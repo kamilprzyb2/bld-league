@@ -20,6 +20,7 @@ assignees: ''
 ## Notes
 <!-- Additional information, context, or links -->
 
-## Checklist
+## Verification
+<!-- Tick these off after the PR merges to staging, before merging staging → main. -->
 - [ ] Fix verified on staging
-- [ ] Merged to main
+- [ ] No regressions observed
