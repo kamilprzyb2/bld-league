@@ -1,4 +1,7 @@
-﻿<!DOCTYPE html>
+﻿@using Microsoft.Extensions.Options
+@using BldLeague.Web.Options
+@inject IOptions<EnvironmentBadgeOptions> EnvironmentBadge
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8"/>
@@ -28,7 +31,13 @@
 <header>
     <nav class="navbar navbar-expand-sm navbar-toggleable-sm border-bottom box-shadow mb-1">
         <div class="container">
-            <a class="navbar-brand" asp-area="" asp-page="/Index">3BLD League</a>
+            <a class="navbar-brand d-flex flex-column align-items-start lh-1" asp-area="" asp-page="/Index">
+                3BLD League
+                @if (!string.IsNullOrEmpty(EnvironmentBadge.Value.Name))
+                {
+                    <span class="badge mt-1" style="background-color: @EnvironmentBadge.Value.Color; font-size: 0.75rem;">@EnvironmentBadge.Value.Name</span>
+                }
+            </a>
 
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse"
                     aria-controls="navbarSupportedContent"
