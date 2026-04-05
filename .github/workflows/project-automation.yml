@@ -1,0 +1,104 @@
+name: Project Automation
+
+on:
+  create:
+  pull_request:
+    types: [opened, closed]
+    branches: [staging]
+
+env:
+  PROJECT_ID: PVT_kwHOBF8AFc4BTr28
+  STATUS_FIELD_ID: PVTSSF_lAHOBF8AFc4BTr28zhA5Keg
+  IN_PROGRESS_OPTION_ID: 47fc9ee4
+  REVIEW_OPTION_ID: 19d1e540
+  TESTING_OPTION_ID: 825d204e
+
+jobs:
+  branch-created:
+    name: Move to In Progress on branch create
+    if: github.actor == 'kamilprzyb2' && github.event_name == 'create' && github.event.ref_type == 'branch'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Extract issue number from branch name
+        id: parse
+        run: |
+          BRANCH="${{ github.event.ref }}"
+          ISSUE=$(echo "$BRANCH" | grep -oP '(?<=/)\d+(?=-)' | head -1)
+          echo "issue=$ISSUE" >> $GITHUB_OUTPUT
+
+      - name: Move issue to In Progress
+        if: steps.parse.outputs.issue != ''
+        env:
+          GH_TOKEN: ${{ secrets.PROJECT_TOKEN }}
+          ISSUE_NUMBER: ${{ steps.parse.outputs.issue }}
+          REPO_OWNER: ${{ github.repository_owner }}
+          REPO_NAME: ${{ github.event.repository.name }}
+        run: |
+          ITEM_ID=$(gh api graphql \
+            -f query='query($owner:String!,$repo:String!,$num:Int!){repository(owner:$owner,name:$repo){issue(number:$num){projectItems(first:10){nodes{id project{id}}}}}}' \
+            -f owner="$REPO_OWNER" -f repo="$REPO_NAME" -F num="$ISSUE_NUMBER" \
+            --jq ".data.repository.issue.projectItems.nodes[] | select(.project.id == \"$PROJECT_ID\") | .id")
+
+          gh api graphql \
+            -f query='mutation($proj:ID!,$item:ID!,$field:ID!,$val:String!){updateProjectV2ItemFieldValue(input:{projectId:$proj,itemId:$item,fieldId:$field,value:{singleSelectOptionId:$val}}){projectV2Item{id}}}' \
+            -f proj="$PROJECT_ID" -f item="$ITEM_ID" -f field="$STATUS_FIELD_ID" -f val="$IN_PROGRESS_OPTION_ID"
+
+  pr-opened:
+    name: Move to Review on PR open
+    if: github.actor == 'kamilprzyb2' && github.event.action == 'opened'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Extract issue number from PR body
+        id: parse
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: |
+          ISSUE=$(echo "$PR_BODY" | grep -ioP '(?:closes|fixes|resolves)\s+#\K\d+' | head -1)
+          echo "issue=$ISSUE" >> $GITHUB_OUTPUT
+
+      - name: Move issue to Review
+        if: steps.parse.outputs.issue != ''
+        env:
+          GH_TOKEN: ${{ secrets.PROJECT_TOKEN }}
+          ISSUE_NUMBER: ${{ steps.parse.outputs.issue }}
+          REPO_OWNER: ${{ github.repository_owner }}
+          REPO_NAME: ${{ github.event.repository.name }}
+        run: |
+          ITEM_ID=$(gh api graphql \
+            -f query='query($owner:String!,$repo:String!,$num:Int!){repository(owner:$owner,name:$repo){issue(number:$num){projectItems(first:10){nodes{id project{id}}}}}}' \
+            -f owner="$REPO_OWNER" -f repo="$REPO_NAME" -F num="$ISSUE_NUMBER" \
+            --jq ".data.repository.issue.projectItems.nodes[] | select(.project.id == \"$PROJECT_ID\") | .id")
+
+          gh api graphql \
+            -f query='mutation($proj:ID!,$item:ID!,$field:ID!,$val:String!){updateProjectV2ItemFieldValue(input:{projectId:$proj,itemId:$item,fieldId:$field,value:{singleSelectOptionId:$val}}){projectV2Item{id}}}' \
+            -f proj="$PROJECT_ID" -f item="$ITEM_ID" -f field="$STATUS_FIELD_ID" -f val="$REVIEW_OPTION_ID"
+
+  pr-merged:
+    name: Move to Testing on PR merge to staging
+    if: github.actor == 'kamilprzyb2' && github.event.action == 'closed' && github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Extract issue number from PR body
+        id: parse
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: |
+          ISSUE=$(echo "$PR_BODY" | grep -ioP '(?:closes|fixes|resolves)\s+#\K\d+' | head -1)
+          echo "issue=$ISSUE" >> $GITHUB_OUTPUT
+
+      - name: Move issue to Testing
+        if: steps.parse.outputs.issue != ''
+        env:
+          GH_TOKEN: ${{ secrets.PROJECT_TOKEN }}
+          ISSUE_NUMBER: ${{ steps.parse.outputs.issue }}
+          REPO_OWNER: ${{ github.repository_owner }}
+          REPO_NAME: ${{ github.event.repository.name }}
+        run: |
+          ITEM_ID=$(gh api graphql \
+            -f query='query($owner:String!,$repo:String!,$num:Int!){repository(owner:$owner,name:$repo){issue(number:$num){projectItems(first:10){nodes{id project{id}}}}}}' \
+            -f owner="$REPO_OWNER" -f repo="$REPO_NAME" -F num="$ISSUE_NUMBER" \
+            --jq ".data.repository.issue.projectItems.nodes[] | select(.project.id == \"$PROJECT_ID\") | .id")
+
+          gh api graphql \
+            -f query='mutation($proj:ID!,$item:ID!,$field:ID!,$val:String!){updateProjectV2ItemFieldValue(input:{projectId:$proj,itemId:$item,fieldId:$field,value:{singleSelectOptionId:$val}}){projectV2Item{id}}}' \
+            -f proj="$PROJECT_ID" -f item="$ITEM_ID" -f field="$STATUS_FIELD_ID" -f val="$TESTING_OPTION_ID"

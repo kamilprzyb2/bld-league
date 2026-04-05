@@ -29,6 +29,30 @@ dotnet ef migrations add MigrationName --project src/Infrastructure --startup-pr
 - WCA OAuth credentials (`ClientId`, `ClientSecret`) go under the `WCA` section — use user secrets in development (`UserSecretsId` is set in `Web.csproj`).
 - Database migrations are applied automatically on startup via `EnsureMigratedHelper`.
 
+## Development Workflow
+
+### Issues
+- Every piece of work starts with a GitHub issue.
+- Use the existing issue templates (feature request, hotfix) where applicable.
+- Every issue must have exactly one **type** label (`type: bug`, `type: chore`, `type: feature`) and one **priority** label (`priority: low`, `priority: medium`, `priority: high`).
+
+### Branch Naming
+Branches that reference an issue must include the issue number and follow this pattern:
+- `feature/15-short-description` — new features (`type: feature`)
+- `fix/12-short-description` — bug fixes (`type: bug`)
+- `chore/7-short-description` — chores (`type: chore`)
+
+Other branch types (`refactor/something`, `project-management/something`, etc.) are also valid but are not tied to any issue and will not trigger project automation workflows.
+
+### Pull Requests & Merge Flow
+- All PRs target `staging` first — never merge a feature/fix branch directly into `main`.
+- PR body must include `Closes #<issue-number>` so the issue is linked and automation triggers correctly.
+- Once staging is verified, `staging` is merged into `main`.
+
+### Agent Git Behaviour
+- Local commits may be created without asking for confirmation.
+- Before pushing to `origin`, always show a summary of what will be pushed and ask for explicit confirmation.
+
 ## Architecture
 
 The solution follows a **Clean Architecture** with four projects:
