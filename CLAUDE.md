@@ -37,6 +37,8 @@ dotnet ef migrations add MigrationName --project src/Infrastructure --startup-pr
 - Every issue must have exactly one **type** label (`type: bug`, `type: chore`, `type: feature`) and one **priority** label (`priority: low`, `priority: medium`, `priority: high`).
 
 ### Branch Naming
+Always create new branches from `main`.
+
 Branches that reference an issue must include the issue number and follow this pattern:
 - `feature/15-short-description` — new features (`type: feature`)
 - `fix/12-short-description` — bug fixes (`type: bug`)
@@ -48,6 +50,12 @@ Other branch types (`refactor/something`, `project-management/something`, etc.) 
 - All PRs target `staging` first — never merge a feature/fix branch directly into `main`.
 - PR body must include `Closes #<issue-number>` so the issue is linked and automation triggers correctly.
 - Once staging is verified, `staging` is merged into `main`.
+- When opening a PR from a `feature/`, `fix/`, or `chore/` branch, always pass `--delete-branch` to `gh pr create` so the branch is automatically deleted after merge.
+
+### Testing & Verification
+- Do **not** put a test plan or verification checklist in the PR body. PRs merge to `staging` before the owner can test, so checkboxes in a closed PR are inaccessible in practice.
+- Instead, add a `## Verification` section to the **linked GitHub issue** (as a comment or by editing the issue body). The issue stays open until `staging` is merged into `main`, giving the owner a live, tickable checklist during the staging window.
+- The staging→main merge (and issue auto-close) serves as the implicit sign-off that verification passed.
 
 ### Agent Git Behaviour
 - Local commits may be created without asking for confirmation.
