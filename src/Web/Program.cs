@@ -8,6 +8,7 @@ using BldLeague.Infrastructure;
 using BldLeague.Infrastructure.Context;
 using BldLeague.Infrastructure.Helpers;
 using BldLeague.Web.Auth;
+using BldLeague.Web.Options;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OAuth;
@@ -24,6 +25,8 @@ builder.Services.AddRazorPages();
 
 builder.Services.AddBldLeagueInfrastructure(builder.Configuration.GetConnectionString("Default") ?? string.Empty);
 builder.Services.AddBldLeagueApplication();
+
+builder.Services.Configure<EnvironmentBadgeOptions>(builder.Configuration.GetSection("EnvironmentBadge"));
 
 builder.Services.AddAuthentication(options =>
     {
