@@ -49,8 +49,15 @@
             <tbody>
             @if (Model.LeagueSeason.Standings.Any())
             {
+                var hasMultipleGroups = Model.LeagueSeason.Standings.Select(s => s.SubleagueGroup).Distinct().Count() > 1;
+                int? previousGroup = null;
                 foreach (var standing in Model.LeagueSeason.Standings)
                 {
+                    if (hasMultipleGroups && previousGroup.HasValue && standing.SubleagueGroup != previousGroup.Value)
+                    {
+                        <tr style="border-top: 3px solid #000;"><td colspan="12"></td></tr>
+                    }
+                    previousGroup = standing.SubleagueGroup;
                     <tr class="js-detail-row"
                         data-place="@standing.Place"
                         data-name="@standing.UserFullName"
