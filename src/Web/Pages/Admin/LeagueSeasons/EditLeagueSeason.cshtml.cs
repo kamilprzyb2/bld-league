@@ -31,8 +31,13 @@ public class EditLeagueSeason(IMediator mediator) : PageModel
 
     [BindProperty] public List<Guid> SelectedUserIds { get; set; } = [];
     [BindProperty] public Guid? RemoveUserId { get; set; }
-    [BindProperty] public Guid? SetGroupUserId { get; set; }
-    [BindProperty] public int SetGroupValue { get; set; }
+    [BindProperty] public List<UserGroupInput> UserGroups { get; set; } = [];
+
+    public class UserGroupInput
+    {
+        public Guid UserId { get; set; }
+        public int SubleagueGroup { get; set; }
+    }
 
     public async Task<IActionResult> OnGet()
     {
@@ -90,16 +95,18 @@ public class EditLeagueSeason(IMediator mediator) : PageModel
         return RedirectToPage();
     }
 
-    public async Task<IActionResult> OnPostSetGroupAsync()
+    public async Task<IActionResult> OnPostSaveGroupsAsync()
     {
-        if (!SetGroupUserId.HasValue)
-            return RedirectToPage();
-
-        var request = new SetLeagueSeasonUserGroupRequest
+        var request = new SetLeagueSeasonUserGroupsBatchRequest
         {
             LeagueSeasonId = Id,
-            UserId = SetGroupUserId.Value,
-            SubleagueGroup = SetGroupValue
+            Entries = UserGroups
+                .Select(g => new SetLeagueSeasonUserGroupsBatchRequest.UserGroupEntry
+                {
+                    UserId = g.UserId,
+                    SubleagueGroup = g.SubleagueGroup
+                })
+                .ToList()
         };
 
         var result = await mediator.Send(request);

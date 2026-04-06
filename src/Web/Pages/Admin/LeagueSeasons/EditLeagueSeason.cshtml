@@ -48,50 +48,55 @@
         </div>
     }
 
-    <div class="table-responsive">
-        <table class="table table-hover align-middle">
-            <thead class="table">
-            <tr>
-                <th scope="col">Imię i nazwisko</th>
-                <th scope="col">WCA ID</th>
-                <th scope="col" class="text-center">Grupa</th>
-                <th></th>
-            </tr>
-            </thead>
-            <tbody>
-            @if (Model.AssignedUsers.Any())
-            {
-                foreach (var user in Model.AssignedUsers)
+    <form method="post" asp-page-handler="SaveGroups">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table">
+                <tr>
+                    <th scope="col">Imię i nazwisko</th>
+                    <th scope="col">WCA ID</th>
+                    <th scope="col" class="text-center">Grupa</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                @if (Model.AssignedUsers.Any())
+                {
+                    var users = Model.AssignedUsers.ToList();
+                    for (var i = 0; i < users.Count; i++)
+                    {
+                        var user = users[i];
+                        <tr>
+                            <td>@user.FullName</td>
+                            <td>@user.WcaId</td>
+                            <td class="text-center">
+                                <input type="hidden" name="UserGroups[@i].UserId" value="@user.Id" />
+                                <input type="number" name="UserGroups[@i].SubleagueGroup" value="@user.SubleagueGroup" min="0" class="form-control form-control-sm mx-auto" style="width:5rem;" />
+                            </td>
+                            <td>
+                                <form method="post" asp-page-handler="RemoveUser"
+                                      onsubmit="return confirm('Czy na pewno chcesz usunąć użytkownika z ligo-sezonu?\nJeżeli rozegrał już jakieś mecze, wszystkie wyniki zostaną skasowane.')">
+                                    <input type="hidden" name="RemoveUserId" value="@user.Id" />
+                                    <button type="submit" class="btn btn-sm btn-danger">Usuń</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
                 {
                     <tr>
-                        <td>@user.FullName</td>
-                        <td>@user.WcaId</td>
-                        <td class="text-center">
-                            <form method="post" asp-page-handler="SetGroup" class="d-flex align-items-center justify-content-center gap-1">
-                                <input type="hidden" name="SetGroupUserId" value="@user.Id" />
-                                <input type="number" name="SetGroupValue" value="@user.SubleagueGroup" min="0" class="form-control form-control-sm" style="width:5rem;" />
-                                <button type="submit" class="btn btn-sm btn-outline-secondary">OK</button>
-                            </form>
-                        </td>
-                        <td>
-                            <form method="post" asp-page-handler="RemoveUser"
-                                  onsubmit="return confirm('Czy na pewno chcesz usunąć użytkownika z ligo-sezonu?\nJeżeli rozegrał już jakieś mecze, wszystkie wyniki zostaną skasowane.')">
-                                <input type="hidden" name="RemoveUserId" value="@user.Id" />
-                                <button type="submit" class="btn btn-sm btn-danger">Usuń</button>
-                            </form>
-                        </td>
+                        <td colspan="4" class="text-center">Nie znaleziono żadnego uczestnika.</td>
                     </tr>
                 }
-            }
-            else
-            {
-                <tr>
-                    <td colspan="4" class="text-center">Nie znaleziono żadnego uczestnika.</td>
-                </tr>
-            }
-            </tbody>
-        </table>
-    </div>
+                </tbody>
+            </table>
+        </div>
+        @if (Model.AssignedUsers.Any())
+        {
+            <button type="submit" class="btn btn-primary mb-3">Zapisz grupy</button>
+        }
+    </form>
 
     <h3>Dodaj uczestników</h3>
     <form method="post" asp-page-handler="AddUsers">
