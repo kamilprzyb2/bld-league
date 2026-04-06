@@ -11,13 +11,25 @@ public class SolveRepository(AppDbContext context) :
 {
     public async Task<IReadOnlyCollection<(Guid, SolveResult)>> GetBestSolvesForLeagueSeason(Guid leagueSeasonId)
     {
-        return await DbSet
-            .Where(s => s.Match.LeagueSeasonId == leagueSeasonId && s.Result > 0)
+        var groups = await DbSet
+            .Where(s => s.Match.LeagueSeasonId == leagueSeasonId)
             .GroupBy(s => s.UserId)
-            .Select(g => new ValueTuple<Guid, SolveResult>(
-                g.Key,
-                g.Min(s => s.Result)
-            ))
+            .Select(g => new
+            {
+                UserId = g.Key,
+                BestValid = g.Where(s => s.Result > 0).Min(s => (int?)s.Result),
+                HasDnf = g.Any(s => s.Result == -1)
+            })
             .ToListAsync();
+
+        return groups
+            .Select(g =>
+            {
+                SolveResult best = g.BestValid.HasValue
+                    ? SolveResult.FromCentiseconds(g.BestValid.Value)
+                    : g.HasDnf ? SolveResult.Dnf() : SolveResult.Dns();
+                return (g.UserId, best);
+            })
+            .ToList();
     }
 }
