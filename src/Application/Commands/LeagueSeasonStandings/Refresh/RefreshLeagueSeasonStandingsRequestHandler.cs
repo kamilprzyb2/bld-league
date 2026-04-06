@@ -25,6 +25,7 @@ public class RefreshLeagueSeasonStandingsRequestHandler(IUnitOfWork unitOfWork)
 
         var users = await unitOfWork.LeagueSeasonUserRepository.GetUsersByLeagueSeasonIdAsync(request.LeagueSeasonId);
         Dictionary<Guid, Standing> standings = []; // userId -> standing
+        Dictionary<Guid, int> subleagueGroups = users.ToDictionary(u => u.Id, u => u.SubleagueGroup);
 
         List<LeagueSeasonStanding> toUpdate =
             (await unitOfWork.LeagueSeasonStandingRepository.GetStandingsByLeagueSeasonIdAsync(request.LeagueSeasonId))
@@ -115,7 +116,8 @@ public class RefreshLeagueSeasonStandingsRequestHandler(IUnitOfWork unitOfWork)
 
         // 4. Calculate places and update collections
         var sorted = standings
-            .OrderByDescending(s => s.Value.BigPoints)
+            .OrderBy(s => subleagueGroups.GetValueOrDefault(s.Key, 0))
+            .ThenByDescending(s => s.Value.BigPoints)
             .ThenByDescending(s => s.Value.BonusPoints)
             .ThenByDescending(s => s.Value.SmallPointsBalance)
             .ThenByDescending(s => s.Value.Best)
@@ -127,12 +129,14 @@ public class RefreshLeagueSeasonStandingsRequestHandler(IUnitOfWork unitOfWork)
             int place = i + 1;
             var standing = sorted[i].Value;
 
+            var sameGroup = i > 0 &&
+                subleagueGroups.GetValueOrDefault(sorted[i].Key, 0) == subleagueGroups.GetValueOrDefault(sorted[i - 1].Key, 0);
 
-            if (i > 0 &&
+            if (sameGroup &&
                 standing.BigPoints == sorted[i-1].Value.BigPoints &&
                 standing.BonusPoints == sorted[i-1].Value.BonusPoints &&
                 standing.SmallPointsBalance == sorted[i-1].Value.SmallPointsBalance &&
-                standing.Best == sorted[i-1].Value.Best) // somehow tied
+                standing.Best == sorted[i-1].Value.Best) // somehow tied within same group
             {
                 place = previous;
             }

@@ -31,6 +31,11 @@ public class LeagueSeasonUser : IIdentifiable
     public Guid UserId { get; init; }
 
     /// <summary>
+    /// Subleague group for revenge-period splits (0 = top group, 1 = bottom group). Default 0.
+    /// </summary>
+    public int SubleagueGroup { get; set; } = 0;
+
+    /// <summary>
     /// Factory method for league season user.
     /// </summary>
     /// <param name="leagueSeasonId"></param>

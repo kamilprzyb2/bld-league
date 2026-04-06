@@ -197,7 +197,7 @@ Avoid JavaScript by default. Prefer server-side form submissions and page reload
 | League create/update/delete/import | `src/Application/Commands/Leagues/` |
 | Season create/edit/delete/import | `src/Application/Commands/Seasons/` |
 | LeagueSeason create/delete/import | `src/Application/Commands/LeagueSeasons/` |
-| LeagueSeasonUser add/remove/import | `src/Application/Commands/LeagueSeasonUsers/` |
+| LeagueSeasonUser add/remove/import/set-group | `src/Application/Commands/LeagueSeasonUsers/` |
 | Round create/update/delete/import + scramble update | `src/Application/Commands/Rounds/` |
 | Match create/edit/delete/import | `src/Application/Commands/Matches/` |
 | User create/update/delete/import | `src/Application/Commands/Users/` |
