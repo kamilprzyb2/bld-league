@@ -4,7 +4,6 @@ using BldLeague.Application.Queries.LeagueSeasons.GetLeagueSeasonsForSeasonId;
 using BldLeague.Application.Queries.Matches.GetMatchDetailsById;
 using BldLeague.Application.Queries.Rounds.GetAllBySeasonId;
 using BldLeague.Application.Queries.Seasons.GetAll;
-using BldLeague.Application.Queries.Users.GetAll;
 using BldLeague.Application.Queries.Users.GetByLeagueSeasonId;
 using BldLeague.Domain.Entities;
 using BldLeague.Web.Attributes;
@@ -23,7 +22,7 @@ public class AddMatch(IMediator mediator) : PageModel
     public IReadOnlyCollection<SeasonSummaryDto> Seasons { get; set; } = new List<SeasonSummaryDto>();
     public IReadOnlyCollection<LeagueSeasonDto> LeagueSeasons { get; set; } = new List<LeagueSeasonDto>();
     public IReadOnlyCollection<RoundSummaryDto> Rounds { get; set; } = new List<RoundSummaryDto>();
-    public IReadOnlyCollection<UserSummaryDto> Users { get; set; } = new List<UserSummaryDto>();
+    public IReadOnlyCollection<LeagueSeasonUserDto> Users { get; set; } = new List<LeagueSeasonUserDto>();
 
     public async Task OnGet()
     {
