@@ -1,5 +1,6 @@
 @page "/Matches/{id:guid}"
 @using BldLeague.Domain.Entities
+@using BldLeague.Web.ViewModels
 @model BldLeague.Web.Pages.Matches.ViewMatch
 
 <div class="container mt-2">
@@ -21,6 +22,15 @@
         </div>
 
         <hr class="my-4" />
+
+        @if (Model.MatchDetails.Status != MatchStatus.Finished)
+        {
+            <div class="alert alert-secondary">
+                Mecz zaplanowany. Wyniki będą dostępne po zakończeniu kolejki.
+            </div>
+        }
+        else
+        {
 
         <div>
             <table class="table table-hover align-middle">
@@ -99,6 +109,7 @@
             </table>
         </div>
         }
+    }
 </div>
 
 <div class="modal fade" id="rowDetailModal" tabindex="-1" aria-hidden="true">

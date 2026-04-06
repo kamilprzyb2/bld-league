@@ -22,6 +22,12 @@ public class RefreshRoundStandingsRequestHandler(IUnitOfWork unitOfWork, ISender
                 $"Nie znaleziono rundy z ID: {request.RoundId}");
         }
 
+        if (round.EndDate >= DateTime.UtcNow)
+        {
+            return CommandResult.FailGeneral(
+                $"Nie można odświeżyć klasyfikacji niezakończonej kolejki (kolejka {round.RoundNumber}).");
+        }
+
         var repository = unitOfWork.RoundStandingRepository;
 
         List<RoundStanding> toUpdate = (await repository.GetRoundStandingsByRoundId(request.RoundId)).ToList();
