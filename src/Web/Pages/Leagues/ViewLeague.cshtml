@@ -55,7 +55,7 @@
                 {
                     if (hasMultipleGroups && previousGroup.HasValue && standing.SubleagueGroup != previousGroup.Value)
                     {
-                        <tr style="border-top: 3px solid #000;"><td colspan="12"></td></tr>
+                        <tr style="border-top: 2px solid var(--bs-secondary-color);"><td colspan="12" class="p-0"></td></tr>
                     }
                     previousGroup = standing.SubleagueGroup;
                     <tr class="js-detail-row"
