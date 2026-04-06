@@ -10,6 +10,10 @@
             <a id="export-link" asp-page="/Admin/Rounds/AllRounds" asp-page-handler="ExportCsv"
                class="btn btn-outline-secondary">Export CSV</a>
             <button class="btn btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#importForm">Import CSV</button>
+            <form method="post" asp-page-handler="RefreshAllStandings"
+                  onsubmit="return confirm('Przelicz klasyfikacje wszystkich kolejek?')">
+                <button type="submit" class="btn btn-success">Przelicz wszystkie kolejki</button>
+            </form>
             <a asp-page="/Admin/Rounds/AddRound" class="btn btn-primary">Dodaj kolejkę</a>
         </div>
     </div>

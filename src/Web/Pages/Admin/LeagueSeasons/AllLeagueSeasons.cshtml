@@ -7,6 +7,10 @@
         <div class="d-flex gap-2">
             <a asp-page="/Admin/LeagueSeasons/AllLeagueSeasons" asp-page-handler="ExportCsv" class="btn btn-outline-secondary">Export CSV</a>
             <button class="btn btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#importForm">Import CSV</button>
+            <form method="post" asp-page-handler="RefreshAllStandings"
+                  onsubmit="return confirm('Przelicz klasyfikacje wszystkich liga-sezonów?')">
+                <button type="submit" class="btn btn-success">Przelicz wszystkie liga-sezony</button>
+            </form>
             <a asp-page="/Admin/LeagueSeasons/AddLeagueSeason" class="btn btn-primary">Dodaj liga-sezon</a>
         </div>
     </div>
