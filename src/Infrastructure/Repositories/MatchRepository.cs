@@ -88,6 +88,8 @@ public class MatchRepository(AppDbContext context)
                     .ToList(),
                 UserAScore = m.UserAScore,
                 UserBScore = m.UserBScore,
+                RoundStartDate = m.Round.StartDate,
+                RoundEndDate = m.Round.EndDate,
                 UserABest = m.UserABest,
                 UserBBest = m.UserBBest,
                 UserAAverage = m.UserAAverage,
@@ -121,7 +123,9 @@ public class MatchRepository(AppDbContext context)
                 UserAFullName = m.UserA.FullName,
                 UserBFullName = m.UserB != null ? m.UserB.FullName : null,
                 UserAScore = m.UserAScore,
-                UserBScore = m.UserBScore
+                UserBScore = m.UserBScore,
+                RoundStartDate = m.Round.StartDate,
+                RoundEndDate = m.Round.EndDate
             })
             .ToListAsync();
     }
@@ -136,6 +140,11 @@ public class MatchRepository(AppDbContext context)
     public async Task<IReadOnlyCollection<Match>> GetMatchesByLeagueSeasonAsync(Guid leagueSeasonId)
         => await DbSet
             .Where(m => m.LeagueSeasonId == leagueSeasonId)
+            .ToListAsync();
+
+    public async Task<IReadOnlyCollection<Match>> GetFinishedMatchesByLeagueSeasonAsync(Guid leagueSeasonId, DateTime cutoff)
+        => await DbSet
+            .Where(m => m.LeagueSeasonId == leagueSeasonId && m.Round.EndDate < cutoff)
             .ToListAsync();
 
     public async Task<Match?> GetMatchWithSolvesAsync(Guid id)

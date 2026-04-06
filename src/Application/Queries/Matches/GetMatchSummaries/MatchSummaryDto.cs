@@ -10,4 +10,6 @@ public class MatchSummaryDto
     public string? UserBFullName { get; set; }
     public int UserAScore { get; set; }
     public int UserBScore { get; set; }
+    public DateTime RoundStartDate { get; set; }
+    public DateTime RoundEndDate { get; set; }
 }

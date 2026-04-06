@@ -109,10 +109,13 @@
                                asp-route-id="@round.Id">
                                 Edytuj
                             </a>
-                            <form method="post" asp-page-handler="RefreshStandings">
-                                <input type="hidden" name="RefreshStandingsRoundId" value="@round.Id"/>
-                                <button type="submit" class="btn btn-sm btn-success">Przelicz klasyfikację</button>
-                            </form>
+                            @if (round.EndDate < DateTime.Now)
+                            {
+                                <form method="post" asp-page-handler="RefreshStandings">
+                                    <input type="hidden" name="RefreshStandingsRoundId" value="@round.Id"/>
+                                    <button type="submit" class="btn btn-sm btn-success">Przelicz klasyfikację</button>
+                                </form>
+                            }
                             <form method="post" asp-page-handler="RemoveRound"
                                   onsubmit="return confirm('Czy na pewno chcesz usunąć kolejkę?\nJeżeli rozegrano w niej mecze, wszystkie wyniki zostaną skasowane.')">
                                 <input type="hidden" name="RemoveRoundId" value="@round.Id"/>
