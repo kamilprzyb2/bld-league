@@ -34,9 +34,9 @@ public class RefreshLeagueSeasonStandingsRequestHandler(IUnitOfWork unitOfWork)
         List<LeagueSeasonStanding> toAdd = [];
 
 
-        // 1. Calculate big points and small points
+        // 1. Calculate big points and small points — only from rounds that have ended
         var matches = await unitOfWork.MatchRepository
-            .GetMatchesByLeagueSeasonAsync(request.LeagueSeasonId);
+            .GetFinishedMatchesByLeagueSeasonAsync(request.LeagueSeasonId, DateTime.UtcNow);
         foreach (var user in users)
         {
             standings.Add(user.Id, new Standing());

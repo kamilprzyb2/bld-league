@@ -13,15 +13,16 @@ public class RefreshAllRoundStandingsRequestHandler(IUnitOfWork unitOfWork, ISen
 {
     public async Task<CommandResult> Handle(RefreshAllRoundStandingsRequest request, CancellationToken cancellationToken)
     {
-        var rounds = await unitOfWork.RoundRepository.GetAllRoundSummariesAsync();
+        var allRounds = await unitOfWork.RoundRepository.GetAllRoundSummariesAsync();
+        var finishedRounds = allRounds.Where(r => r.EndDate < DateTime.UtcNow).ToList();
 
-        foreach (var round in rounds)
+        foreach (var round in finishedRounds)
         {
             var result = await sender.Send(new RefreshRoundStandingsRequest(round.Id), cancellationToken);
             if (!result.Success)
                 return CommandResult.FailGeneral($"Błąd przy przeliczaniu kolejki {round.RoundNumber} (sezon {round.SeasonNumber}): {result.Message}");
         }
 
-        return CommandResult.Ok($"Zaktualizowano klasyfikacje wszystkich kolejek ({rounds.Count}).");
+        return CommandResult.Ok($"Zaktualizowano klasyfikacje wszystkich zakończonych kolejek ({finishedRounds.Count}).");
     }
 }
