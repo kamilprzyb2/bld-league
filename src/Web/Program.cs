@@ -23,7 +23,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorPages();
 
 builder.Services.AddBldLeagueInfrastructure(builder.Configuration.GetConnectionString("Default") ?? string.Empty);
-builder.Services.AddBldLeagueApplication();
+builder.Services.AddBldLeagueApplication(builder.Configuration["MediatR:LicenseKey"]);
 
 builder.Services.AddAuthentication(options =>
     {
