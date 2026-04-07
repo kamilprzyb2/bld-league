@@ -2,7 +2,7 @@
 @using BldLeague.Application.Queries.LeagueSeasons.GetAll
 @using BldLeague.Application.Queries.Rounds.GetAllBySeasonId
 @using BldLeague.Application.Queries.Seasons.GetAll
-@using BldLeague.Application.Queries.Users.GetAll
+@using BldLeague.Application.Queries.Users.GetByLeagueSeasonId
 @using Microsoft.AspNetCore.Mvc.TagHelpers
 @model BldLeague.Web.Pages.Admin.Matches.AddMatch
 
@@ -65,8 +65,8 @@
                         asp-for="CreateMatchRequest.UserAId" 
                         asp-items="@(
                                    new SelectList(Model.Users,
-                                       nameof(UserSummaryDto.Id),
-                                       nameof(UserSummaryDto.FullName)))"
+                                       nameof(LeagueSeasonUserDto.Id),
+                                       nameof(LeagueSeasonUserDto.FullName)))"
                         class="form-select user-dropdown" 
                         disabled="@(Model.Users.Count == 0)">
                     <option value="@Guid.Empty">-- Wybierz sezon i ligę --</option>
@@ -80,8 +80,8 @@
                         asp-for="CreateMatchRequest.UserBId" 
                         asp-items="@(
                                    new SelectList(Model.Users,
-                                       nameof(UserSummaryDto.Id),
-                                       nameof(UserSummaryDto.FullName)))"
+                                       nameof(LeagueSeasonUserDto.Id),
+                                       nameof(LeagueSeasonUserDto.FullName)))"
                         class="form-select user-dropdown" 
                         disabled="@(Model.Users.Count == 0)">
                     <option value="@Guid.Empty">-- Wybierz sezon i ligę --</option>

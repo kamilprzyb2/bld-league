@@ -48,23 +48,32 @@
         </div>
     }
 
+    <form id="saveGroupsForm" method="post" asp-page-handler="SaveGroups"></form>
+
     <div class="table-responsive">
         <table class="table table-hover align-middle">
             <thead class="table">
             <tr>
                 <th scope="col">Imię i nazwisko</th>
                 <th scope="col">WCA ID</th>
+                <th scope="col" class="text-center">Grupa</th>
                 <th></th>
             </tr>
             </thead>
             <tbody>
             @if (Model.AssignedUsers.Any())
             {
-                foreach (var user in Model.AssignedUsers)
+                var users = Model.AssignedUsers.ToList();
+                for (var i = 0; i < users.Count; i++)
                 {
+                    var user = users[i];
                     <tr>
                         <td>@user.FullName</td>
                         <td>@user.WcaId</td>
+                        <td class="text-center">
+                            <input type="hidden" name="UserGroups[@i].UserId" value="@user.Id" form="saveGroupsForm" />
+                            <input type="number" name="UserGroups[@i].SubleagueGroup" value="@user.SubleagueGroup" min="0" class="form-control form-control-sm mx-auto" style="width:5rem;" form="saveGroupsForm" />
+                        </td>
                         <td>
                             <form method="post" asp-page-handler="RemoveUser"
                                   onsubmit="return confirm('Czy na pewno chcesz usunąć użytkownika z ligo-sezonu?\nJeżeli rozegrał już jakieś mecze, wszystkie wyniki zostaną skasowane.')">
@@ -78,12 +87,16 @@
             else
             {
                 <tr>
-                    <td colspan="3" class="text-center">Nie znaleziono żadnego uczestnika.</td>
+                    <td colspan="4" class="text-center">Nie znaleziono żadnego uczestnika.</td>
                 </tr>
             }
             </tbody>
         </table>
     </div>
+    @if (Model.AssignedUsers.Any())
+    {
+        <button type="submit" form="saveGroupsForm" class="btn btn-primary mb-3">Zapisz grupy</button>
+    }
 
     <h3>Dodaj uczestników</h3>
     <form method="post" asp-page-handler="AddUsers">

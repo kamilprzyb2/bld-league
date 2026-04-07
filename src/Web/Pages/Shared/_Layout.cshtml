@@ -1,4 +1,7 @@
-﻿<!DOCTYPE html>
+﻿@using Microsoft.Extensions.Options
+@using BldLeague.Web.Options
+@inject IOptions<EnvironmentBadgeOptions> EnvironmentBadge
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8"/>
@@ -10,7 +13,8 @@
     <link rel="icon" type="image/png" sizes="16x16" href="~/favicon-16x16.png"/>
     <link rel="apple-touch-icon" sizes="180x180" href="~/apple-touch-icon.png"/>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css"/>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <link rel="preload" href="/lib/bootstrap-icons/fonts/bootstrap-icons.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="stylesheet" href="~/lib/bootstrap-icons/bootstrap-icons.css"/>
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true"/>
     <link rel="stylesheet" href="~/Web.styles.css" asp-append-version="true"/>
 
@@ -19,7 +23,7 @@
 
     <script>
         (function () {
-            const savedTheme = localStorage.getItem("bs-theme") || "light";
+            const savedTheme = localStorage.getItem("bsTheme") || "dark";
             document.documentElement.setAttribute("data-bs-theme", savedTheme);
         })();
     </script>
@@ -28,7 +32,13 @@
 <header>
     <nav class="navbar navbar-expand-sm navbar-toggleable-sm border-bottom box-shadow mb-1">
         <div class="container">
-            <a class="navbar-brand" asp-area="" asp-page="/Index">3BLD League</a>
+            <a class="navbar-brand d-flex flex-column align-items-start lh-1" asp-area="" asp-page="/Index">
+                3BLD League
+                @if (!string.IsNullOrEmpty(EnvironmentBadge.Value.Name))
+                {
+                    <span class="badge mt-1" style="background-color: @EnvironmentBadge.Value.Color; font-size: 0.75rem;">@EnvironmentBadge.Value.Name</span>
+                }
+            </a>
 
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse"
                     aria-controls="navbarSupportedContent"
@@ -157,23 +167,15 @@
 <script src="~/js/site.js" asp-append-version="true"></script>
 
 <script>
-    document.addEventListener('DOMContentLoaded', (event) => {
-        const htmlElement = document.documentElement;
+    document.addEventListener('DOMContentLoaded', function () {
         const switchElement = document.getElementById('darkModeSwitch');
-
-        // Set the default theme to dark if no setting is found in local storage
         const currentTheme = localStorage.getItem('bsTheme') || 'dark';
-        htmlElement.setAttribute('data-bs-theme', currentTheme);
         switchElement.checked = currentTheme === 'dark';
 
         switchElement.addEventListener('change', function () {
-            if (this.checked) {
-                htmlElement.setAttribute('data-bs-theme', 'dark');
-                localStorage.setItem('bsTheme', 'dark');
-            } else {
-                htmlElement.setAttribute('data-bs-theme', 'light');
-                localStorage.setItem('bsTheme', 'light');
-            }
+            const theme = this.checked ? 'dark' : 'light';
+            document.documentElement.setAttribute('data-bs-theme', theme);
+            localStorage.setItem('bsTheme', theme);
         });
     });
 </script>

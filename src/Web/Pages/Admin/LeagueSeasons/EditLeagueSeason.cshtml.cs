@@ -1,6 +1,7 @@
 using BldLeague.Application.Commands.LeagueSeasonUsers.Create;
 using BldLeague.Application.Commands.LeagueSeasonUsers.Delete;
 using BldLeague.Application.Commands.LeagueSeasonUsers.Import;
+using BldLeague.Application.Commands.LeagueSeasonUsers.SetGroup;
 using BldLeague.Application.Common;
 using BldLeague.Application.Queries.LeagueSeasons.GetAll;
 using BldLeague.Application.Queries.LeagueSeasons.GetById;
@@ -24,12 +25,19 @@ public class EditLeagueSeason(IMediator mediator) : PageModel
     public Guid Id { get; set; }
 
     public LeagueSeasonDto? LeagueSeason { get; set; }
-    public IReadOnlyCollection<UserSummaryDto> AssignedUsers { get; set; } = Array.Empty<UserSummaryDto>();
+    public IReadOnlyCollection<LeagueSeasonUserDto> AssignedUsers { get; set; } = Array.Empty<LeagueSeasonUserDto>();
     public IReadOnlyCollection<UserSummaryDto> UnassignedUsers { get; set; } = Array.Empty<UserSummaryDto>();
     public ImportResult? ImportResult { get; private set; }
 
     [BindProperty] public List<Guid> SelectedUserIds { get; set; } = [];
     [BindProperty] public Guid? RemoveUserId { get; set; }
+    [BindProperty] public List<UserGroupInput> UserGroups { get; set; } = [];
+
+    public class UserGroupInput
+    {
+        public Guid UserId { get; set; }
+        public int SubleagueGroup { get; set; }
+    }
 
     public async Task<IActionResult> OnGet()
     {
@@ -75,6 +83,30 @@ public class EditLeagueSeason(IMediator mediator) : PageModel
         {
             UserId = RemoveUserId.Value,
             LeagueSeasonId = Id
+        };
+
+        var result = await mediator.Send(request);
+
+        if (result.Success)
+            TempData["SuccessMessage"] = result.Message;
+        else
+            TempData["ErrorMessage"] = result.Message;
+
+        return RedirectToPage();
+    }
+
+    public async Task<IActionResult> OnPostSaveGroupsAsync()
+    {
+        var request = new SetLeagueSeasonUserGroupsBatchRequest
+        {
+            LeagueSeasonId = Id,
+            Entries = UserGroups
+                .Select(g => new SetLeagueSeasonUserGroupsBatchRequest.UserGroupEntry
+                {
+                    UserId = g.UserId,
+                    SubleagueGroup = g.SubleagueGroup
+                })
+                .ToList()
         };
 
         var result = await mediator.Send(request);
