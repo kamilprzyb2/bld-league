@@ -1,4 +1,3 @@
-using System.Globalization;
 using System.Net.Http.Headers;
 using System.Security.Claims;
 using System.Text.Json;
@@ -13,18 +12,13 @@ using MediatR;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OAuth;
 
-// Set culture
-var culture = new CultureInfo("pl-PL");
-CultureInfo.DefaultThreadCurrentCulture = culture;
-CultureInfo.DefaultThreadCurrentUICulture = culture;
-
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorPages();
 
 builder.Services.AddBldLeagueInfrastructure(builder.Configuration.GetConnectionString("Default") ?? string.Empty);
-builder.Services.AddBldLeagueApplication();
+builder.Services.AddBldLeagueApplication(builder.Configuration["MediatR:LicenseKey"]);
 
 builder.Services.Configure<EnvironmentBadgeOptions>(builder.Configuration.GetSection("EnvironmentBadge"));
 

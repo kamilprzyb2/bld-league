@@ -91,8 +91,8 @@
                     <tr data-season="@round.SeasonNumber">
                         <td>@round.SeasonNumber</td>
                         <td>@round.RoundNumber</td>
-                        <td>@round.StartDate.ToShortDateString()</td>
-                        <td>@round.EndDate.ToShortDateString()</td>
+                        <td>@round.StartDate.ToDisplayDate()</td>
+                        <td>@round.EndDate.ToDisplayDate()</td>
                         @for (var i = 1; i <= Match.SOLVES_PER_MATCH; i++)
                         {
                             var notation = scrambles.FirstOrDefault(x => x.ScrambleNumber == i)?.Notation;
