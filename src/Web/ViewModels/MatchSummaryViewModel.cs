@@ -15,7 +15,7 @@ public class MatchSummaryViewModel
 
     public static MatchSummaryViewModel FromDto(MatchSummaryDto dto)
     {
-        var now = DateTime.Now;
+        var now = DateTime.UtcNow;
         var status = dto.RoundEndDate < now
             ? MatchStatus.Finished
             : dto.RoundStartDate <= now
