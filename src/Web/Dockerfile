@@ -1,4 +1,5 @@
 ﻿FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS base
+RUN mkdir -p /home/app/.aspnet/DataProtection-Keys && chown $APP_UID /home/app/.aspnet/DataProtection-Keys
 USER $APP_UID
 WORKDIR /app
 EXPOSE 8080
