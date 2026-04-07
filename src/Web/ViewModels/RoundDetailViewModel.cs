@@ -1,4 +1,5 @@
 ﻿using BldLeague.Application.Queries.Rounds.GetDetail;
+using BldLeague.Web.Helpers;
 
 namespace BldLeague.Web.ViewModels;
 
@@ -13,8 +14,8 @@ public class RoundDetailViewModel
     {
         return new RoundDetailViewModel
         {
-            StartDate = dto.StartDate.ToShortDateString(),
-            EndDate = dto.EndDate.ToShortDateString(),
+            StartDate = dto.StartDate.ToDisplayDate(),
+            EndDate = dto.EndDate.ToDisplayDate(),
             Scrambles = dto.Scrambles
                 .OrderBy(s => s.ScrambleNumber)
                 .Select(s => s.Notation)
