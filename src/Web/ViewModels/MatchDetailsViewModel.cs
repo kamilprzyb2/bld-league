@@ -31,7 +31,7 @@ public class MatchDetailsViewModel : MatchSummaryViewModel
 
     public static MatchDetailsViewModel FromDto(MatchDetailsDto dto)
     {
-        var now = DateTime.Now;
+        var now = DateTime.UtcNow;
         var status = dto.RoundEndDate < now
             ? MatchStatus.Finished
             : dto.RoundStartDate <= now

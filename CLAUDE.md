@@ -17,10 +17,6 @@ docker compose up --build   # full stack with PostgreSQL
 
 ### Database Migrations
 ```bash
-# Add a new migration (Windows batch script)
-add-migration.bat MigrationName
-
-# Equivalent dotnet command (Linux/cross-platform)
 dotnet ef migrations add MigrationName --project src/Infrastructure --startup-project src/Web
 ```
 
@@ -50,7 +46,6 @@ Other branch types (`refactor/something`, `project-management/something`, etc.) 
 - All PRs target `staging` first — never merge a feature/fix branch directly into `main`.
 - PR body must include `Closes #<issue-number>` so the issue is linked and automation triggers correctly.
 - Once staging is verified, `staging` is merged into `main`.
-- When opening a PR from a `feature/`, `fix/`, or `chore/` branch, always pass `--delete-branch` to `gh pr create` so the branch is automatically deleted after merge.
 
 ### Testing & Verification
 - Do **not** put a test plan or verification checklist in the PR body. PRs merge to `staging` before the owner can test, so checkboxes in a closed PR are inaccessible in practice.
@@ -129,12 +124,12 @@ Avoid JavaScript by default. Prefer server-side form submissions and page reload
 
 - **Season** → contains **Rounds** and belongs to multiple **LeagueSeasons**.
 - **League** → a division (e.g., "Liga A"). Multiple leagues run simultaneously within a season.
-- **LeagueSeason** → junction of League + Season; holds the roster (`LeagueSeasonUser`).
+- **LeagueSeason** → junction of League + Season; holds the roster (`LeagueSeasonUser`). Users can be assigned a `SubleagueGroup` (integer) on their `LeagueSeasonUser` record to split the league into subleagues during a revenge period.
 - **Season** has no start/end dates — it is just a `SeasonNumber`. "Latest season" (highest `SeasonNumber`) is used as the UI default in AddRound and AddMatch. LeagueSeasons are created manually (not auto-generated).
-- **Match** → 1v1 within a Round + League. Each match has exactly 5 solves (`Match.SOLVES_PER_MATCH`) per player. Scoring: 1 point per solve won + 1 bonus point for best single. Scores are computed and stored at match creation time.
+- **Match** → 1v1 within a Round + League. Each match has exactly 5 solves (`Match.SOLVES_PER_MATCH`) per player. Scoring: 1 point per solve won + 1 bonus point for best single. Scores are computed and stored at match creation time. Matches have a `MatchStatus` (Upcoming/InProgress/Finished) derived from the round's `StartDate`/`EndDate` relative to `DateTime.UtcNow`; scores and solve details are hidden in the UI until the match is Finished.
 - **Scramble** → one per solve position (1–`Match.SOLVES_PER_MATCH`) per round; shared across all leagues in that round. Field `Notation` holds the move sequence. A round may have 0–5 scrambles.
-- **RoundStanding** — standings per round per league; refreshed on demand via `RefreshRoundStandingsRequest`. Points: place 1–7 → 50–38 (step -2), place 8–44 → 37–1 (step -1).
-- **LeagueSeasonStanding** — cumulative season standings; refreshed via `RefreshLeagueSeasonStandingsRequest`.
+- **RoundStanding** — standings per round per league; refreshed on demand via `RefreshRoundStandingsRequest` (single round) or `RefreshAllRoundStandingsRequest` (all finished rounds). Points: place 1–7 → 50–38 (step -2), place 8–44 → 37–1 (step -1).
+- **LeagueSeasonStanding** — cumulative season standings; refreshed via `RefreshLeagueSeasonStandingsRequest` (single league season) or `RefreshAllLeagueSeasonStandingsRequest` (all league seasons).
 
 ## File Map
 
@@ -201,8 +196,8 @@ Avoid JavaScript by default. Prefer server-side form submissions and page reload
 | Round create/update/delete/import + scramble update | `src/Application/Commands/Rounds/` |
 | Match create/edit/delete/import | `src/Application/Commands/Matches/` |
 | User create/update/delete/import | `src/Application/Commands/Users/` |
-| Refresh round standings | `src/Application/Commands/RoundStandings/Refresh/` |
-| Refresh season standings | `src/Application/Commands/LeagueSeasonStandings/Refresh/` |
+| Refresh round standings (single + refresh-all) | `src/Application/Commands/RoundStandings/Refresh/` and `RefreshAll/` |
+| Refresh season standings (single + refresh-all) | `src/Application/Commands/LeagueSeasonStandings/Refresh/` and `RefreshAll/` |
 
 ### Application — queries (read operations, by feature)
 
@@ -213,7 +208,7 @@ Avoid JavaScript by default. Prefer server-side form submissions and page reload
 | LeagueSeason queries + DTOs | `src/Application/Queries/LeagueSeasons/` |
 | Round queries + DTOs (incl. `ScrambleDto`, `RoundSummaryDto`) | `src/Application/Queries/Rounds/` |
 | Match queries + DTOs (incl. `SolveDto`, `MatchDetailsDto`, `MatchExportRowDto`) | `src/Application/Queries/Matches/` |
-| User queries + DTOs | `src/Application/Queries/Users/` |
+| User queries + DTOs (incl. `LeagueSeasonUserDto` for roster queries) | `src/Application/Queries/Users/` |
 
 ### Infrastructure
 
@@ -240,6 +235,8 @@ Avoid JavaScript by default. Prefer server-side form submissions and page reload
 | Shared layout | `src/Web/Pages/Shared/_Layout.cshtml` |
 | `CsvHelper` (CSV builder, UTF-8 BOM) | `src/Web/Helpers/CsvHelper.cs` |
 | `CsvParser` (CSV `IFormFile` parser) | `src/Web/Helpers/CsvParser.cs` |
+| `EnvironmentBadgeOptions` (optional navbar env label) | `src/Web/Options/EnvironmentBadgeOptions.cs` |
+| `MatchStatus` enum (Upcoming/InProgress/Finished) | `src/Web/ViewModels/MatchStatus.cs` |
 | ViewModels | `src/Web/ViewModels/` |
 
 ### Web — public pages
@@ -277,7 +274,7 @@ Avoid JavaScript by default. Prefer server-side form submissions and page reload
 5. `src/Infrastructure/Repositories/NewEntityRepository.cs` — extend `ReadWriteRepositoryBase<T>`
 6. `src/Infrastructure/Repositories/UnitOfWork.cs` — wire up lazy property
 7. `src/Infrastructure/Context/AppDbContext.cs` — add `DbSet<T>`
-8. Run `add-migration.bat MigrationName`
+8. Run `dotnet ef migrations add MigrationName --project src/Infrastructure --startup-project src/Web`
 
 **Add a new request/handler:**
 1. Create folder `src/Application/Requests/[Feature]/[Operation]/`
