@@ -78,7 +78,18 @@
             {
                 foreach (var standing in Model.RoundDetail.Standings)
                 {
-                    <tr>
+                    <tr class="js-detail-row"
+                        data-place="@standing.Place"
+                        data-name="@standing.UserFullName"
+                        data-league="@standing.LeagueIdentifier"
+                        data-best="@standing.Best"
+                        data-avg="@standing.Average"
+                        data-s1="@standing.Solve1"
+                        data-s2="@standing.Solve2"
+                        data-s3="@standing.Solve3"
+                        data-s4="@standing.Solve4"
+                        data-s5="@standing.Solve5"
+                        data-pts="@standing.Points">
                         <td class="text-center">@standing.Place</td>
                         <td>@standing.UserFullName</td>
                         <td class="d-none d-md-table-cell">@standing.LeagueIdentifier</td>
@@ -103,3 +114,62 @@
         </table>
     }
 </div>
+
+<div class="modal fade" id="rowDetailModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Szczegóły zawodnika</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Zamknij"></button>
+            </div>
+            <div class="modal-body" id="rowDetailBody"></div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('rowDetailModal'));
+            const modalBody = document.getElementById('rowDetailBody');
+
+            function buildDetailDl(fields) {
+                const dl = document.createElement('dl');
+                dl.className = 'row mb-0';
+                fields.forEach(function ([label, value]) {
+                    const dt = document.createElement('dt');
+                    dt.className = 'col-5';
+                    dt.textContent = label;
+                    const dd = document.createElement('dd');
+                    dd.className = 'col-7';
+                    dd.textContent = value;
+                    dl.appendChild(dt);
+                    dl.appendChild(dd);
+                });
+                return dl;
+            }
+
+            document.querySelectorAll('tr.js-detail-row').forEach(function (row) {
+                row.addEventListener('click', function () {
+                    if (window.innerWidth >= 768) return;
+                    const d = row.dataset;
+                    modalBody.innerHTML = '';
+                    modalBody.appendChild(buildDetailDl([
+                        ['Zawodnik', d.name],
+                        ['Pozycja', d.place],
+                        ['Liga', d.league],
+                        ['Best', d.best],
+                        ['Ao5', d.avg],
+                        ['Ułożenie 1', d.s1],
+                        ['Ułożenie 2', d.s2],
+                        ['Ułożenie 3', d.s3],
+                        ['Ułożenie 4', d.s4],
+                        ['Ułożenie 5', d.s5],
+                        ['Punkty', d.pts]
+                    ]));
+                    modal.show();
+                });
+            });
+        });
+    </script>
+}

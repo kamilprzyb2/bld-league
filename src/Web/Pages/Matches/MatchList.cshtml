@@ -2,6 +2,7 @@
 @using BldLeague.Application.Queries.Leagues.GetAll
 @using BldLeague.Application.Queries.Rounds.GetAllBySeasonId
 @using BldLeague.Application.Queries.Seasons.GetAll
+@using BldLeague.Web.ViewModels
 @model MatchList
 
 <div class="container mt-2">
@@ -58,19 +59,41 @@
                         <td class="text-center" colspan="3">N/A</td>
                         <td></td>
                     }
-                    else
+                    else if (matchSummary.Status == MatchStatus.Finished)
                     {
                         <td class="text-center">@matchSummary.UserAScore</td>
                         <td class="text-center">:</td>
                         <td class="text-center">@matchSummary.UserBScore</td>
                         <td>@matchSummary.UserBFullName</td>
                     }
-                    <td class="d-flex">
-                        <a class="btn btn-sm btn-primary me-2"
-                           asp-page="/Matches/ViewMatch"
-                           asp-route-id="@matchSummary.MatchId">
-                            Zobacz
-                        </a>
+                    else if (matchSummary.Status == MatchStatus.InProgress)
+                    {
+                        <td class="text-center" colspan="3"><span class="badge text-bg-warning">W trakcie</span></td>
+                        <td>@matchSummary.UserBFullName</td>
+                    }
+                    else
+                    {
+                        <td class="text-center" colspan="3"><span class="badge text-bg-secondary">Planowany</span></td>
+                        <td>@matchSummary.UserBFullName</td>
+                    }
+
+                    <td>
+                        @if (matchSummary.Status == MatchStatus.Finished)
+                        {
+                            <a class="btn btn-sm btn-primary"
+                               asp-page="/Matches/ViewMatch"
+                               asp-route-id="@matchSummary.MatchId">
+                                Zobacz
+                            </a>
+                        }
+                        else
+                        {
+                            <a class="btn btn-sm btn-outline-secondary"
+                               asp-page="/Matches/ViewMatch"
+                               asp-route-id="@matchSummary.MatchId">
+                                Zobacz
+                            </a>
+                        }
                     </td>
                 </tr>
             }

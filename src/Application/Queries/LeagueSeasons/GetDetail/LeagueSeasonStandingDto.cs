@@ -9,6 +9,7 @@ public class LeagueSeasonStandingDto
 {
     public required string UserFullName { get; set; }
     public int Place { get; set; }
+    public int SubleagueGroup { get; set; }
     public int MatchesPlayed { get; set; }
     public int MatchesWon { get; set; }
     public int MatchesTied { get; set; }

@@ -1,4 +1,5 @@
 using BldLeague.Application.Commands.LeagueSeasonStandings.Refresh;
+using BldLeague.Application.Commands.LeagueSeasonStandings.RefreshAll;
 using BldLeague.Application.Commands.LeagueSeasons.Delete;
 using BldLeague.Application.Commands.LeagueSeasons.Import;
 using BldLeague.Application.Common;
@@ -47,6 +48,18 @@ public class AllLeagueSeasons(IMediator mediator) : PageModel
             return RedirectToPage();
 
         var result = await mediator.Send(new RefreshLeagueSeasonStandingsRequest(RefreshStandingsLeagueSeasonId));
+
+        if (result.Success)
+            TempData["SuccessMessage"] = result.Message;
+        else
+            TempData["ErrorMessage"] = result.Message;
+
+        return RedirectToPage();
+    }
+
+    public async Task<IActionResult> OnPostRefreshAllStandingsAsync()
+    {
+        var result = await mediator.Send(new RefreshAllLeagueSeasonStandingsRequest());
 
         if (result.Success)
             TempData["SuccessMessage"] = result.Message;

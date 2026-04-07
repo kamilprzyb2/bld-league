@@ -1,5 +1,6 @@
 @page "/Matches/{id:guid}"
 @using BldLeague.Domain.Entities
+@using BldLeague.Web.ViewModels
 @model BldLeague.Web.Pages.Matches.ViewMatch
 
 <div class="container mt-2">
@@ -22,6 +23,15 @@
 
         <hr class="my-4" />
 
+        @if (Model.MatchDetails.Status != MatchStatus.Finished)
+        {
+            <div class="alert alert-secondary">
+                Mecz zaplanowany. Wyniki będą dostępne po zakończeniu kolejki.
+            </div>
+        }
+        else
+        {
+
         <div>
             <table class="table table-hover align-middle">
                 <thead class="table">
@@ -39,7 +49,13 @@
                 @for (var i = 0; i < Match.SOLVES_PER_MATCH; i++)
                 {
                     var scramble = Model.MatchDetails.Scrambles[i];
-                    <tr>
+                    <tr class="js-detail-row"
+                        data-solve="@(i + 1)"
+                        data-usera="@Model.MatchDetails.UserAFullName"
+                        data-solve-a="@Model.MatchDetails.SolvesUserA[i]"
+                        data-userb="@(Model.MatchDetails.UserBFullName ?? "")"
+                        data-solve-b="@(string.IsNullOrEmpty(Model.MatchDetails.UserBFullName) ? "" : Model.MatchDetails.SolvesUserB[i])"
+                        data-scramble="@(scramble ?? "")">
                         <td class="text-center">@(i+1).</td>
                         <td class="text-center">@Model.MatchDetails.SolvesUserA[i]</td>
                         @if (!string.IsNullOrEmpty(Model.MatchDetails.UserBFullName))
@@ -93,6 +109,55 @@
             </table>
         </div>
         }
-
-
+    }
 </div>
+
+<div class="modal fade" id="rowDetailModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Szczegóły ułożenia</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Zamknij"></button>
+            </div>
+            <div class="modal-body" id="rowDetailBody"></div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('rowDetailModal'));
+            const modalBody = document.getElementById('rowDetailBody');
+
+            function addField(dl, label, value, extraClass) {
+                const dt = document.createElement('dt');
+                dt.className = 'col-5';
+                dt.textContent = label;
+                const dd = document.createElement('dd');
+                dd.className = 'col-7' + (extraClass ? ' ' + extraClass : '');
+                dd.textContent = value;
+                dl.appendChild(dt);
+                dl.appendChild(dd);
+            }
+
+            document.querySelectorAll('tr.js-detail-row').forEach(function (row) {
+                row.addEventListener('click', function () {
+                    if (window.innerWidth >= 768) return;
+                    const d = row.dataset;
+                    const dl = document.createElement('dl');
+                    dl.className = 'row mb-0';
+                    addField(dl, 'Ułożenie', d.solve);
+                    addField(dl, d.usera, d.solveA);
+                    if (d.userb) addField(dl, d.userb, d.solveB);
+                    addField(dl, 'Scramble',
+                        d.scramble || 'nie znaleziono scrambla',
+                        'font-monospace' + (d.scramble ? '' : ' fst-italic text-muted'));
+                    modalBody.innerHTML = '';
+                    modalBody.appendChild(dl);
+                    modal.show();
+                });
+            });
+        });
+    </script>
+}

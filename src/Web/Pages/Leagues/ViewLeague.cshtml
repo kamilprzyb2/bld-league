@@ -49,9 +49,28 @@
             <tbody>
             @if (Model.LeagueSeason.Standings.Any())
             {
+                var hasMultipleGroups = Model.LeagueSeason.Standings.Select(s => s.SubleagueGroup).Distinct().Count() > 1;
+                int? previousGroup = null;
                 foreach (var standing in Model.LeagueSeason.Standings)
                 {
-                    <tr>
+                    if (hasMultipleGroups && previousGroup.HasValue && standing.SubleagueGroup != previousGroup.Value)
+                    {
+                        <tr style="border-top: 2px solid var(--bs-secondary-color);"><td colspan="12" class="p-0"></td></tr>
+                    }
+                    previousGroup = standing.SubleagueGroup;
+                    <tr class="js-detail-row"
+                        data-place="@standing.Place"
+                        data-name="@standing.UserFullName"
+                        data-m="@standing.MatchesPlayed"
+                        data-z="@standing.MatchesWon"
+                        data-r="@standing.MatchesTied"
+                        data-p="@standing.MatchesLost"
+                        data-pkt="@standing.BigPoints"
+                        data-pktdk="@standing.BonusPoints"
+                        data-pz="@standing.SmallPointsGained"
+                        data-ps="@standing.SmallPointsLost"
+                        data-rp="@standing.SmallPointsBalance"
+                        data-best="@standing.Best">
                         <td class="text-center">@standing.Place</td>
                         <td>@standing.UserFullName</td>
                         <td class="text-center d-none d-md-table-cell">@standing.MatchesPlayed</td>
@@ -78,12 +97,82 @@
     }
 </div>
 
+<div class="modal fade" id="rowDetailModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Szczegóły zawodnika</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Zamknij"></button>
+            </div>
+            <div class="modal-body" id="rowDetailBody"></div>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
             tooltipTriggerList.map(function (tooltipTriggerEl) {
                 return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+
+            const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('rowDetailModal'));
+            const modalBody = document.getElementById('rowDetailBody');
+
+            function buildDetailDl(fields) {
+                const fragment = document.createDocumentFragment();
+                let dl = null;
+                fields.forEach(function (field) {
+                    if (field === null) {
+                        const hr = document.createElement('hr');
+                        hr.className = 'my-2';
+                        fragment.appendChild(hr);
+                        dl = null;
+                        return;
+                    }
+                    if (!dl) {
+                        dl = document.createElement('dl');
+                        dl.className = 'row mb-0';
+                        fragment.appendChild(dl);
+                    }
+                    const [label, value] = field;
+                    const dt = document.createElement('dt');
+                    dt.className = 'col-5';
+                    dt.textContent = label;
+                    const dd = document.createElement('dd');
+                    dd.className = 'col-7';
+                    dd.textContent = value;
+                    dl.appendChild(dt);
+                    dl.appendChild(dd);
+                });
+                return fragment;
+            }
+
+            document.querySelectorAll('tr.js-detail-row').forEach(function (row) {
+                row.addEventListener('click', function () {
+                    if (window.innerWidth >= 768) return;
+                    const d = row.dataset;
+                    modalBody.innerHTML = '';
+                    modalBody.appendChild(buildDetailDl([
+                        ['Zawodnik', d.name],
+                        ['Pozycja', d.place],
+                        ['Mecze rozegrane', d.m],
+                        ['Zwycięstwa', d.z],
+                        ['Remisy', d.r],
+                        ['Porażki', d.p],
+                        null,
+                        ['Punkty (1. kryterium)', d.pkt],
+                        ['Punkty (2. kryterium)', d.pktdk],
+                        null,
+                        ['Punkty meczowe zdobyte', d.pz],
+                        ['Punkty meczowe stracone', d.ps],
+                        ['Różnica punktów', d.rp],
+                        null,
+                        ['Najlepszy singiel', d.best]
+                    ]));
+                    modal.show();
+                });
             });
         });
     </script>

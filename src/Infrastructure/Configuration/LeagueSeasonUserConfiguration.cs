@@ -22,6 +22,8 @@ public class LeagueSeasonUserConfiguration : IEntityTypeConfiguration<LeagueSeas
             .HasForeignKey(lsu => lsu.LeagueSeasonId)
             .IsRequired();
         
+        b.Property(lsu => lsu.SubleagueGroup).HasDefaultValue(0).IsRequired();
+
         b.HasIndex(lsu => new { lsu.LeagueSeasonId, lsu.UserId })
             .IsUnique();
     }

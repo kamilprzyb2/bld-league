@@ -72,6 +72,10 @@ public class LeagueSeasonRepository(AppDbContext context) :
                     {
                         UserFullName = lss.User.FullName,
                         Place = lss.Place,
+                        SubleagueGroup = ls.LeagueSeasonUsers
+                            .Where(lsu => lsu.UserId == lss.UserId)
+                            .Select(lsu => lsu.SubleagueGroup)
+                            .FirstOrDefault(),
                         MatchesPlayed = lss.MatchesPlayed,
                         MatchesWon = lss.MatchesWon,
                         MatchesTied = lss.MatchesTied,

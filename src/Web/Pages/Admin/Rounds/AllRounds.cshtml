@@ -10,6 +10,10 @@
             <a id="export-link" asp-page="/Admin/Rounds/AllRounds" asp-page-handler="ExportCsv"
                class="btn btn-outline-secondary">Export CSV</a>
             <button class="btn btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#importForm">Import CSV</button>
+            <form method="post" asp-page-handler="RefreshAllStandings"
+                  onsubmit="return confirm('Przelicz klasyfikacje wszystkich kolejek?')">
+                <button type="submit" class="btn btn-success">Przelicz wszystkie kolejki</button>
+            </form>
             <a asp-page="/Admin/Rounds/AddRound" class="btn btn-primary">Dodaj kolejkę</a>
         </div>
     </div>
@@ -105,10 +109,13 @@
                                asp-route-id="@round.Id">
                                 Edytuj
                             </a>
-                            <form method="post" asp-page-handler="RefreshStandings">
-                                <input type="hidden" name="RefreshStandingsRoundId" value="@round.Id"/>
-                                <button type="submit" class="btn btn-sm btn-success">Przelicz klasyfikację</button>
-                            </form>
+                            @if (round.EndDate < DateTime.Now)
+                            {
+                                <form method="post" asp-page-handler="RefreshStandings">
+                                    <input type="hidden" name="RefreshStandingsRoundId" value="@round.Id"/>
+                                    <button type="submit" class="btn btn-sm btn-success">Przelicz klasyfikację</button>
+                                </form>
+                            }
                             <form method="post" asp-page-handler="RemoveRound"
                                   onsubmit="return confirm('Czy na pewno chcesz usunąć kolejkę?\nJeżeli rozegrano w niej mecze, wszystkie wyniki zostaną skasowane.')">
                                 <input type="hidden" name="RemoveRoundId" value="@round.Id"/>

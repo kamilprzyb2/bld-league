@@ -1,4 +1,5 @@
 using BldLeague.Application.Commands.RoundStandings.Refresh;
+using BldLeague.Application.Commands.RoundStandings.RefreshAll;
 using BldLeague.Application.Commands.Rounds.Delete;
 using BldLeague.Application.Commands.Rounds.Import;
 using BldLeague.Application.Common;
@@ -54,6 +55,18 @@ public class AllRounds(IMediator mediator) : PageModel
             return RedirectToPage();
 
         var result = await mediator.Send(new RefreshRoundStandingsRequest(RefreshStandingsRoundId));
+
+        if (result.Success)
+            TempData["SuccessMessage"] = result.Message;
+        else
+            TempData["ErrorMessage"] = result.Message;
+
+        return RedirectToPage();
+    }
+
+    public async Task<IActionResult> OnPostRefreshAllStandingsAsync()
+    {
+        var result = await mediator.Send(new RefreshAllRoundStandingsRequest());
 
         if (result.Success)
             TempData["SuccessMessage"] = result.Message;
