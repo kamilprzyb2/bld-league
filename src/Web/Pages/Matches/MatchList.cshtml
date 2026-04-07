@@ -43,7 +43,6 @@
                 <th scope="col" class="text-end pe-3">Zawodnik A</th>
                 <th scope="col" colspan="3" class="text-center">Wynik</th>
                 <th scope="col">Zawodnik B</th>
-                <th scope="col">Status</th>
                 <th scope="col">Akcje</th>
             </tr>
         </thead>
@@ -67,26 +66,16 @@
                         <td class="text-center">@matchSummary.UserBScore</td>
                         <td>@matchSummary.UserBFullName</td>
                     }
-                    else
+                    else if (matchSummary.Status == MatchStatus.InProgress)
                     {
-                        <td class="text-center" colspan="3">–</td>
+                        <td class="text-center" colspan="3"><span class="badge text-bg-warning">W trakcie</span></td>
                         <td>@matchSummary.UserBFullName</td>
                     }
-
-                    <td>
-                        @switch (matchSummary.Status)
-                        {
-                            case MatchStatus.Finished:
-                                <span class="badge text-bg-success">Zakończony</span>
-                                break;
-                            case MatchStatus.InProgress:
-                                <span class="badge text-bg-warning">W trakcie</span>
-                                break;
-                            case MatchStatus.Upcoming:
-                                <span class="badge text-bg-secondary">Planowany</span>
-                                break;
-                        }
-                    </td>
+                    else
+                    {
+                        <td class="text-center" colspan="3"><span class="badge text-bg-secondary">Planowany</span></td>
+                        <td>@matchSummary.UserBFullName</td>
+                    }
 
                     <td>
                         @if (matchSummary.Status == MatchStatus.Finished)
@@ -112,7 +101,7 @@
         else
         {
             <tr>
-                <td colspan="7" class="text-center">Brak danych.</td>
+                <td colspan="6" class="text-center">Brak danych.</td>
             </tr>
         }
         </tbody>
