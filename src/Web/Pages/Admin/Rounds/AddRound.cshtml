@@ -33,6 +33,12 @@
             <span asp-validation-for="CreateRoundRequest.EndDate" class="text-danger"></span>
         </div>
 
+        <div class="mb-3">
+            <label asp-for="CreateRoundRequest.SubmissionFormUrl" class="form-label">Link do formularza (opcjonalnie)</label>
+            <input asp-for="CreateRoundRequest.SubmissionFormUrl" type="url" class="form-control" placeholder="https://forms.google.com/...">
+            <span asp-validation-for="CreateRoundRequest.SubmissionFormUrl" class="text-danger"></span>
+        </div>
+
         <button type="submit" class="btn btn-primary">Dodaj</button>
         <a asp-page="/Admin/Rounds/AllRounds" class="btn btn-outline-secondary ms-2">Anuluj</a>
     </form>

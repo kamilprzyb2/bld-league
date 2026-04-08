@@ -90,4 +90,20 @@
             </div>
         </a>
     </div>
+    @if (Model.ActiveRoundForm != null)
+    {
+        <div class="col-12 col-sm-6 col-md-4">
+            <a href="@Model.ActiveRoundForm.Url" class="text-decoration-none" target="_blank" rel="noopener noreferrer">
+                <div class="card h-100 border-0 shadow-sm p-3">
+                    <div class="d-flex align-items-center gap-3">
+                        <i class="bi bi-pencil-square fs-2" style="color: var(--bs-purple)"></i>
+                        <div>
+                            <div class="fw-semibold">Formularz wynikowy</div>
+                            <div class="text-muted small">Zgłoś wyniki — @Model.ActiveRoundForm.RoundName</div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+    }
 </div>

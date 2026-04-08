@@ -30,6 +30,12 @@
             <span asp-validation-for="UpdateRoundRequest.EndDate" class="text-danger"></span>
         </div>
 
+        <div class="mb-3">
+            <label asp-for="UpdateRoundRequest.SubmissionFormUrl" class="form-label">Link do formularza (opcjonalnie)</label>
+            <input asp-for="UpdateRoundRequest.SubmissionFormUrl" type="url" class="form-control" placeholder="https://forms.google.com/...">
+            <span asp-validation-for="UpdateRoundRequest.SubmissionFormUrl" class="text-danger"></span>
+        </div>
+
         <hr class="my-4" />
         <h5>Scramble</h5>
 

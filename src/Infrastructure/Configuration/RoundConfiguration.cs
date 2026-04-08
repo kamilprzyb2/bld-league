@@ -20,9 +20,11 @@ public class RoundConfiguration : IEntityTypeConfiguration<Round>
         b.Property(r => r.RoundNumber).IsRequired();
         
         b.Property(r => r.StartDate).IsRequired();
-        
+
         b.Property(r => r.EndDate).IsRequired();
-        
+
+        b.Property(r => r.SubmissionFormUrl).HasMaxLength(2048);
+
         b.HasIndex(r => new { r.SeasonId, r.RoundNumber })
             .IsUnique();
     }

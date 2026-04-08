@@ -1,4 +1,5 @@
 using BldLeague.Application.Abstractions.Repositories;
+using BldLeague.Application.Queries.Rounds.GetActiveFormUrl;
 using BldLeague.Application.Queries.Rounds.GetAll;
 using BldLeague.Application.Queries.Rounds.GetAllBySeasonId;
 using BldLeague.Application.Queries.Rounds.GetDetail;
@@ -16,7 +17,7 @@ public class RoundRepository(AppDbContext context) :
         => await DbSet
             .Where(r => r.SeasonId == seasonId)
             .OrderBy(r => r.RoundNumber)
-            .Select(r => new RoundSummaryDto(r.Id, r.SeasonId, r.RoundNumber, r.StartDate, r.EndDate))
+            .Select(r => new RoundSummaryDto(r.Id, r.SeasonId, r.RoundNumber, r.StartDate, r.EndDate, r.SubmissionFormUrl))
             .ToListAsync();
 
     public async Task<IReadOnlyCollection<RoundAdminSummaryDto>> GetAllRoundSummariesAsync()
@@ -29,13 +30,24 @@ public class RoundRepository(AppDbContext context) :
     public async Task<RoundSummaryDto?> GetSummaryByIdAsync(Guid id)
         => await DbSet
             .Where(r => r.Id == id)
-            .Select(r => new RoundSummaryDto(r.Id, r.SeasonId, r.RoundNumber, r.StartDate, r.EndDate))
+            .Select(r => new RoundSummaryDto(r.Id, r.SeasonId, r.RoundNumber, r.StartDate, r.EndDate, r.SubmissionFormUrl))
             .FirstOrDefaultAsync();
 
     public async Task<int?> GetLatestRoundNumberAsync()
         => await DbSet
             .Select(r => (int?)r.RoundNumber)
             .MaxAsync();
+
+    public async Task<ActiveRoundFormDto?> GetActiveRoundFormUrlAsync(DateTime utcNow)
+    {
+        var todayStart = utcNow.Date;
+        var tomorrowStart = todayStart.AddDays(1);
+        return await DbSet
+            .Where(r => r.StartDate < tomorrowStart && r.EndDate >= todayStart
+                        && r.SubmissionFormUrl != null && r.SubmissionFormUrl != "")
+            .Select(r => new ActiveRoundFormDto(r.SubmissionFormUrl!, "Kolejka " + r.RoundNumber))
+            .FirstOrDefaultAsync();
+    }
 
     public async Task<RoundDetailDto?> GetRoundDetailAsync(Guid seasonId, int roundNumber)
         => await DbSet

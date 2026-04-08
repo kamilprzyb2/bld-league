@@ -20,6 +20,10 @@ public class CreateRoundRequest : IRequest<CommandResult>, IValidatableObject
     [RequiredPl] [DataType(DataType.Date)]
     public DateTime EndDate { get; set; }
 
+    [Url]
+    [StringLength(2048)]
+    public string? SubmissionFormUrl { get; set; }
+
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {
         if (EndDate <= StartDate)
