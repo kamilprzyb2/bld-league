@@ -34,7 +34,7 @@ public class CreateRoundRequestHandler(IUnitOfWork unitOfWork)
                 "Kolejka o podanym numerze już istnieje");
         }
 
-        var round = Round.Create(request.SeasonId, request.RoundNumber, request.StartDate, request.EndDate);
+        var round = Round.Create(request.SeasonId, request.RoundNumber, request.StartDate, request.EndDate, request.SubmissionFormUrl);
         await unitOfWork.RoundRepository.AddAsync(round);
         await unitOfWork.SaveAsync();
         return CommandResult.Ok("Kolejka została utworzona");

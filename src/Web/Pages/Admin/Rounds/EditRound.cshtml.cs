@@ -33,6 +33,7 @@ public class EditRound(IMediator mediator) : PageModel
             RoundNumber = round.RoundNumber,
             StartDate = round.StartDate,
             EndDate = round.EndDate,
+            SubmissionFormUrl = round.SubmissionFormUrl,
         };
 
         var scrambles = await mediator.Send(new GetScramblesByRoundIdRequest(round.Id));
