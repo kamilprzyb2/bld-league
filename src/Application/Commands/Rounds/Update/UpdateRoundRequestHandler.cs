@@ -47,6 +47,7 @@ public class UpdateRoundRequestHandler(IUnitOfWork unitOfWork)
         round.RoundNumber = request.RoundNumber;
         round.StartDate = request.StartDate;
         round.EndDate = request.EndDate;
+        round.SubmissionFormUrl = request.SubmissionFormUrl;
 
         unitOfWork.RoundRepository.Update(round);
         await unitOfWork.SaveAsync();

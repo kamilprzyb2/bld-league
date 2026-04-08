@@ -3,7 +3,7 @@ namespace BldLeague.Application.Queries.Rounds.GetAllBySeasonId;
 /// <summary>
 /// Summary data transfer object for a round, used in the public-facing round selector and standings pages.
 /// </summary>
-public record RoundSummaryDto(Guid Id, Guid SeasonId, int RoundNumber, DateTime StartDate, DateTime EndDate)
+public record RoundSummaryDto(Guid Id, Guid SeasonId, int RoundNumber, DateTime StartDate, DateTime EndDate, string? SubmissionFormUrl = null)
 {
     public string RoundName => $"Kolejka {RoundNumber}";
 }
