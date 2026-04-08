@@ -53,6 +53,12 @@ public class Round : IIdentifiable
     public ICollection<Match> Matches { get; set; } = new List<Match>();
     
     /// <summary>
+    /// Optional URL for the external result submission form (e.g. Google Forms).
+    /// Temporary — will be removed once in-app submission is implemented.
+    /// </summary>
+    public string? SubmissionFormUrl { get; set; }
+
+    /// <summary>
     /// Scrambles belonging to the round.
     /// </summary>
     public ICollection<Scramble> Scrambles { get; set; } = new List<Scramble>();
@@ -69,14 +75,16 @@ public class Round : IIdentifiable
     /// <param name="roundNumber"></param>
     /// <param name="startDate"></param>
     /// <param name="endDate"></param>
+    /// <param name="submissionFormUrl"></param>
     /// <returns></returns>
-    public static Round Create(Guid seasonId, int roundNumber, DateTime startDate, DateTime endDate)
+    public static Round Create(Guid seasonId, int roundNumber, DateTime startDate, DateTime endDate, string? submissionFormUrl = null)
         => new Round
         {
             Id = Guid.CreateVersion7(),
             SeasonId = seasonId,
             RoundNumber = roundNumber,
             StartDate = startDate,
-            EndDate = endDate
+            EndDate = endDate,
+            SubmissionFormUrl = submissionFormUrl
         };
 }
