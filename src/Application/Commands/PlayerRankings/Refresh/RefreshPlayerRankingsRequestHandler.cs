@@ -102,18 +102,20 @@ public class RefreshPlayerRankingsRequestHandler(IUnitOfWork unitOfWork)
 
         var allUserIds = byUser.Select(g => g.Key).ToList();
 
+        var existingRankings = await unitOfWork.PlayerRankingRepository.GetAllAsync();
+        var existingByUserId = existingRankings.ToDictionary(r => r.UserId);
+
         var toAdd = new List<PlayerRanking>();
         var toUpdate = new List<PlayerRanking>();
 
         foreach (var userId in allUserIds)
         {
-            var ranking = await unitOfWork.PlayerRankingRepository.GetByUserIdAsync(userId);
-            bool isNew = ranking == null;
+            bool isNew = !existingByUserId.TryGetValue(userId, out var ranking);
             if (isNew)
                 ranking = PlayerRanking.Create(userId);
 
             var singleEntry = singleMap[userId];
-            ranking!.BestSingle = singleEntry.BestSingle;
+            ranking.BestSingle = singleEntry.BestSingle;
             ranking.SingleRoundId = singleEntry.SingleRoundId;
             ranking.SingleRank = singleRanks.TryGetValue(userId, out var sr) ? sr : null;
 

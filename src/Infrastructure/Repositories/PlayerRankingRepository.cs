@@ -8,12 +8,6 @@ namespace BldLeague.Infrastructure.Repositories;
 public class PlayerRankingRepository(AppDbContext context)
     : ReadWriteRepositoryBase<PlayerRanking>(context), IPlayerRankingRepository
 {
-    public async Task<PlayerRanking?> GetByUserIdAsync(Guid userId)
-    {
-        return await DbSet
-            .FirstOrDefaultAsync(pr => pr.UserId == userId);
-    }
-
     public async Task<IReadOnlyCollection<PlayerRanking>> GetAllWithDetailsAsync()
     {
         return await DbSet
