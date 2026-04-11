@@ -483,5 +483,6 @@ $RECYCLE.BIN/
 # Vim temporary swap files
 *.swp
 
-# Exclude claude config
-.claude/
+# Exclude claude config, but keep project-level commands
+.claude/*
+!.claude/commands/

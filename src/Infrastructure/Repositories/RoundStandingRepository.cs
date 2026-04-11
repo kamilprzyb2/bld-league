@@ -1,5 +1,7 @@
 ﻿using BldLeague.Application.Abstractions.Repositories;
+using BldLeague.Application.Commands.PlayerRankings.Refresh;
 using BldLeague.Domain.Entities;
+using BldLeague.Domain.ValueObjects;
 using BldLeague.Infrastructure.Context;
 using Microsoft.EntityFrameworkCore;
 
@@ -22,8 +24,30 @@ public class RoundStandingRepository(AppDbContext context)
             .Where(rs => rs.LeagueId == leagueId && rs.Round.SeasonId == seasonId)
             .GroupBy(rs => rs.UserId)
             .Select(g => new ValueTuple<Guid, int>(
-                g.Key, 
+                g.Key,
                 g.Sum(rs=>rs.Points)))
+            .ToListAsync();
+    }
+
+    public async Task<IReadOnlyCollection<BestSinglePerUserDto>> GetBestSinglePerUserAsync()
+    {
+        return await DbSet
+            .Where(rs => rs.Best >= (SolveResult)0)
+            .GroupBy(rs => rs.UserId)
+            .Select(g => g.OrderBy(rs => rs.Best).First())
+            .Select(rs => new BestSinglePerUserDto(rs.UserId, rs.Best, rs.RoundId))
+            .ToListAsync();
+    }
+
+    public async Task<IReadOnlyCollection<BestAveragePerUserDto>> GetBestAveragePerUserAsync()
+    {
+        return await DbSet
+            .Where(rs => rs.Average >= (SolveResult)0)
+            .GroupBy(rs => rs.UserId)
+            .Select(g => g.OrderBy(rs => rs.Average).First())
+            .Select(rs => new BestAveragePerUserDto(
+                rs.UserId, rs.Average, rs.RoundId,
+                rs.Solve1, rs.Solve2, rs.Solve3, rs.Solve4, rs.Solve5))
             .ToListAsync();
     }
 }

@@ -28,6 +28,7 @@ public class UnitOfWork : IUnitOfWork, IDisposable, IAsyncDisposable
     private readonly Lazy<IScrambleRepository> _scrambleRepository;
     private readonly Lazy<IRoundStandingRepository> _roundStandingRepository;
     private readonly Lazy<ILeagueSeasonStandingRepository> _leagueSeasonStandingRepository;
+    private readonly Lazy<IPlayerRankingRepository> _playerRankingRepository;
 
     // Public properties to access the lazily loaded repositories.
     public IUserRepository UserRepository => _userRepository.Value;
@@ -41,6 +42,7 @@ public class UnitOfWork : IUnitOfWork, IDisposable, IAsyncDisposable
     public IScrambleRepository ScrambleRepository => _scrambleRepository.Value;
     public IRoundStandingRepository RoundStandingRepository => _roundStandingRepository.Value;
     public ILeagueSeasonStandingRepository LeagueSeasonStandingRepository => _leagueSeasonStandingRepository.Value;
+    public IPlayerRankingRepository PlayerRankingRepository => _playerRankingRepository.Value;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="UnitOfWork"/> class.
@@ -73,6 +75,8 @@ public class UnitOfWork : IUnitOfWork, IDisposable, IAsyncDisposable
             new Lazy<IRoundStandingRepository>(() => new RoundStandingRepository(_dbContext));
         _leagueSeasonStandingRepository =
             new  Lazy<ILeagueSeasonStandingRepository>(() => new LeagueSeasonStandingRepository(_dbContext));
+        _playerRankingRepository =
+            new Lazy<IPlayerRankingRepository>(() => new PlayerRankingRepository(_dbContext));
     }
 
     /// <inheritdoc />

@@ -1,5 +1,6 @@
 using BldLeague.Application.Abstractions.Repositories;
 using BldLeague.Application.Commands.LeagueSeasonStandings.Refresh;
+using BldLeague.Application.Commands.PlayerRankings.Refresh;
 using BldLeague.Application.Common;
 using BldLeague.Domain.Entities;
 using BldLeague.Domain.ValueObjects;
@@ -151,6 +152,8 @@ public class RefreshRoundStandingsRequestHandler(IUnitOfWork unitOfWork, ISender
         var leagueSeasons = await unitOfWork.LeagueSeasonRepository.GetLeagueSeasonsForSeasonIdAsync(round.SeasonId);
         foreach (var ls in leagueSeasons)
             await sender.Send(new RefreshLeagueSeasonStandingsRequest(ls.LeagueSeasonId), cancellationToken);
+
+        await sender.Send(new RefreshPlayerRankingsRequest(), cancellationToken);
 
         return CommandResult.Ok("Zaktualizowano klasyfikację kolejki");
     }

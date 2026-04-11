@@ -17,6 +17,7 @@ public interface IUnitOfWork
     IScrambleRepository ScrambleRepository { get; }
     IRoundStandingRepository RoundStandingRepository { get; }
     ILeagueSeasonStandingRepository LeagueSeasonStandingRepository { get; }
+    IPlayerRankingRepository PlayerRankingRepository { get; }
     
     /// <summary>
     /// Commits all changes made in the current unit of work as a single transaction asynchronously.

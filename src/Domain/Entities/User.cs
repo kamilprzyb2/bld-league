@@ -66,6 +66,11 @@ public sealed class User : IIdentifiable
     /// League season standings of the user.
     /// </summary>
     public ICollection<LeagueSeasonStanding> LeagueSeasonStandings { get; set; } = new List<LeagueSeasonStanding>();
+
+    /// <summary>
+    /// Player ranking for this user.
+    /// </summary>
+    public PlayerRanking? PlayerRanking { get; set; }
     
     /// <summary>
     /// User factory method.
