@@ -151,6 +151,7 @@ Avoid JavaScript by default. Prefer server-side form submissions and page reload
 | `Scramble` entity | `src/Domain/Entities/Scramble.cs` |
 | `RoundStanding` entity | `src/Domain/Entities/RoundStanding.cs` |
 | `LeagueSeasonStanding` entity | `src/Domain/Entities/LeagueSeasonStanding.cs` |
+| `PlayerRanking` entity | `src/Domain/Entities/PlayerRanking.cs` |
 | `User` entity | `src/Domain/Entities/User.cs` |
 | `SolveResult` value object | `src/Domain/ValueObjects/SolveResult.cs` |
 | `AverageCalculator` (Ao5 logic) | `src/Domain/Scoring/AverageCalculator.cs` |
@@ -188,6 +189,7 @@ Avoid JavaScript by default. Prefer server-side form submissions and page reload
 | `IRoundStandingRepository` | `src/Application/Abstractions/Repositories/IRoundStandingRepository.cs` |
 | `ILeagueSeasonStandingRepository` | `src/Application/Abstractions/Repositories/ILeagueSeasonStandingRepository.cs` |
 | `IUserRepository` | `src/Application/Abstractions/Repositories/IUserRepository.cs` |
+| `IPlayerRankingRepository` | `src/Application/Abstractions/Repositories/IPlayerRankingRepository.cs` |
 
 ### Application — commands (write operations, by feature)
 
@@ -202,6 +204,7 @@ Avoid JavaScript by default. Prefer server-side form submissions and page reload
 | User create/update/delete/import | `src/Application/Commands/Users/` |
 | Refresh round standings (single + refresh-all) | `src/Application/Commands/RoundStandings/Refresh/` and `RefreshAll/` |
 | Refresh season standings (single + refresh-all) | `src/Application/Commands/LeagueSeasonStandings/Refresh/` and `RefreshAll/` |
+| Refresh player rankings | `src/Application/Commands/PlayerRankings/Refresh/` |
 
 ### Application — queries (read operations, by feature)
 
@@ -213,6 +216,7 @@ Avoid JavaScript by default. Prefer server-side form submissions and page reload
 | Round queries + DTOs (incl. `ScrambleDto`, `RoundSummaryDto`) | `src/Application/Queries/Rounds/` |
 | Match queries + DTOs (incl. `SolveDto`, `MatchDetailsDto`, `MatchExportRowDto`) | `src/Application/Queries/Matches/` |
 | User queries + DTOs (incl. `LeagueSeasonUserDto` for roster queries) | `src/Application/Queries/Users/` |
+| Player rankings query + DTOs (`SingleRankingDto`, `AverageRankingDto`) | `src/Application/Queries/PlayerRankings/` |
 
 ### Infrastructure
 
@@ -252,6 +256,7 @@ Avoid JavaScript by default. Prefer server-side form submissions and page reload
 | View round results | `src/Web/Pages/Rounds/ViewRound.cshtml[.cs]` |
 | Match list | `src/Web/Pages/Matches/MatchList.cshtml[.cs]` |
 | Match detail | `src/Web/Pages/Matches/ViewMatch.cshtml[.cs]` |
+| Player rankings (single + average) | `src/Web/Pages/Rankings/Rankings.cshtml[.cs]` |
 | About / rules | `src/Web/Pages/About/About.cshtml[.cs]` |
 | Season 2 guidelines | `src/Web/Pages/About/Guidelines.cshtml[.cs]` |
 | Season 1 guidelines (archived) | `src/Web/Pages/About/GuidelinesSeason1.cshtml[.cs]` |

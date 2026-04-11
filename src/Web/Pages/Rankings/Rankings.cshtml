@@ -1,0 +1,101 @@
+@page "/Rankings/Rankings"
+@using BldLeague.Application.Queries.PlayerRankings.GetPlayerRankings
+@model BldLeague.Web.Pages.Rankings.Rankings
+
+<div class="container mt-2">
+    <h2>Rankingi</h2>
+
+    <ul class="nav nav-tabs mb-3" id="rankingTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="single-tab" data-bs-toggle="tab" data-bs-target="#single-tab-pane"
+                    type="button" role="tab" aria-controls="single-tab-pane" aria-selected="true">
+                Single
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="average-tab" data-bs-toggle="tab" data-bs-target="#average-tab-pane"
+                    type="button" role="tab" aria-controls="average-tab-pane" aria-selected="false">
+                Średnia
+            </button>
+        </li>
+    </ul>
+
+    <div class="tab-content" id="rankingTabContent">
+        <div class="tab-pane fade show active" id="single-tab-pane" role="tabpanel" aria-labelledby="single-tab" tabindex="0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th scope="col" class="text-center">#</th>
+                            <th scope="col">Imię i nazwisko</th>
+                            <th scope="col">Wynik</th>
+                            <th scope="col">Kolejka</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    @if (Model.SingleRankings.Any())
+                    {
+                        foreach (var r in Model.SingleRankings)
+                        {
+                            <tr>
+                                <td class="text-center">@r.SingleRank</td>
+                                <td>@r.FullName</td>
+                                <td class="fw-bold">@r.BestSingle</td>
+                                <td>@r.RoundLabel</td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="4" class="text-center">Brak danych.</td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="tab-pane fade" id="average-tab-pane" role="tabpanel" aria-labelledby="average-tab" tabindex="0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th scope="col" class="text-center">#</th>
+                            <th scope="col">Imię i nazwisko</th>
+                            <th scope="col">Wynik</th>
+                            <th scope="col">Kolejka</th>
+                            <th scope="col">Ułożenia</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    @if (Model.AverageRankings.Any())
+                    {
+                        foreach (var r in Model.AverageRankings)
+                        {
+                            <tr>
+                                <td class="text-center">@r.AverageRank</td>
+                                <td>@r.FullName</td>
+                                <td class="fw-bold">@r.BestAverage</td>
+                                <td>@r.RoundLabel</td>
+                                <td class="font-monospace">
+                                    @Rankings.FormatSolveWithParens(r, 0)
+                                    @Rankings.FormatSolveWithParens(r, 1)
+                                    @Rankings.FormatSolveWithParens(r, 2)
+                                    @Rankings.FormatSolveWithParens(r, 3)
+                                    @Rankings.FormatSolveWithParens(r, 4)
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="5" class="text-center">Brak danych.</td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

@@ -22,8 +22,9 @@ public class RoundStandingRepository(AppDbContext context)
             .Where(rs => rs.LeagueId == leagueId && rs.Round.SeasonId == seasonId)
             .GroupBy(rs => rs.UserId)
             .Select(g => new ValueTuple<Guid, int>(
-                g.Key, 
+                g.Key,
                 g.Sum(rs=>rs.Points)))
             .ToListAsync();
     }
+
 }
