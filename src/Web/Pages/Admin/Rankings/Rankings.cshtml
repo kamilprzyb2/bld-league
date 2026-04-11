@@ -1,0 +1,11 @@
+@page "/Admin/Rankings"
+@model BldLeague.Web.Pages.Admin.Rankings.Rankings
+
+<div class="container mt-2">
+    <h2>Rankingi</h2>
+    <form method="post" asp-page-handler="RefreshRankings">
+        <button type="submit" class="btn btn-secondary">
+            Odśwież rankingi
+        </button>
+    </form>
+</div>

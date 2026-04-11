@@ -65,30 +65,28 @@
         </a>
     </div>
     <div class="col-12 col-sm-6 col-md-4">
-        <a asp-page="/About/Guidelines" class="text-decoration-none">
+        <a asp-page="/Rankings/Rankings" class="text-decoration-none">
             <div class="card h-100 border-0 shadow-sm p-3">
                 <div class="d-flex align-items-center gap-3">
-                    <i class="bi bi-book fs-2 text-success"></i>
+                    <i class="bi bi-bar-chart-line fs-2 text-info"></i>
                     <div>
-                        <div class="fw-semibold">Zasady</div>
-                        <div class="text-muted small">Format rozgrywek</div>
+                        <div class="fw-semibold">Rankingi</div>
+                        <div class="text-muted small">Najlepsze ułożenia</div>
                     </div>
                 </div>
             </div>
         </a>
     </div>
     <div class="col-12 col-sm-6 col-md-4">
-        <a asp-page="/About/About" class="text-decoration-none">
-            <div class="card h-100 border-0 shadow-sm p-3">
-                <div class="d-flex align-items-center gap-3">
-                    <i class="bi bi-info-circle fs-2 text-secondary"></i>
-                    <div>
-                        <div class="fw-semibold">O projekcie</div>
-                        <div class="text-muted small">Autorzy i informacje</div>
-                    </div>
+        <div class="card h-100 border-0 shadow-sm p-3">
+            <div class="d-flex align-items-center gap-3">
+                <i class="bi bi-person-circle fs-2 text-muted"></i>
+                <div>
+                    <div class="fw-semibold">Osoby</div>
+                    <div class="text-muted small">Profile zawodników — wkrótce</div>
                 </div>
             </div>
-        </a>
+        </div>
     </div>
     @if (Model.ActiveRoundForm != null)
     {

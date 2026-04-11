@@ -256,7 +256,7 @@ Avoid JavaScript by default. Prefer server-side form submissions and page reload
 | View round results | `src/Web/Pages/Rounds/ViewRound.cshtml[.cs]` |
 | Match list | `src/Web/Pages/Matches/MatchList.cshtml[.cs]` |
 | Match detail | `src/Web/Pages/Matches/ViewMatch.cshtml[.cs]` |
-| Player rankings (single + average) | `src/Web/Pages/Rankings/Rankings.cshtml[.cs]` |
+| Player rankings (single + average) at `/Rankings` | `src/Web/Pages/Rankings/Rankings.cshtml[.cs]` |
 | About / rules | `src/Web/Pages/About/About.cshtml[.cs]` |
 | Season 2 guidelines | `src/Web/Pages/About/Guidelines.cshtml[.cs]` |
 | Season 1 guidelines (archived) | `src/Web/Pages/About/GuidelinesSeason1.cshtml[.cs]` |
@@ -272,6 +272,7 @@ Avoid JavaScript by default. Prefer server-side form submissions and page reload
 | Edit LeagueSeason roster (+ user CSV import/export) | `src/Web/Pages/Admin/LeagueSeasons/EditLeagueSeason.cshtml[.cs]` |
 | Matches list / add / edit | `src/Web/Pages/Admin/Matches/` |
 | Users list / add / edit | `src/Web/Pages/Admin/Users/` |
+| Rankings refresh | `src/Web/Pages/Admin/Rankings/Rankings.cshtml[.cs]` |
 
 ## Common Tasks
 

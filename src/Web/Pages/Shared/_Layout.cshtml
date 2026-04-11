@@ -59,10 +59,8 @@
                             <li><a class="dropdown-item" asp-area="" asp-page="/Leagues/ViewLeague">Ligi</a></li>
                             <li><a class="dropdown-item" asp-area="" asp-page="/Rounds/ViewRound">Kolejki</a></li>
                             <li><a class="dropdown-item" asp-area="" asp-page="/Matches/MatchList">Mecze</a></li>
+                            <li><a class="dropdown-item" asp-area="" asp-page="/Rankings/Rankings">Rankingi</a></li>
                         </ul>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" asp-area="" asp-page="/Rankings/Rankings">Rankingi</a>
                     </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button"
@@ -89,6 +87,7 @@
                                 <li><a class="dropdown-item" asp-area="" asp-page="/Admin/Rounds/AllRounds">Kolejki</a></li>
                                 <li><a class="dropdown-item" asp-area="" asp-page="/Admin/LeagueSeasons/AllLeagueSeasons">Ligo-sezony</a></li>
                                 <li><a class="dropdown-item" asp-area="" asp-page="/Admin/Matches/AllMatches">Mecze</a></li>
+                                <li><a class="dropdown-item" asp-area="" asp-page="/Admin/Rankings/Rankings">Rankingi</a></li>
                             </ul>
                         </li>
                     }
@@ -161,7 +160,10 @@
 
 <footer class="border-top footer text-muted">
     <div class="container">
-        &copy; @DateTime.Now.Year - 3BLD League - <a asp-page="/About/Privacy">Polityka prywatności</a>
+        &copy; @DateTime.Now.Year - 3BLD League -
+        <a asp-page="/About/Guidelines">Zasady</a> -
+        <a asp-page="/About/About">O projekcie</a> -
+        <a asp-page="/About/Privacy">Polityka prywatności</a>
     </div>
 </footer>
 

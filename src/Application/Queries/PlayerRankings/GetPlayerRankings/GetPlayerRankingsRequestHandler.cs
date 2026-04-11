@@ -17,7 +17,10 @@ public class GetPlayerRankingsRequestHandler(IUnitOfWork unitOfWork)
                 r.SingleRank!.Value,
                 r.User.FullName,
                 r.BestSingle!.Value,
-                $"Sezon {r.SingleRound!.Season.SeasonNumber} Kolejka {r.SingleRound.RoundNumber}"
+                $"Sezon {r.SingleRound!.Season.SeasonNumber} Kolejka {r.SingleRound.RoundNumber}",
+                r.SingleRound!.Season.Id,
+                r.SingleRound!.Season.SeasonNumber,
+                r.SingleRound!.RoundNumber
             ))
             .ToList();
 
@@ -29,6 +32,9 @@ public class GetPlayerRankingsRequestHandler(IUnitOfWork unitOfWork)
                 r.User.FullName,
                 r.BestAverage!.Value,
                 $"Sezon {r.AverageRound!.Season.SeasonNumber} Kolejka {r.AverageRound.RoundNumber}",
+                r.AverageRound!.Season.Id,
+                r.AverageRound!.Season.SeasonNumber,
+                r.AverageRound!.RoundNumber,
                 r.AverageSolve1!.Value,
                 r.AverageSolve2!.Value,
                 r.AverageSolve3!.Value,

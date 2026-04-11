@@ -6,5 +6,8 @@ public record SingleRankingDto(
     int SingleRank,
     string FullName,
     SolveResult BestSingle,
-    string RoundLabel
+    string RoundLabel,
+    Guid SeasonId,
+    int SeasonNumber,
+    int RoundNumber
 );
