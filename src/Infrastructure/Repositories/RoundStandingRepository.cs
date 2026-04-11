@@ -31,23 +31,29 @@ public class RoundStandingRepository(AppDbContext context)
 
     public async Task<IReadOnlyCollection<BestSinglePerUserDto>> GetBestSinglePerUserAsync()
     {
-        return await DbSet
+        var rows = await DbSet
             .Where(rs => rs.Best >= (SolveResult)0)
             .GroupBy(rs => rs.UserId)
             .Select(g => g.OrderBy(rs => rs.Best).First())
-            .Select(rs => new BestSinglePerUserDto(rs.UserId, rs.Best, rs.RoundId))
             .ToListAsync();
+
+        return rows
+            .Select(rs => new BestSinglePerUserDto(rs.UserId, rs.Best, rs.RoundId))
+            .ToList();
     }
 
     public async Task<IReadOnlyCollection<BestAveragePerUserDto>> GetBestAveragePerUserAsync()
     {
-        return await DbSet
+        var rows = await DbSet
             .Where(rs => rs.Average >= (SolveResult)0)
             .GroupBy(rs => rs.UserId)
             .Select(g => g.OrderBy(rs => rs.Average).First())
+            .ToListAsync();
+
+        return rows
             .Select(rs => new BestAveragePerUserDto(
                 rs.UserId, rs.Average, rs.RoundId,
                 rs.Solve1, rs.Solve2, rs.Solve3, rs.Solve4, rs.Solve5))
-            .ToListAsync();
+            .ToList();
     }
 }
