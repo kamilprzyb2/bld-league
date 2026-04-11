@@ -18,4 +18,9 @@ public class PlayerRankingRepository(AppDbContext context)
                 .ThenInclude(r => r!.Season)
             .ToListAsync();
     }
+
+    public async Task DeleteAllAsync()
+    {
+        await DbSet.ExecuteDeleteAsync();
+    }
 }
