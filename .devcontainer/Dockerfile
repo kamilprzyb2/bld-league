@@ -15,8 +15,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   zsh \
   man-db \
   unzip \
-  gnupg2 \
-  gh \
+  openssh-client \
   iptables \
   ipset \
   iproute2 \
@@ -52,8 +51,9 @@ RUN SNIPPET="export PROMPT_COMMAND='history -a' && export HISTFILE=/commandhisto
 ENV DEVCONTAINER=true
 
 # Create workspace and config directories and set permissions
-RUN mkdir -p /workspace /home/node/.claude && \
-  chown -R node:node /workspace /home/node/.claude
+RUN mkdir -p /workspace /home/node/.claude /home/node/.ssh && \
+  chmod 700 /home/node/.ssh && \
+  chown -R node:node /workspace /home/node/.claude /home/node/.ssh
 
 WORKDIR /workspace
 
@@ -94,10 +94,10 @@ RUN npm install -g @anthropic-ai/claude-code@${CLAUDE_CODE_VERSION}
 RUN /usr/local/dotnet/dotnet tool install --global dotnet-ef
 ENV PATH=$PATH:/home/node/.dotnet/tools
 
-# Copy and set up firewall script
-COPY init-firewall.sh /usr/local/bin/
+# Copy and set up firewall and GitHub init scripts
+COPY init-firewall.sh init-github.sh /usr/local/bin/
 USER root
-RUN chmod +x /usr/local/bin/init-firewall.sh && \
+RUN chmod +x /usr/local/bin/init-firewall.sh /usr/local/bin/init-github.sh && \
   echo "node ALL=(root) NOPASSWD: /usr/local/bin/init-firewall.sh" > /etc/sudoers.d/node-firewall && \
   chmod 0440 /etc/sudoers.d/node-firewall
 USER node

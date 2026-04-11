@@ -25,6 +25,10 @@ dotnet ef migrations add MigrationName --project src/Infrastructure --startup-pr
 - WCA OAuth credentials (`ClientId`, `ClientSecret`) go under the `WCA` section — use user secrets in development (`UserSecretsId` is set in `Web.csproj`).
 - Database migrations are applied automatically on startup via `EnsureMigratedHelper`.
 
+## GitHub
+
+Repository: `kamilprzyb2/bld-league`. Use the GitHub MCP server for all GitHub operations (issues, PRs, branches) — do not use the `gh` CLI.
+
 ## Development Workflow
 
 ### Issues
