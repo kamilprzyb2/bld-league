@@ -31,39 +31,23 @@ public class RoundStandingRepository(AppDbContext context)
 
     public async Task<IReadOnlyCollection<BestSinglePerUserDto>> GetBestSinglePerUserAsync()
     {
-        var rows = await DbSet
-            .Where(rs => rs.Best >= (SolveResult)0
-                && !DbSet.Any(other =>
-                    other.UserId == rs.UserId
-                    && other.Best >= (SolveResult)0
-                    && other.Best < rs.Best))
+        return await DbSet
+            .Where(rs => rs.Best >= (SolveResult)0)
+            .GroupBy(rs => rs.UserId)
+            .Select(g => g.OrderBy(rs => rs.Best).First())
             .Select(rs => new BestSinglePerUserDto(rs.UserId, rs.Best, rs.RoundId))
             .ToListAsync();
-
-        // Deduplicate in case of exact ties: pick one row per user arbitrarily
-        return rows
-            .GroupBy(dto => dto.UserId)
-            .Select(g => g.First())
-            .ToList();
     }
 
     public async Task<IReadOnlyCollection<BestAveragePerUserDto>> GetBestAveragePerUserAsync()
     {
-        var rows = await DbSet
-            .Where(rs => rs.Average >= (SolveResult)0
-                && !DbSet.Any(other =>
-                    other.UserId == rs.UserId
-                    && other.Average >= (SolveResult)0
-                    && other.Average < rs.Average))
+        return await DbSet
+            .Where(rs => rs.Average >= (SolveResult)0)
+            .GroupBy(rs => rs.UserId)
+            .Select(g => g.OrderBy(rs => rs.Average).First())
             .Select(rs => new BestAveragePerUserDto(
                 rs.UserId, rs.Average, rs.RoundId,
                 rs.Solve1, rs.Solve2, rs.Solve3, rs.Solve4, rs.Solve5))
             .ToListAsync();
-
-        // Deduplicate in case of exact ties: pick one row per user arbitrarily
-        return rows
-            .GroupBy(dto => dto.UserId)
-            .Select(g => g.First())
-            .ToList();
     }
 }
