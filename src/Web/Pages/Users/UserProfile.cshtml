@@ -9,11 +9,11 @@
     <div class="text-center mb-4">
         @if (Model.Profile!.AvatarUrl != null)
         {
-            <img src="@Model.Profile.AvatarUrl" alt="Avatar" class="rounded-circle mb-2" style="width:96px;height:96px;object-fit:cover;" />
+            <img src="@Model.Profile.AvatarUrl" alt="Avatar" class="mb-2" style="max-width:200px;height:auto;" />
         }
         else if (Model.Profile.AvatarThumbnailUrl != null)
         {
-            <img src="@Model.Profile.AvatarThumbnailUrl" alt="Avatar" class="rounded-circle mb-2" style="width:96px;height:96px;object-fit:cover;" />
+            <img src="@Model.Profile.AvatarThumbnailUrl" alt="Avatar" class="mb-2" style="max-width:200px;height:auto;" />
         }
         else
         {
@@ -35,10 +35,10 @@
             <thead>
             <tr>
                 <th>Konkurencja</th>
-                <th title="Rekord ligi">LR (single)</th>
+                <th data-bs-toggle="tooltip" title="Rekord ligi">LR (single)</th>
                 <th>Best</th>
                 <th>Średnia</th>
-                <th title="Rekord ligi">LR (avg)</th>
+                <th data-bs-toggle="tooltip" title="Rekord ligi">LR (avg)</th>
             </tr>
             </thead>
             <tbody>
@@ -468,6 +468,9 @@
     }
     <script>
         document.addEventListener("DOMContentLoaded", function () {
+            [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+                .forEach(function (el) { new bootstrap.Tooltip(el); });
+
             const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('roundDetailModal'));
             const modalBody = document.getElementById('roundDetailBody');
 

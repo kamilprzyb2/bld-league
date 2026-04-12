@@ -88,7 +88,9 @@ body {
 }
 
 @media (max-width: 767.98px) {
-    tr.js-detail-row { cursor: pointer; }
+    tr.js-detail-row,
+    tr.js-round-row,
+    tr.js-avg-row { cursor: pointer; }
 }
 
 /* Invert event icons in dark mode so they appear white */
