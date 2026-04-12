@@ -23,7 +23,9 @@ public class LeagueSeasonRepository(AppDbContext context) :
                 SeasonNumber = ls.Season.SeasonNumber,
                 SeasonName =  ls.Season.SeasonName,
                 SeasonId = ls.SeasonId,
-                UserCount = ls.LeagueSeasonUsers.Count
+                UserCount = ls.LeagueSeasonUsers.Count,
+                PromotionCount = ls.PromotionCount,
+                RelegationCount = ls.RelegationCount
             })
             .ToListAsync();
 
@@ -40,7 +42,9 @@ public class LeagueSeasonRepository(AppDbContext context) :
                 SeasonNumber = ls.Season.SeasonNumber,
                 SeasonName = ls.Season.SeasonName,
                 SeasonId = ls.SeasonId,
-                UserCount = ls.LeagueSeasonUsers.Count
+                UserCount = ls.LeagueSeasonUsers.Count,
+                PromotionCount = ls.PromotionCount,
+                RelegationCount = ls.RelegationCount
             })
             .ToListAsync();
 
