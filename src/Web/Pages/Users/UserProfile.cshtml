@@ -19,13 +19,11 @@
         {
             <i class="bi bi-person-circle" style="font-size:5rem;"></i>
         }
-        <h2 class="mb-1">
-            @Model.Profile.FullName
-            @if (Model.Profile.IsAdmin)
-            {
-                <span class="badge bg-secondary ms-2">Administrator</span>
-            }
-        </h2>
+        <h2 class="mb-1">@Model.Profile.FullName</h2>
+        @if (Model.Profile.IsAdmin)
+        {
+            <span class="badge bg-primary" style="font-size:.65rem;">Administrator</span>
+        }
         <a href="https://www.worldcubeassociation.org/persons/@Model.Profile.WcaId"
            rel="nofollow noreferrer noopener" target="_blank">@Model.Profile.WcaId</a>
     </div>
@@ -37,15 +35,18 @@
             <thead>
             <tr>
                 <th>Konkurencja</th>
-                <th>NR (single)</th>
+                <th title="Rekord ligi">LR (single)</th>
                 <th>Best</th>
                 <th>Średnia</th>
-                <th>NR (avg)</th>
+                <th title="Rekord ligi">LR (avg)</th>
             </tr>
             </thead>
             <tbody>
             <tr>
-                <td>3x3 Bez Patrzenia</td>
+                <td>
+                    <img src="/images/333bf.svg" alt="3x3 Bez Patrzenia" style="width:20px;height:20px;vertical-align:middle;" class="me-1" />
+                    3x3 Bez Patrzenia
+                </td>
                 <td>@(Model.Ranking?.SingleRank?.ToString() ?? "–")</td>
                 <td class="fw-bold">@(Model.Ranking?.BestSingle?.ToString() ?? "–")</td>
                 <td class="fw-bold">@(Model.Ranking?.BestAverage?.ToString() ?? "–")</td>
@@ -72,7 +73,7 @@
         <li class="nav-item" role="presentation">
             <button class="nav-link" id="sezony-tab" data-bs-toggle="tab" data-bs-target="#sezony-tab-pane"
                     type="button" role="tab" aria-controls="sezony-tab-pane" aria-selected="false">
-                Sezony
+                Klasyfikacja
             </button>
         </li>
         <li class="nav-item" role="presentation">
@@ -92,15 +93,10 @@
                     <thead class="table">
                     <tr>
                         <th scope="col">Sezon/Kolejka</th>
-                        <th scope="col">Liga</th>
                         <th scope="col" class="text-center">Poz.</th>
                         <th scope="col">Best</th>
                         <th scope="col">Ao5</th>
-                        <th scope="col" class="d-none d-md-table-cell">A1</th>
-                        <th scope="col" class="d-none d-md-table-cell">A2</th>
-                        <th scope="col" class="d-none d-md-table-cell">A3</th>
-                        <th scope="col" class="d-none d-md-table-cell">A4</th>
-                        <th scope="col" class="d-none d-md-table-cell">A5</th>
+                        <th scope="col" class="d-none d-md-table-cell">Ułożenia</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -108,38 +104,42 @@
                     {
                         foreach (var result in Model.RoundResults)
                         {
+                            var placeDisplay = (result.Place == null || result.Place == int.MaxValue) ? "–" : result.Place.ToString()!;
                             <tr class="js-round-row"
                                 data-season="@result.SeasonName"
                                 data-round="@result.RoundName"
                                 data-league="@result.LeagueIdentifier"
-                                data-place="@result.Place"
+                                data-place="@placeDisplay"
                                 data-best="@result.Best"
                                 data-avg="@result.Average"
-                                data-s1="@result.Solve1"
-                                data-s2="@result.Solve2"
-                                data-s3="@result.Solve3"
-                                data-s4="@result.Solve4"
-                                data-s5="@result.Solve5">
+                                data-s1="@UserProfile.FormatSolveWithParens(result, 0)"
+                                data-s2="@UserProfile.FormatSolveWithParens(result, 1)"
+                                data-s3="@UserProfile.FormatSolveWithParens(result, 2)"
+                                data-s4="@UserProfile.FormatSolveWithParens(result, 3)"
+                                data-s5="@UserProfile.FormatSolveWithParens(result, 4)">
                                 <td>
-                                    <span class="d-none d-md-inline">@result.SeasonName @result.RoundName</span>
-                                    <span class="d-inline d-md-none">S@(result.SeasonNumber) K@(result.RoundNumber)</span>
+                                    <a asp-page="/Rounds/ViewRound" asp-route-SeasonId="@result.SeasonId" asp-route-RoundNumber="@result.RoundNumber">
+                                        <span class="d-none d-md-inline">@result.SeasonName @result.RoundName</span>
+                                        <span class="d-inline d-md-none">S@(result.SeasonNumber) K@(result.RoundNumber)</span>
+                                    </a>
                                 </td>
-                                <td>@result.LeagueIdentifier</td>
-                                <td class="text-center">@result.Place</td>
+                                <td class="text-center">@placeDisplay</td>
                                 <td class="fw-bold">@result.Best</td>
                                 <td>@result.Average</td>
-                                <td class="d-none d-md-table-cell">@result.Solve1</td>
-                                <td class="d-none d-md-table-cell">@result.Solve2</td>
-                                <td class="d-none d-md-table-cell">@result.Solve3</td>
-                                <td class="d-none d-md-table-cell">@result.Solve4</td>
-                                <td class="d-none d-md-table-cell">@result.Solve5</td>
+                                <td class="font-monospace d-none d-md-table-cell">
+                                    @UserProfile.FormatSolveWithParens(result, 0)
+                                    @UserProfile.FormatSolveWithParens(result, 1)
+                                    @UserProfile.FormatSolveWithParens(result, 2)
+                                    @UserProfile.FormatSolveWithParens(result, 3)
+                                    @UserProfile.FormatSolveWithParens(result, 4)
+                                </td>
                             </tr>
                         }
                     }
                     else
                     {
                         <tr>
-                            <td colspan="10" class="text-center">Brak danych.</td>
+                            <td colspan="5" class="text-center">Brak danych.</td>
                         </tr>
                     }
                     </tbody>
@@ -154,6 +154,7 @@
                     <thead class="table">
                     <tr>
                         <th scope="col">Sezon/Kolejka</th>
+                        <th scope="col">Liga</th>
                         <th scope="col">Zawodnik A</th>
                         <th scope="col" class="text-center">Wynik</th>
                         <th scope="col">Zawodnik B</th>
@@ -167,9 +168,12 @@
                         {
                             <tr>
                                 <td>
-                                    <span class="d-none d-md-inline">@match.SeasonName @match.RoundName</span>
-                                    <span class="d-inline d-md-none">S@(match.SeasonNumber) K@(match.RoundNumber)</span>
+                                    <a asp-page="/Rounds/ViewRound" asp-route-SeasonId="@match.SeasonId" asp-route-RoundNumber="@match.RoundNumber">
+                                        <span class="d-none d-md-inline">@match.SeasonName @match.RoundName</span>
+                                        <span class="d-inline d-md-none">S@(match.SeasonNumber) K@(match.RoundNumber)</span>
+                                    </a>
                                 </td>
+                                <td>@match.LeagueIdentifier</td>
                                 <td>@match.ProfileUserFullName</td>
                                 <td class="text-center text-nowrap">
                                     @if (match.OpponentFullName == null)
@@ -183,7 +187,7 @@
                                 </td>
                                 <td>@(match.OpponentFullName ?? "BYE")</td>
                                 <td>
-                                    <a asp-page="/Matches/ViewMatch" asp-route-id="@match.MatchId">Zobacz</a>
+                                    <a class="btn btn-sm btn-primary" asp-page="/Matches/ViewMatch" asp-route-id="@match.MatchId">Zobacz</a>
                                 </td>
                             </tr>
                         }
@@ -191,7 +195,7 @@
                     else
                     {
                         <tr>
-                            <td colspan="5" class="text-center">Brak danych.</td>
+                            <td colspan="6" class="text-center">Brak danych.</td>
                         </tr>
                     }
                     </tbody>
@@ -218,7 +222,21 @@
                             <tr>
                                 <td>@history.SeasonName</td>
                                 <td>@history.LeagueName</td>
-                                <td class="text-center">@history.Place</td>
+                                <td class="text-center text-nowrap">
+                                    @if (history.Place == 1)
+                                    {
+                                        <i class="bi bi-trophy-fill text-warning me-1"></i>
+                                    }
+                                    else if (history.Place == 2)
+                                    {
+                                        <i class="bi bi-trophy-fill me-1" style="color:#c0c0c0;"></i>
+                                    }
+                                    else if (history.Place == 3)
+                                    {
+                                        <i class="bi bi-trophy-fill me-1" style="color:#cd7f32;"></i>
+                                    }
+                                    @history.Place
+                                </td>
                             </tr>
                         }
                     }
@@ -282,19 +300,29 @@
         <script>
             (function () {
                 var labels = @Html.Raw(JsonSerializer.Serialize(validChartPoints.Select(r => $"S{r.SeasonNumber} K{r.RoundNumber}").ToArray()));
-                var values = @Html.Raw(JsonSerializer.Serialize(validChartPoints.Select(r => Math.Round(r.Best.Centiseconds / 100.0, 2)).ToArray()));
+                var singleValues = @Html.Raw(JsonSerializer.Serialize(validChartPoints.Select(r => Math.Round(r.Best.Centiseconds / 100.0, 2)).ToArray()));
+                var avgValues = @Html.Raw(JsonSerializer.Serialize(validChartPoints.Select(r => r.Average.IsValid ? (double?)Math.Round(r.Average.Centiseconds / 100.0, 2) : null).ToArray()));
 
                 var ctx = document.getElementById('progressionChart').getContext('2d');
                 new Chart(ctx, {
                     type: 'line',
                     data: {
                         labels: labels,
-                        datasets: [{
-                            label: 'Best Single',
-                            data: values,
-                            tension: 0.3,
-                            fill: false
-                        }]
+                        datasets: [
+                            {
+                                label: 'Best Single',
+                                data: singleValues,
+                                tension: 0.3,
+                                fill: false
+                            },
+                            {
+                                label: 'Ao5',
+                                data: avgValues,
+                                tension: 0.3,
+                                fill: false,
+                                spanGaps: true
+                            }
+                        ]
                     },
                     options: {
                         scales: {

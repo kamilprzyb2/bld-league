@@ -8,6 +8,7 @@ public record UserRoundResultDto(
     string SeasonName,
     string RoundName,
     string LeagueIdentifier,
+    Guid SeasonId,
     int? Place,
     SolveResult Best,
     SolveResult Average,

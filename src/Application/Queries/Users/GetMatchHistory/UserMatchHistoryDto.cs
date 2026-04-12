@@ -6,6 +6,8 @@ public record UserMatchHistoryDto(
     int RoundNumber,
     string SeasonName,
     string RoundName,
+    Guid SeasonId,
+    string LeagueIdentifier,
     string ProfileUserFullName,
     string? OpponentFullName,
     int ProfileUserScore,

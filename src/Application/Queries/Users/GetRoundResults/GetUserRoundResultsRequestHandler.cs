@@ -17,6 +17,7 @@ public class GetUserRoundResultsRequestHandler(IUnitOfWork unitOfWork)
                 rs.Round.Season.SeasonName,
                 rs.Round.RoundName,
                 rs.League.LeagueIdentifier,
+                rs.Round.SeasonId,
                 rs.Place,
                 rs.Best,
                 rs.Average,

@@ -4,6 +4,7 @@ using BldLeague.Application.Queries.Users.GetById;
 using BldLeague.Application.Queries.Users.GetMatchHistory;
 using BldLeague.Application.Queries.Users.GetRoundResults;
 using BldLeague.Application.Queries.Users.GetSeasonHistory;
+using BldLeague.Web.Helpers;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -30,5 +31,11 @@ public class UserProfile(IMediator mediator) : PageModel
         SeasonHistory = await mediator.Send(new GetUserSeasonHistoryRequest { UserId = id });
 
         return Page();
+    }
+
+    public static string FormatSolveWithParens(UserRoundResultDto result, int index)
+    {
+        var solves = new[] { result.Solve1, result.Solve2, result.Solve3, result.Solve4, result.Solve5 };
+        return SolveFormatHelper.FormatWithParens(solves, index);
     }
 }

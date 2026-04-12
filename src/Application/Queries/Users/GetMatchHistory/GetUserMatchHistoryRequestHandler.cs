@@ -25,6 +25,8 @@ public class GetUserMatchHistoryRequestHandler(IUnitOfWork unitOfWork)
                     m.Round.RoundNumber,
                     m.Round.Season.SeasonName,
                     m.Round.RoundName,
+                    m.Round.SeasonId,
+                    m.LeagueSeason.League.LeagueIdentifier,
                     profileUserFullName,
                     opponentFullName,
                     profileUserScore,
