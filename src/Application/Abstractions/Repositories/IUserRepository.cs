@@ -10,4 +10,5 @@ public interface IUserRepository : IReadWriteRepository<User>
     Task<UserSummaryDto?> GetSummaryByIdAsync(Guid id);
     Task<IReadOnlyCollection<UserSummaryDto>> GetUnassignedUsersBySeasonIdAsync(Guid seasonId);
     Task<UserDetailDto?> GetUserDetailByWcaIdAsync(string wcaId);
+    Task UpdateAvatarAsync(Guid userId, string? avatarUrl, string? avatarThumbnailUrl, CancellationToken cancellationToken = default);
 }
