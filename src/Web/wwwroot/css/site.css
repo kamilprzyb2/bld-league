@@ -91,6 +91,11 @@ body {
     tr.js-detail-row { cursor: pointer; }
 }
 
+/* Invert event icons in dark mode so they appear white */
+[data-bs-theme="dark"] .event-icon {
+    filter: invert(1);
+}
+
 /* Hide Bootstrap's default caret, use our own chevron icon */
 .navbar .dropdown-toggle::after {
     display: none;

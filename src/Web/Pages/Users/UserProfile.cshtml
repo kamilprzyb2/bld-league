@@ -44,7 +44,7 @@
             <tbody>
             <tr>
                 <td>
-                    <img src="/images/333bf.svg" alt="3x3 Bez Patrzenia" style="width:20px;height:20px;vertical-align:middle;" class="me-1" />
+                    <img src="/images/333bf.svg" alt="3x3 Bez Patrzenia" style="width:20px;height:20px;vertical-align:middle;" class="me-1 event-icon" />
                     3x3 Bez Patrzenia
                 </td>
                 <td>@(Model.Ranking?.SingleRank?.ToString() ?? "–")</td>
@@ -82,6 +82,12 @@
                 Progresja
             </button>
         </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="statystyki-tab" data-bs-toggle="tab" data-bs-target="#statystyki-tab-pane"
+                    type="button" role="tab" aria-controls="statystyki-tab-pane" aria-selected="false">
+                Statystyki
+            </button>
+        </li>
     </ul>
 
     <div class="tab-content" id="profileTabContent">
@@ -92,10 +98,13 @@
                 <table class="table table-hover align-middle">
                     <thead class="table">
                     <tr>
-                        <th scope="col">Sezon/Kolejka</th>
-                        <th scope="col" class="text-center">Poz.</th>
-                        <th scope="col">Best</th>
-                        <th scope="col">Ao5</th>
+                        <th scope="col">
+                            <span class="d-none d-md-inline">Sezon/Kolejka</span>
+                            <span class="d-inline d-md-none">S/K</span>
+                        </th>
+                        <th scope="col" class="text-center text-nowrap">Poz.</th>
+                        <th scope="col" class="text-nowrap">Best</th>
+                        <th scope="col" class="text-nowrap">Ao5</th>
                         <th scope="col" class="d-none d-md-table-cell">Ułożenia</th>
                     </tr>
                     </thead>
@@ -153,12 +162,12 @@
                 <table class="table table-hover align-middle">
                     <thead class="table">
                     <tr>
-                        <th scope="col">Sezon/Kolejka</th>
-                        <th scope="col">Liga</th>
+                        <th scope="col" class="text-nowrap">Sezon/Kolejka</th>
+                        <th scope="col" class="text-nowrap d-none d-md-table-cell">Liga</th>
                         <th scope="col">Zawodnik A</th>
-                        <th scope="col" class="text-center">Wynik</th>
+                        <th scope="col" class="text-center text-nowrap">Wynik</th>
                         <th scope="col">Zawodnik B</th>
-                        <th scope="col">Szczegóły</th>
+                        <th scope="col" class="text-nowrap">Szczegóły</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -173,7 +182,7 @@
                                         <span class="d-inline d-md-none">S@(match.SeasonNumber) K@(match.RoundNumber)</span>
                                     </a>
                                 </td>
-                                <td>@match.LeagueIdentifier</td>
+                                <td class="d-none d-md-table-cell">@match.LeagueIdentifier</td>
                                 <td>@match.ProfileUserFullName</td>
                                 <td class="text-center text-nowrap">
                                     @if (match.OpponentFullName == null)
@@ -270,6 +279,75 @@
             }
         </div>
 
+        @* Statystyki tab *@
+        <div class="tab-pane fade" id="statystyki-tab-pane" role="tabpanel" aria-labelledby="statystyki-tab" tabindex="0">
+            @{
+                var totalMatches = Model.Stats.Wins + Model.Stats.Losses + Model.Stats.Draws;
+                var effectivenessStr = Model.Stats.NonDnsSolves > 0
+                    ? $"{(int)Math.Round(100.0 * Model.Stats.ValidSolves / Model.Stats.NonDnsSolves)}%"
+                    : "–";
+            }
+            <div class="row g-4 mt-1">
+                <div class="col-md-6">
+                    <h6 class="fw-semibold border-bottom pb-2 mb-3">Ułożenia</h6>
+                    <table class="table table-sm">
+                        <tbody>
+                        <tr>
+                            <td>Skuteczność</td>
+                            <td class="text-end">
+                                @Model.Stats.ValidSolves/@Model.Stats.NonDnsSolves
+                                <span class="text-muted ms-2">@effectivenessStr</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Średni czas</td>
+                            <td class="text-end fw-semibold">@(Model.Stats.AverageSingle?.ToString() ?? "–")</td>
+                        </tr>
+                        <tr>
+                            <td>Najwięcej sukcesów z rzędu</td>
+                            <td class="text-end fw-semibold">@Model.Stats.LongestSuccessStreak</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="col-md-6">
+                    <h6 class="fw-semibold border-bottom pb-2 mb-3">Mecze</h6>
+                    @{
+                        string WinPct(int n) => totalMatches > 0 ? $"{(int)Math.Round(100.0 * n / totalMatches)}%" : "–";
+                    }
+                    <table class="table table-sm">
+                        <tbody>
+                        <tr>
+                            <td>Zwycięstwa</td>
+                            <td class="text-end">
+                                @Model.Stats.Wins/@totalMatches
+                                <span class="text-muted ms-2">@WinPct(Model.Stats.Wins)</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Porażki</td>
+                            <td class="text-end">
+                                @Model.Stats.Losses/@totalMatches
+                                <span class="text-muted ms-2">@WinPct(Model.Stats.Losses)</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Remisy</td>
+                            <td class="text-end">
+                                @Model.Stats.Draws/@totalMatches
+                                <span class="text-muted ms-2">@WinPct(Model.Stats.Draws)</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Najlepsza passa zwycięstw</td>
+                            <td class="text-end fw-semibold">@Model.Stats.LongestWinStreak</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
     </div>
 </div>
 
@@ -303,6 +381,22 @@
                 var singleValues = @Html.Raw(JsonSerializer.Serialize(validChartPoints.Select(r => Math.Round(r.Best.Centiseconds / 100.0, 2)).ToArray()));
                 var avgValues = @Html.Raw(JsonSerializer.Serialize(validChartPoints.Select(r => r.Average.IsValid ? (double?)Math.Round(r.Average.Centiseconds / 100.0, 2) : null).ToArray()));
 
+                function fmtSecs(v) {
+                    if (v === null || v === undefined) return '–';
+                    if (v >= 60) {
+                        var m = Math.floor(v / 60);
+                        var s = v - m * 60;
+                        return m + ':' + (s < 10 ? '0' : '') + s.toFixed(2);
+                    }
+                    return v.toFixed(2) + 's';
+                }
+
+                var sorted = singleValues.slice().sort(function (a, b) { return a - b; });
+                var mid = Math.floor(sorted.length / 2);
+                var medianSingle = sorted.length % 2 !== 0
+                    ? sorted[mid]
+                    : (sorted[mid - 1] + sorted[mid]) / 2;
+
                 var ctx = document.getElementById('progressionChart').getContext('2d');
                 new Chart(ctx, {
                     type: 'line',
@@ -312,15 +406,31 @@
                             {
                                 label: 'Best Single',
                                 data: singleValues,
+                                borderColor: 'rgb(54, 162, 235)',
+                                backgroundColor: 'rgba(54, 162, 235, 0.1)',
                                 tension: 0.3,
                                 fill: false
                             },
                             {
                                 label: 'Ao5',
                                 data: avgValues,
+                                borderColor: 'rgb(255, 99, 132)',
+                                backgroundColor: 'rgba(255, 99, 132, 0.1)',
                                 tension: 0.3,
                                 fill: false,
                                 spanGaps: true
+                            },
+                            {
+                                label: 'Mediana singla (' + fmtSecs(medianSingle) + ')',
+                                data: labels.map(function () { return medianSingle; }),
+                                borderColor: 'rgba(75, 192, 75, 0.8)',
+                                backgroundColor: 'transparent',
+                                borderWidth: 2,
+                                borderDash: [6, 4],
+                                pointRadius: 0,
+                                fill: false,
+                                tension: 0,
+                                order: 10
                             }
                         ]
                     },
@@ -328,7 +438,17 @@
                         scales: {
                             y: {
                                 ticks: {
-                                    callback: function (v) { return v + 's'; }
+                                    callback: function (v) { return fmtSecs(v); }
+                                }
+                            }
+                        },
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    label: function (context) {
+                                        var val = context.parsed.y;
+                                        return context.dataset.label + ': ' + fmtSecs(val);
+                                    }
                                 }
                             }
                         }
