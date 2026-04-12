@@ -46,18 +46,32 @@ public class LeagueSeason : IIdentifiable
     public ICollection<Match> Matches { get; set; } = new List<Match>();
     
     /// <summary>
+    /// Number of top-placed players to display as promoted. Zero means no promotion icons are shown.
+    /// </summary>
+    public int PromotionCount { get; set; }
+
+    /// <summary>
+    /// Number of bottom-placed players to display as relegated. Zero means no relegation icons are shown.
+    /// </summary>
+    public int RelegationCount { get; set; }
+
+    /// <summary>
     /// Factory method for LeagueSeason.
     /// </summary>
     /// <param name="league">Associated league.</param>
     /// <param name="season">Associated Season.</param>
+    /// <param name="promotionCount">Number of promoted places (default 0).</param>
+    /// <param name="relegationCount">Number of relegated places (default 0).</param>
     /// <returns></returns>
-    public static LeagueSeason Create(League league, Season season)
+    public static LeagueSeason Create(League league, Season season, int promotionCount = 0, int relegationCount = 0)
         => new LeagueSeason
         {
             Id = Guid.CreateVersion7(),
             League = league,
             LeagueId = league.Id,
             Season = season,
-            SeasonId = season.Id
+            SeasonId = season.Id,
+            PromotionCount = promotionCount,
+            RelegationCount = relegationCount
         };
 }

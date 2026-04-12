@@ -10,4 +10,6 @@ public class CreateLeagueSeasonRequest : IRequest<CommandResult>
 {
     public Guid SeasonId { get; set; }
     public Guid LeagueId { get; set; }
+    public int PromotionCount { get; set; }
+    public int RelegationCount { get; set; }
 }

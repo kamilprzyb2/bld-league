@@ -56,7 +56,9 @@ public class LeagueSeasonRepository(AppDbContext context) :
                 SeasonNumber = ls.Season.SeasonNumber,
                 SeasonName = ls.Season.SeasonName,
                 SeasonId = ls.SeasonId,
-                UserCount = ls.LeagueSeasonUsers.Count
+                UserCount = ls.LeagueSeasonUsers.Count,
+                PromotionCount = ls.PromotionCount,
+                RelegationCount = ls.RelegationCount
             })
             .FirstOrDefaultAsync();
 
@@ -65,6 +67,8 @@ public class LeagueSeasonRepository(AppDbContext context) :
             .Where(ls => ls.SeasonId == seasonId && ls.LeagueId == leagueId)
             .Select(ls => new LeagueSeasonDetailDto
             {
+                PromotionCount = ls.PromotionCount,
+                RelegationCount = ls.RelegationCount,
                 Standings = ls.LeagueSeasonStandings
                     .OrderBy(lss => lss.Place)
                     .ThenBy(lss => lss.User.FullName)

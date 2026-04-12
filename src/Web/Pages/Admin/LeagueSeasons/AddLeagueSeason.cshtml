@@ -22,6 +22,16 @@
             </select>
         </div>
 
+        <div class="mb-3">
+            <label asp-for="CreateLeagueSeasonRequest.PromotionCount" class="form-label">Liczba awansów</label>
+            <input asp-for="CreateLeagueSeasonRequest.PromotionCount" type="number" min="0" class="form-control" />
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="CreateLeagueSeasonRequest.RelegationCount" class="form-label">Liczba spadków</label>
+            <input asp-for="CreateLeagueSeasonRequest.RelegationCount" type="number" min="0" class="form-control" />
+        </div>
+
         <button type="submit" class="btn btn-primary">Dodaj</button>
         <a asp-page="/Admin/LeagueSeasons/AllLeagueSeasons" class="btn btn-outline-secondary ms-2">Anuluj</a>
     </form>

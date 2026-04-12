@@ -48,6 +48,20 @@
         </div>
     }
 
+    <form method="post" asp-page-handler="SaveSettings" class="mb-4" style="max-width: 400px;">
+        <h3>Ustawienia awansu / spadku</h3>
+        <input type="hidden" asp-for="LeagueSeasonSettings.LeagueSeasonId" />
+        <div class="mb-3">
+            <label asp-for="LeagueSeasonSettings.PromotionCount" class="form-label">Liczba awansów</label>
+            <input asp-for="LeagueSeasonSettings.PromotionCount" type="number" min="0" class="form-control" />
+        </div>
+        <div class="mb-3">
+            <label asp-for="LeagueSeasonSettings.RelegationCount" class="form-label">Liczba spadków</label>
+            <input asp-for="LeagueSeasonSettings.RelegationCount" type="number" min="0" class="form-control" />
+        </div>
+        <button type="submit" class="btn btn-primary">Zapisz ustawienia</button>
+    </form>
+
     <form id="saveGroupsForm" method="post" asp-page-handler="SaveGroups"></form>
 
     <div class="table-responsive">

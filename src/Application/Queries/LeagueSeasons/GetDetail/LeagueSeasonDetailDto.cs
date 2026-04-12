@@ -6,4 +6,6 @@ namespace BldLeague.Application.Queries.LeagueSeasons.GetDetail;
 public class LeagueSeasonDetailDto
 {
     public required List<LeagueSeasonStandingDto> Standings { get; set; }
+    public int PromotionCount { get; set; }
+    public int RelegationCount { get; set; }
 }
