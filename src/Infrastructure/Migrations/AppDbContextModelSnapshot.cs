@@ -54,6 +54,18 @@ namespace BldLeague.Infrastructure.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("league_id");
 
+                    b.Property<int>("PlayoffPromotionCount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0)
+                        .HasColumnName("playoff_promotion_count");
+
+                    b.Property<int>("PlayoffRelegationCount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0)
+                        .HasColumnName("playoff_relegation_count");
+
                     b.Property<int>("PromotionCount")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
