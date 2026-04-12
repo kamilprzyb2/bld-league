@@ -118,6 +118,9 @@ public static class AuthenticationExtensions
                         await mediator.Send(new UpdateUserAvatarRequest
                         {
                             UserId = user.Id,
+                            FullName = user.FullName,
+                            WcaId = user.WcaId,
+                            IsAdmin = user.IsAdmin,
                             AvatarUrl = wcaAvatarUrl,
                             AvatarThumbnailUrl = wcaThumbnailUrl,
                         }, context.HttpContext.RequestAborted);

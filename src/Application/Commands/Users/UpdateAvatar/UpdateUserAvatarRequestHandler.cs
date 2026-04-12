@@ -12,20 +12,19 @@ public class UpdateUserAvatarRequestHandler(IUnitOfWork unitOfWork)
     {
         var repository = unitOfWork.UserRepository;
 
-        var existing = await repository.GetByIdAsync(request.UserId);
-        if (existing == null)
+        if (!await repository.ExistsAsync(request.UserId))
         {
             return CommandResult.FailGeneral($"Nie znaleziono użytkownika z id: {request.UserId}.");
         }
 
         var updated = new User
         {
-            Id = existing.Id,
-            FullName = existing.FullName,
-            WcaId = existing.WcaId,
+            Id = request.UserId,
+            FullName = request.FullName,
+            WcaId = request.WcaId,
             AvatarUrl = request.AvatarUrl,
             AvatarThumbnailUrl = request.AvatarThumbnailUrl,
-            IsAdmin = existing.IsAdmin,
+            IsAdmin = request.IsAdmin,
         };
 
         repository.Update(updated);
