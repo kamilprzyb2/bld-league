@@ -1,6 +1,7 @@
 ﻿using System.Net.Http.Headers;
 using System.Security.Claims;
 using System.Text.Json;
+using BldLeague.Application.Commands.Users.UpdateAvatar;
 using BldLeague.Application.Queries.Users.GetById;
 using BldLeague.Application.Queries.Users.GetUserDetailByWcaId;
 using MediatR;
@@ -109,12 +110,25 @@ public static class AuthenticationExtensions
                         return;
                     }
 
+                    var wcaAvatarUrl = wcaResponse.User.Avatar.Url;
+                    var wcaThumbnailUrl = wcaResponse.User.Avatar.ThumbnailUrl;
+
+                    if (user.AvatarThumbnailUrl != wcaThumbnailUrl || user.AvatarUrl != wcaAvatarUrl)
+                    {
+                        _ = await mediator.Send(new UpdateUserAvatarRequest
+                        {
+                            UserId = user.Id,
+                            AvatarUrl = wcaAvatarUrl,
+                            AvatarThumbnailUrl = wcaThumbnailUrl,
+                        }, context.HttpContext.RequestAborted);
+                    }
+
                     var claims = new List<Claim>
                     {
                         new(ClaimTypes.NameIdentifier, user.Id.ToString()),
                         new(ClaimTypes.Name, user.FullName),
                         new(ClaimTypes.Role, user.IsAdmin ? "Admin" : "User"),
-                        new("thumbnail", wcaResponse.User.Avatar.ThumbnailUrl),
+                        new("thumbnail", wcaThumbnailUrl),
                         new("claims_refreshed_at", DateTime.UtcNow.ToString("O"))
                     };
 
