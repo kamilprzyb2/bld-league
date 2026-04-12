@@ -15,6 +15,8 @@ public class UpdateLeagueSeasonSettingsRequestHandler(IUnitOfWork unitOfWork)
 
         leagueSeason.PromotionCount = request.PromotionCount;
         leagueSeason.RelegationCount = request.RelegationCount;
+        leagueSeason.PlayoffPromotionCount = request.PlayoffPromotionCount;
+        leagueSeason.PlayoffRelegationCount = request.PlayoffRelegationCount;
         unitOfWork.LeagueSeasonRepository.Update(leagueSeason);
         await unitOfWork.SaveAsync();
 

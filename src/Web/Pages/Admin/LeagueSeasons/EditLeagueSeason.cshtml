@@ -59,6 +59,14 @@
             <label asp-for="LeagueSeasonSettings.RelegationCount" class="form-label">Liczba spadków</label>
             <input asp-for="LeagueSeasonSettings.RelegationCount" type="number" min="0" class="form-control" />
         </div>
+        <div class="mb-3">
+            <label asp-for="LeagueSeasonSettings.PlayoffPromotionCount" class="form-label">Liczba barażów awansowych</label>
+            <input asp-for="LeagueSeasonSettings.PlayoffPromotionCount" type="number" min="0" class="form-control" />
+        </div>
+        <div class="mb-3">
+            <label asp-for="LeagueSeasonSettings.PlayoffRelegationCount" class="form-label">Liczba barażów spadkowych</label>
+            <input asp-for="LeagueSeasonSettings.PlayoffRelegationCount" type="number" min="0" class="form-control" />
+        </div>
         <button type="submit" class="btn btn-primary">Zapisz ustawienia</button>
     </form>
 
