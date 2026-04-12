@@ -72,7 +72,17 @@
                         data-rp="@standing.SmallPointsBalance"
                         data-best="@standing.Best">
                         <td class="text-center">@standing.Place</td>
-                        <td>@standing.UserFullName</td>
+                        <td>
+                            @standing.UserFullName
+                            @if (Model.LeagueSeason.PromotionCount > 0 && standing.Place <= Model.LeagueSeason.PromotionCount)
+                            {
+                                <i class="bi bi-arrow-up-circle-fill text-success ms-1"></i>
+                            }
+                            @if (Model.LeagueSeason.RelegationCount > 0 && standing.Place > Model.LeagueSeason.Standings.Count - Model.LeagueSeason.RelegationCount)
+                            {
+                                <i class="bi bi-arrow-down-circle-fill text-danger ms-1"></i>
+                            }
+                        </td>
                         <td class="text-center d-none d-md-table-cell">@standing.MatchesPlayed</td>
                         <td class="text-center d-none d-md-table-cell">@standing.MatchesWon</td>
                         <td class="text-center d-none d-md-table-cell">@standing.MatchesTied</td>

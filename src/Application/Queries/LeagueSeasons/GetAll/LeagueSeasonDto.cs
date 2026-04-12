@@ -13,4 +13,6 @@ public class LeagueSeasonDto
     public string SeasonName { get; set; } = string.Empty;
     public int UserCount { get; set; }
     public Guid SeasonId { get; set; }
+    public int PromotionCount { get; set; }
+    public int RelegationCount { get; set; }
 }

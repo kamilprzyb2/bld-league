@@ -26,7 +26,7 @@ public class CreateLeagueSeasonRequestHandler(IUnitOfWork unitOfWork)
         if (exists)
             return CommandResult.FailGeneral("Ten liga-sezon już istnieje.");
 
-        var leagueSeason = LeagueSeason.Create(league, season);
+        var leagueSeason = LeagueSeason.Create(league, season, request.PromotionCount, request.RelegationCount);
         await unitOfWork.LeagueSeasonRepository.AddAsync(leagueSeason);
         await unitOfWork.SaveAsync();
         return CommandResult.Ok($"Utworzono liga-sezon: {league.LeagueName} — {season.SeasonName}.");

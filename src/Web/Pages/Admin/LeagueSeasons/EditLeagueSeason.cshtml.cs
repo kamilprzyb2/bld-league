@@ -2,6 +2,7 @@ using BldLeague.Application.Commands.LeagueSeasonUsers.Create;
 using BldLeague.Application.Commands.LeagueSeasonUsers.Delete;
 using BldLeague.Application.Commands.LeagueSeasonUsers.Import;
 using BldLeague.Application.Commands.LeagueSeasonUsers.SetGroup;
+using BldLeague.Application.Commands.LeagueSeasons.Update;
 using BldLeague.Application.Common;
 using BldLeague.Application.Queries.LeagueSeasons.GetAll;
 using BldLeague.Application.Queries.LeagueSeasons.GetById;
@@ -32,6 +33,7 @@ public class EditLeagueSeason(IMediator mediator) : PageModel
     [BindProperty] public List<Guid> SelectedUserIds { get; set; } = [];
     [BindProperty] public Guid? RemoveUserId { get; set; }
     [BindProperty] public List<UserGroupInput> UserGroups { get; set; } = [];
+    [BindProperty] public UpdateLeagueSeasonSettingsRequest LeagueSeasonSettings { get; set; } = new();
 
     public class UserGroupInput
     {
@@ -47,6 +49,13 @@ public class EditLeagueSeason(IMediator mediator) : PageModel
             TempData["ErrorMessage"] = $"Nie znaleziono sezonu w lidze z id: {Id}.";
             return RedirectToPage("/Admin/LeagueSeasons/AllLeagueSeasons");
         }
+
+        LeagueSeasonSettings = new UpdateLeagueSeasonSettingsRequest
+        {
+            LeagueSeasonId = Id,
+            PromotionCount = LeagueSeason.PromotionCount,
+            RelegationCount = LeagueSeason.RelegationCount
+        };
 
         AssignedUsers = await mediator.Send(new GetUsersByLeagueSeasonIdRequest(Id));
         UnassignedUsers = await mediator.Send(new GetUnassignedUsersBySeasonIdRequest(LeagueSeason.SeasonId));
@@ -110,6 +119,20 @@ public class EditLeagueSeason(IMediator mediator) : PageModel
         };
 
         var result = await mediator.Send(request);
+
+        if (result.Success)
+            TempData["SuccessMessage"] = result.Message;
+        else
+            TempData["ErrorMessage"] = result.Message;
+
+        return RedirectToPage();
+    }
+
+    public async Task<IActionResult> OnPostSaveSettingsAsync()
+    {
+        LeagueSeasonSettings.LeagueSeasonId = Id;
+
+        var result = await mediator.Send(LeagueSeasonSettings);
 
         if (result.Success)
             TempData["SuccessMessage"] = result.Message;

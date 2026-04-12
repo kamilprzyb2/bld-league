@@ -22,6 +22,9 @@ public class LeagueSeasonConfiguration : IEntityTypeConfiguration<LeagueSeason>
             .HasForeignKey(ls => ls.SeasonId)
             .IsRequired();
         
+        b.Property(ls => ls.PromotionCount).HasDefaultValue(0);
+        b.Property(ls => ls.RelegationCount).HasDefaultValue(0);
+
         // Enforce unique League+Season combination
         b.HasIndex(ls => new { ls.LeagueId, ls.SeasonId })
             .IsUnique();
