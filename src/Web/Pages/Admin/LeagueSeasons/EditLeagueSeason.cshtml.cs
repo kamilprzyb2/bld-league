@@ -54,7 +54,9 @@ public class EditLeagueSeason(IMediator mediator) : PageModel
         {
             LeagueSeasonId = Id,
             PromotionCount = LeagueSeason.PromotionCount,
-            RelegationCount = LeagueSeason.RelegationCount
+            RelegationCount = LeagueSeason.RelegationCount,
+            PlayoffPromotionCount = LeagueSeason.PlayoffPromotionCount,
+            PlayoffRelegationCount = LeagueSeason.PlayoffRelegationCount
         };
 
         AssignedUsers = await mediator.Send(new GetUsersByLeagueSeasonIdRequest(Id));

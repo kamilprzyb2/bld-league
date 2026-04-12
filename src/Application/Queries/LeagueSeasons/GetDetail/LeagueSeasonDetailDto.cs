@@ -8,4 +8,6 @@ public class LeagueSeasonDetailDto
     public required List<LeagueSeasonStandingDto> Standings { get; set; }
     public int PromotionCount { get; set; }
     public int RelegationCount { get; set; }
+    public int PlayoffPromotionCount { get; set; }
+    public int PlayoffRelegationCount { get; set; }
 }

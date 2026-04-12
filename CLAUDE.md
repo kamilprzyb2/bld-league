@@ -128,7 +128,7 @@ Avoid JavaScript by default. Prefer server-side form submissions and page reload
 
 - **Season** → contains **Rounds** and belongs to multiple **LeagueSeasons**.
 - **League** → a division (e.g., "Liga A"). Multiple leagues run simultaneously within a season.
-- **LeagueSeason** → junction of League + Season; holds the roster (`LeagueSeasonUser`). Users can be assigned a `SubleagueGroup` (integer) on their `LeagueSeasonUser` record to split the league into subleagues during a revenge period. Has `PromotionCount` and `RelegationCount` (int, default 0) — when non-zero, the public standings view renders promotion (↑) and relegation (↓) icons next to the top/bottom N finishers. Purely visual.
+- **LeagueSeason** → junction of League + Season; holds the roster (`LeagueSeasonUser`). Users can be assigned a `SubleagueGroup` (integer) on their `LeagueSeasonUser` record to split the league into subleagues during a revenge period. Has `PromotionCount`, `RelegationCount`, `PlayoffPromotionCount`, and `PlayoffRelegationCount` (all int, default 0) — when non-zero, the public standings view renders zone icons: filled green ↑ (Awans), outlined yellow ↑ (Baraż), outlined yellow ↓ (Baraż), filled red ↓ (Spadek). Purely visual.
 - **Season** has no start/end dates — it is just a `SeasonNumber`. "Latest season" (highest `SeasonNumber`) is used as the UI default in AddRound and AddMatch. LeagueSeasons are created manually (not auto-generated).
 - **Match** → 1v1 within a Round + League. Each match has exactly 5 solves (`Match.SOLVES_PER_MATCH`) per player. Scoring: 1 point per solve won + 1 bonus point for best single. Scores are computed and stored at match creation time. Matches have a `MatchStatus` (Upcoming/InProgress/Finished) derived from the round's `StartDate`/`EndDate` relative to `DateTime.UtcNow`; scores and solve details are hidden in the UI until the match is Finished.
 - **Scramble** → one per solve position (1–`Match.SOLVES_PER_MATCH`) per round; shared across all leagues in that round. Field `Notation` holds the move sequence. A round may have 0–5 scrambles.
@@ -198,7 +198,7 @@ Avoid JavaScript by default. Prefer server-side form submissions and page reload
 | League create/update/delete/import | `src/Application/Commands/Leagues/` |
 | Season create/edit/delete/import | `src/Application/Commands/Seasons/` |
 | LeagueSeason create/delete/import | `src/Application/Commands/LeagueSeasons/` |
-| LeagueSeason update settings (promotion/relegation counts) | `src/Application/Commands/LeagueSeasons/Update/` |
+| LeagueSeason update settings (promotion/relegation/playoff counts) | `src/Application/Commands/LeagueSeasons/Update/` |
 | LeagueSeasonUser add/remove/import/set-group | `src/Application/Commands/LeagueSeasonUsers/` |
 | Round create/update/delete/import + scramble update | `src/Application/Commands/Rounds/` |
 | Match create/edit/delete/import | `src/Application/Commands/Matches/` |

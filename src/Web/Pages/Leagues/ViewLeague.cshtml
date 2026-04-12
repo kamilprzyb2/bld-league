@@ -76,11 +76,19 @@
                             <a asp-page="/Users/UserProfile" asp-route-id="@standing.UserId">@standing.UserFullName</a>
                             @if (Model.LeagueSeason.PromotionCount > 0 && standing.Place <= Model.LeagueSeason.PromotionCount)
                             {
-                                <i class="bi bi-arrow-up-circle-fill text-success ms-1"></i>
+                                <i class="bi bi-arrow-up-circle-fill text-success ms-1" data-bs-toggle="tooltip" title="Awans"></i>
+                            }
+                            @if (Model.LeagueSeason.PlayoffPromotionCount > 0 && standing.Place > Model.LeagueSeason.PromotionCount && standing.Place <= Model.LeagueSeason.PromotionCount + Model.LeagueSeason.PlayoffPromotionCount)
+                            {
+                                <i class="bi bi-arrow-up-circle text-warning ms-1" data-bs-toggle="tooltip" title="Baraż"></i>
+                            }
+                            @if (Model.LeagueSeason.PlayoffRelegationCount > 0 && standing.Place <= Model.LeagueSeason.Standings.Count - Model.LeagueSeason.RelegationCount && standing.Place > Model.LeagueSeason.Standings.Count - Model.LeagueSeason.RelegationCount - Model.LeagueSeason.PlayoffRelegationCount)
+                            {
+                                <i class="bi bi-arrow-down-circle text-warning ms-1" data-bs-toggle="tooltip" title="Baraż"></i>
                             }
                             @if (Model.LeagueSeason.RelegationCount > 0 && standing.Place > Model.LeagueSeason.Standings.Count - Model.LeagueSeason.RelegationCount)
                             {
-                                <i class="bi bi-arrow-down-circle-fill text-danger ms-1"></i>
+                                <i class="bi bi-arrow-down-circle-fill text-danger ms-1" data-bs-toggle="tooltip" title="Spadek"></i>
                             }
                         </td>
                         <td class="text-center d-none d-md-table-cell">@standing.MatchesPlayed</td>

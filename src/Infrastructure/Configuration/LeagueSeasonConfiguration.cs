@@ -24,6 +24,8 @@ public class LeagueSeasonConfiguration : IEntityTypeConfiguration<LeagueSeason>
         
         b.Property(ls => ls.PromotionCount).HasDefaultValue(0);
         b.Property(ls => ls.RelegationCount).HasDefaultValue(0);
+        b.Property(ls => ls.PlayoffPromotionCount).HasDefaultValue(0);
+        b.Property(ls => ls.PlayoffRelegationCount).HasDefaultValue(0);
 
         // Enforce unique League+Season combination
         b.HasIndex(ls => new { ls.LeagueId, ls.SeasonId })

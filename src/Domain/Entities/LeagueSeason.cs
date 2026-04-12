@@ -56,14 +56,26 @@ public class LeagueSeason : IIdentifiable
     public int RelegationCount { get; set; }
 
     /// <summary>
+    /// Number of places directly below the promotion zone to display as playoff promotion. Zero means no playoff promotion icons are shown.
+    /// </summary>
+    public int PlayoffPromotionCount { get; set; }
+
+    /// <summary>
+    /// Number of places directly above the relegation zone to display as playoff relegation. Zero means no playoff relegation icons are shown.
+    /// </summary>
+    public int PlayoffRelegationCount { get; set; }
+
+    /// <summary>
     /// Factory method for LeagueSeason.
     /// </summary>
     /// <param name="league">Associated league.</param>
     /// <param name="season">Associated Season.</param>
     /// <param name="promotionCount">Number of promoted places (default 0).</param>
     /// <param name="relegationCount">Number of relegated places (default 0).</param>
+    /// <param name="playoffPromotionCount">Number of playoff promotion places (default 0).</param>
+    /// <param name="playoffRelegationCount">Number of playoff relegation places (default 0).</param>
     /// <returns></returns>
-    public static LeagueSeason Create(League league, Season season, int promotionCount = 0, int relegationCount = 0)
+    public static LeagueSeason Create(League league, Season season, int promotionCount = 0, int relegationCount = 0, int playoffPromotionCount = 0, int playoffRelegationCount = 0)
         => new LeagueSeason
         {
             Id = Guid.CreateVersion7(),
@@ -72,6 +84,8 @@ public class LeagueSeason : IIdentifiable
             Season = season,
             SeasonId = season.Id,
             PromotionCount = promotionCount,
-            RelegationCount = relegationCount
+            RelegationCount = relegationCount,
+            PlayoffPromotionCount = playoffPromotionCount,
+            PlayoffRelegationCount = playoffRelegationCount
         };
 }
