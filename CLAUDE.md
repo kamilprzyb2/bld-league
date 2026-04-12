@@ -203,6 +203,7 @@ Avoid JavaScript by default. Prefer server-side form submissions and page reload
 | Round create/update/delete/import + scramble update | `src/Application/Commands/Rounds/` |
 | Match create/edit/delete/import | `src/Application/Commands/Matches/` |
 | User create/update/delete/import | `src/Application/Commands/Users/` |
+| User avatar update (on WCA login) | `src/Application/Commands/Users/UpdateAvatar/` |
 | Refresh round standings (single + refresh-all) | `src/Application/Commands/RoundStandings/Refresh/` and `RefreshAll/` |
 | Refresh season standings (single + refresh-all) | `src/Application/Commands/LeagueSeasonStandings/Refresh/` and `RefreshAll/` |
 | Refresh player rankings | `src/Application/Commands/PlayerRankings/Refresh/` |
