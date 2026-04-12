@@ -4,6 +4,7 @@ namespace BldLeague.Web.ViewModels;
 
 public class RoundStandingViewModel
 {
+    public Guid UserId { get; set; }
     public required string UserFullName { get; set; }
     public required string LeagueIdentifier { get; set; }
     public required string Solve1 { get; set; }
@@ -20,6 +21,7 @@ public class RoundStandingViewModel
     {
         return new RoundStandingViewModel
         {
+            UserId = dto.UserId,
             UserFullName = dto.UserFullName,
             LeagueIdentifier = dto.LeagueIdentifier,
             Solve1 = dto.Solve1.ToString(),

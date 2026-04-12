@@ -218,6 +218,11 @@ Avoid JavaScript by default. Prefer server-side form submissions and page reload
 | Match queries + DTOs (incl. `SolveDto`, `MatchDetailsDto`, `MatchExportRowDto`) | `src/Application/Queries/Matches/` |
 | User queries + DTOs (incl. `LeagueSeasonUserDto` for roster queries) | `src/Application/Queries/Users/` |
 | Player rankings query + DTOs (`SingleRankingDto`, `AverageRankingDto`) | `src/Application/Queries/PlayerRankings/` |
+| Player ranking by user ID | `src/Application/Queries/PlayerRankings/GetByUserId/` |
+| User round results | `src/Application/Queries/Users/GetRoundResults/` |
+| User match history | `src/Application/Queries/Users/GetMatchHistory/` |
+| User season history | `src/Application/Queries/Users/GetSeasonHistory/` |
+| User solves (for stats computation) | `src/Application/Queries/Users/GetSolves/` |
 
 ### Infrastructure
 
@@ -244,6 +249,7 @@ Avoid JavaScript by default. Prefer server-side form submissions and page reload
 | Shared layout | `src/Web/Pages/Shared/_Layout.cshtml` |
 | `CsvHelper` (CSV builder, UTF-8 BOM) | `src/Web/Helpers/CsvHelper.cs` |
 | `CsvParser` (CSV `IFormFile` parser) | `src/Web/Helpers/CsvParser.cs` |
+| `SolveFormatHelper` (Ao5 best/worst parentheses formatting) | `src/Web/Helpers/SolveFormatHelper.cs` |
 | `EnvironmentBadgeOptions` (optional navbar env label) | `src/Web/Options/EnvironmentBadgeOptions.cs` |
 | `MatchStatus` enum (Upcoming/InProgress/Finished) | `src/Web/ViewModels/MatchStatus.cs` |
 | ViewModels | `src/Web/ViewModels/` |
@@ -258,6 +264,8 @@ Avoid JavaScript by default. Prefer server-side form submissions and page reload
 | Match list | `src/Web/Pages/Matches/MatchList.cshtml[.cs]` |
 | Match detail | `src/Web/Pages/Matches/ViewMatch.cshtml[.cs]` |
 | Player rankings (single + average) at `/Rankings` | `src/Web/Pages/Rankings/Rankings.cshtml[.cs]` |
+| User list | `src/Web/Pages/Users/UserList.cshtml[.cs]` |
+| User profile | `src/Web/Pages/Users/UserProfile.cshtml[.cs]` |
 | About / rules | `src/Web/Pages/About/About.cshtml[.cs]` |
 | Season 2 guidelines | `src/Web/Pages/About/Guidelines.cshtml[.cs]` |
 | Season 1 guidelines (archived) | `src/Web/Pages/About/GuidelinesSeason1.cshtml[.cs]` |

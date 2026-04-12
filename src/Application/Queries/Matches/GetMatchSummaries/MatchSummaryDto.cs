@@ -6,6 +6,8 @@ namespace BldLeague.Application.Queries.Matches.GetMatchSummaries;
 public class MatchSummaryDto
 {
     public Guid Id { get; set; }
+    public Guid UserAId { get; set; }
+    public Guid? UserBId { get; set; }
     public required string UserAFullName { get; set; }
     public string? UserBFullName { get; set; }
     public int UserAScore { get; set; }

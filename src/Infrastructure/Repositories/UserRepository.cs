@@ -42,4 +42,11 @@ public class UserRepository(AppDbContext context) :
                 IsAdmin = u.IsAdmin
             })
             .FirstOrDefaultAsync();
+
+    public async Task UpdateAvatarAsync(Guid userId, string? avatarUrl, string? avatarThumbnailUrl, CancellationToken cancellationToken = default)
+        => await DbSet
+            .Where(u => u.Id == userId)
+            .ExecuteUpdateAsync(s => s
+                .SetProperty(u => u.AvatarUrl, avatarUrl)
+                .SetProperty(u => u.AvatarThumbnailUrl, avatarThumbnailUrl), cancellationToken);
 }

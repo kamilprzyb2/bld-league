@@ -39,7 +39,7 @@
                         {
                             <tr>
                                 <td class="text-center text-nowrap">@r.SingleRank</td>
-                                <td>@r.FullName</td>
+                                <td><a asp-page="/Users/UserProfile" asp-route-id="@r.UserId">@r.FullName</a></td>
                                 <td class="fw-bold text-nowrap">@r.BestSingle</td>
                                 <td class="text-nowrap">
                                     <a asp-page="/Rounds/ViewRound" asp-route-SeasonId="@r.SeasonId" asp-route-RoundNumber="@r.RoundNumber">
@@ -88,7 +88,7 @@
                                 data-s4="@Rankings.FormatSolveWithParens(r, 3)"
                                 data-s5="@Rankings.FormatSolveWithParens(r, 4)">
                                 <td class="text-center">@r.AverageRank</td>
-                                <td>@r.FullName</td>
+                                <td><a asp-page="/Users/UserProfile" asp-route-id="@r.UserId">@r.FullName</a></td>
                                 <td class="fw-bold">@r.BestAverage</td>
                                 <td>
                                     <a asp-page="/Rounds/ViewRound" asp-route-SeasonId="@r.SeasonId" asp-route-RoundNumber="@r.RoundNumber">

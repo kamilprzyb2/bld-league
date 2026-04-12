@@ -23,4 +23,7 @@ public class PlayerRankingRepository(AppDbContext context)
     {
         await DbSet.ExecuteDeleteAsync();
     }
+
+    public async Task<PlayerRanking?> GetByUserIdAsync(Guid userId)
+        => await DbSet.FirstOrDefaultAsync(r => r.UserId == userId);
 }

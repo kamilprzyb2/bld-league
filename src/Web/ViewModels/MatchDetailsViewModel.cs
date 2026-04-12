@@ -42,6 +42,8 @@ public class MatchDetailsViewModel : MatchSummaryViewModel
         {
             MatchName = $"{dto.UserAFullName} - {dto.UserBFullName ?? string.Empty}",
             MatchId = dto.Id,
+            UserAId = dto.UserAId,
+            UserBId = dto.UserBId,
             SeasonId = dto.SeasonId,
             LeagueId = dto.LeagueId,
             RoundNumber = dto.RoundNumber,

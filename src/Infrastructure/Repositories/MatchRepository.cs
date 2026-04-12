@@ -68,6 +68,8 @@ public class MatchRepository(AppDbContext context)
             .Select(m => new MatchDetailsDto
             {
                 Id = m.Id,
+                UserAId = m.UserAId,
+                UserBId = m.UserBId,
                 SeasonId = m.LeagueSeason.SeasonId,
                 LeagueId = m.LeagueSeason.LeagueId,
                 RoundNumber = m.Round.RoundNumber,
@@ -120,6 +122,8 @@ public class MatchRepository(AppDbContext context)
             .Select(m => new MatchSummaryDto
             {
                 Id = m.Id,
+                UserAId = m.UserAId,
+                UserBId = m.UserBId,
                 UserAFullName = m.UserA.FullName,
                 UserBFullName = m.UserB != null ? m.UserB.FullName : null,
                 UserAScore = m.UserAScore,
@@ -151,4 +155,18 @@ public class MatchRepository(AppDbContext context)
         => await DbSet
             .Include(m => m.Solves)
             .FirstOrDefaultAsync(m => m.Id == id);
+
+    public async Task<IReadOnlyCollection<Match>> GetFinishedMatchesByUserIdAsync(Guid userId)
+    {
+        var today = DateTime.UtcNow.Date;
+        return await DbSet
+            .Include(m => m.Round).ThenInclude(r => r.Season)
+            .Include(m => m.LeagueSeason).ThenInclude(ls => ls.League)
+            .Include(m => m.UserA)
+            .Include(m => m.UserB)
+            .Where(m => (m.UserAId == userId || m.UserBId == userId) && m.Round.EndDate < today)
+            .OrderByDescending(m => m.Round.Season.SeasonNumber)
+            .ThenByDescending(m => m.Round.RoundNumber)
+            .ToListAsync();
+    }
 }

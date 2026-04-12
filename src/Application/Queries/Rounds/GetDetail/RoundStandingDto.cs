@@ -7,6 +7,7 @@ namespace BldLeague.Application.Queries.Rounds.GetDetail;
 /// </summary>
 public class RoundStandingDto
 {
+    public Guid UserId { get; set; }
     public required string UserFullName { get; set; }
     public required string LeagueIdentifier { get; set; }
     public SolveResult Solve1 { get; set; }

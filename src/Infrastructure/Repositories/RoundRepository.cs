@@ -65,6 +65,7 @@ public class RoundRepository(AppDbContext context) :
                     .ThenBy(rs => rs.User.FullName)
                     .Select(rs => new RoundStandingDto
                     {
+                        UserId = rs.UserId,
                         UserFullName = rs.User.FullName,
                         LeagueIdentifier = rs.League.LeagueIdentifier,
                         Solve1 = rs.Solve1,

@@ -91,7 +91,7 @@
                         data-s5="@standing.Solve5"
                         data-pts="@standing.Points">
                         <td class="text-center">@standing.Place</td>
-                        <td>@standing.UserFullName</td>
+                        <td><a asp-page="/Users/UserProfile" asp-route-id="@standing.UserId">@standing.UserFullName</a></td>
                         <td class="d-none d-md-table-cell">@standing.LeagueIdentifier</td>
                         <td class="fw-bold">@standing.Best</td>
                         <td>@standing.Average</td>

@@ -7,6 +7,7 @@ namespace BldLeague.Application.Queries.LeagueSeasons.GetDetail;
 /// </summary>
 public class LeagueSeasonStandingDto
 {
+    public Guid UserId { get; set; }
     public required string UserFullName { get; set; }
     public int Place { get; set; }
     public int SubleagueGroup { get; set; }

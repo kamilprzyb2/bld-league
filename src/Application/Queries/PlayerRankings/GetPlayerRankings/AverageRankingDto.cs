@@ -14,5 +14,6 @@ public record AverageRankingDto(
     SolveResult Solve2,
     SolveResult Solve3,
     SolveResult Solve4,
-    SolveResult Solve5
+    SolveResult Solve5,
+    Guid UserId
 );

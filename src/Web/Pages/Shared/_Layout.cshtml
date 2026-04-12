@@ -60,6 +60,7 @@
                             <li><a class="dropdown-item" asp-area="" asp-page="/Rounds/ViewRound">Kolejki</a></li>
                             <li><a class="dropdown-item" asp-area="" asp-page="/Matches/MatchList">Mecze</a></li>
                             <li><a class="dropdown-item" asp-area="" asp-page="/Rankings/Rankings">Rankingi</a></li>
+                            <li><a class="dropdown-item" asp-area="" asp-page="/Users/UserList">Osoby</a></li>
                         </ul>
                     </li>
                     <li class="nav-item dropdown">
@@ -159,10 +160,11 @@
 </div>
 
 <footer class="border-top footer text-muted">
-    <div class="container">
-        &copy; @DateTime.Now.Year - 3BLD League -
-        <a asp-page="/About/Guidelines">Zasady</a> -
-        <a asp-page="/About/About">O projekcie</a> -
+    <div class="container text-center">
+        <a asp-page="/About/Guidelines">Zasady ligi</a>
+        <span class="mx-2">|</span>
+        <a asp-page="/About/About">O projekcie</a>
+        <span class="mx-2">|</span>
         <a asp-page="/About/Privacy">Polityka prywatności</a>
     </div>
 </footer>

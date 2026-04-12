@@ -37,10 +37,10 @@
                 <thead class="table">
                 <tr>
                     <th scope="col"></th>
-                    <th scope="col" class="text-center">@Model.MatchDetails.UserAFullName</th>
+                    <th scope="col" class="text-center"><a asp-page="/Users/UserProfile" asp-route-id="@Model.MatchDetails.UserAId">@Model.MatchDetails.UserAFullName</a></th>
                     @if (!string.IsNullOrEmpty(Model.MatchDetails.UserBFullName))
                     {
-                        <th scope="col" class="text-center">@Model.MatchDetails.UserBFullName</th>
+                        <th scope="col" class="text-center"><a asp-page="/Users/UserProfile" asp-route-id="@Model.MatchDetails.UserBId">@Model.MatchDetails.UserBFullName</a></th>
                     }
                     <th scope="col" class="d-none d-md-table-cell">Scramble</th>
                 </tr>

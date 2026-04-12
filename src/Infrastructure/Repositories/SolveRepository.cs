@@ -32,4 +32,16 @@ public class SolveRepository(AppDbContext context) :
             })
             .ToList();
     }
+
+    public async Task<IReadOnlyCollection<SolveResult>> GetFinishedSolvesByUserIdAsync(Guid userId)
+    {
+        var today = DateTime.UtcNow.Date;
+        return await DbSet
+            .Where(s => s.UserId == userId && s.Match.Round.EndDate < today)
+            .OrderBy(s => s.Match.Round.Season.SeasonNumber)
+            .ThenBy(s => s.Match.Round.RoundNumber)
+            .ThenBy(s => s.Index)
+            .Select(s => s.Result)
+            .ToListAsync();
+    }
 }

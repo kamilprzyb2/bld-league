@@ -14,4 +14,12 @@ public class LeagueSeasonStandingRepository(AppDbContext context) :
             .Where(lss => lss.LeagueSeasonId == leagueSeasonId)
             .ToListAsync();
     }
+
+    public async Task<IReadOnlyCollection<LeagueSeasonStanding>> GetByUserIdWithDetailsAsync(Guid userId)
+        => await DbSet
+            .Include(lss => lss.LeagueSeason).ThenInclude(ls => ls.League)
+            .Include(lss => lss.LeagueSeason).ThenInclude(ls => ls.Season)
+            .Where(lss => lss.UserId == userId)
+            .OrderByDescending(lss => lss.LeagueSeason.Season.SeasonNumber)
+            .ToListAsync();
 }

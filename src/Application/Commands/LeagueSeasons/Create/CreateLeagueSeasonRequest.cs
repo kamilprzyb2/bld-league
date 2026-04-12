@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using BldLeague.Application.Common;
 using MediatR;
 
@@ -10,6 +11,6 @@ public class CreateLeagueSeasonRequest : IRequest<CommandResult>
 {
     public Guid SeasonId { get; set; }
     public Guid LeagueId { get; set; }
-    public int PromotionCount { get; set; }
-    public int RelegationCount { get; set; }
+    [Range(0, int.MaxValue)] public int PromotionCount { get; set; }
+    [Range(0, int.MaxValue)] public int RelegationCount { get; set; }
 }

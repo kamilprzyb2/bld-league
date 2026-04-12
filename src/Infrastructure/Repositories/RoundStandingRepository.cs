@@ -56,4 +56,13 @@ public class RoundStandingRepository(AppDbContext context)
                 rs.Solve1, rs.Solve2, rs.Solve3, rs.Solve4, rs.Solve5))
             .ToList();
     }
+
+    public async Task<IReadOnlyCollection<RoundStanding>> GetByUserIdWithDetailsAsync(Guid userId)
+        => await DbSet
+            .Include(rs => rs.Round).ThenInclude(r => r.Season)
+            .Include(rs => rs.League)
+            .Where(rs => rs.UserId == userId)
+            .OrderByDescending(rs => rs.Round.Season.SeasonNumber)
+            .ThenByDescending(rs => rs.Round.RoundNumber)
+            .ToListAsync();
 }

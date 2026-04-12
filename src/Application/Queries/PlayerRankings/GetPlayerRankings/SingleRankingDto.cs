@@ -9,5 +9,6 @@ public record SingleRankingDto(
     string RoundLabel,
     Guid SeasonId,
     int SeasonNumber,
-    int RoundNumber
+    int RoundNumber,
+    Guid UserId
 );

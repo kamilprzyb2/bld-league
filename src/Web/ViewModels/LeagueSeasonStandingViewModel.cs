@@ -4,6 +4,7 @@ namespace BldLeague.Web.ViewModels;
 
 public class LeagueSeasonStandingViewModel
 {
+    public Guid UserId { get; set; }
     public required string UserFullName { get; set; }
     public int Place { get; set; }
     public int SubleagueGroup { get; set; }
@@ -22,6 +23,7 @@ public class LeagueSeasonStandingViewModel
     {
         return new LeagueSeasonStandingViewModel
         {
+            UserId = dto.UserId,
             UserFullName = dto.UserFullName,
             Place = dto.Place,
             SubleagueGroup = dto.SubleagueGroup,

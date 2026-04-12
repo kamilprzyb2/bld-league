@@ -5,6 +5,8 @@ namespace BldLeague.Web.ViewModels;
 public class MatchSummaryViewModel
 {
     public Guid MatchId { get; set; }
+    public Guid UserAId { get; set; }
+    public Guid? UserBId { get; set; }
     public required string UserAFullName { get; set; }
     public string? UserBFullName { get; set; }
     public int UserAScore { get; set; }
@@ -25,6 +27,8 @@ public class MatchSummaryViewModel
         return new MatchSummaryViewModel
         {
             MatchId = dto.Id,
+            UserAId = dto.UserAId,
+            UserBId = dto.UserBId,
             UserAFullName = dto.UserAFullName,
             UserBFullName = dto.UserBFullName,
             UserAScore = dto.UserAScore,

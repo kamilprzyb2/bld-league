@@ -5,4 +5,6 @@ namespace BldLeague.Application.Abstractions.Repositories;
 public interface ILeagueSeasonStandingRepository : IReadWriteRepository<LeagueSeasonStanding>
 {
     Task<IReadOnlyCollection<LeagueSeasonStanding>> GetStandingsByLeagueSeasonIdAsync(Guid leagueSeasonId);
+
+    Task<IReadOnlyCollection<LeagueSeasonStanding>> GetByUserIdWithDetailsAsync(Guid userId);
 }

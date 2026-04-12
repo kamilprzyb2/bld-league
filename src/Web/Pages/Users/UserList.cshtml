@@ -1,0 +1,59 @@
+@page "/Users"
+@using BldLeague.Application.Queries.Users.GetAll
+@model BldLeague.Web.Pages.Users.UserList
+
+<div class="container mt-2">
+    <h2>Osoby</h2>
+
+    <div class="mb-3">
+        <input type="text" id="filter-name" class="form-control form-control-sm" placeholder="Filtruj po imieniu i nazwisku…" />
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead class="table">
+            <tr>
+                <th scope="col">Imię i nazwisko</th>
+                <th scope="col">WCA ID</th>
+            </tr>
+            </thead>
+            <tbody>
+            @if (Model.Users.Any())
+            {
+                foreach (var user in Model.Users)
+                {
+                    <tr>
+                        <td>
+                            <a asp-page="/Users/UserProfile" asp-route-id="@user.Id">@user.FullName</a>
+                        </td>
+                        <td>@user.WcaId</td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="2" class="text-center">Brak danych.</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+    (function () {
+        var input = document.getElementById('filter-name');
+        var tbody = document.querySelector('table tbody');
+
+        input.addEventListener('input', function () {
+            var q = input.value.trim().toLowerCase();
+            Array.from(tbody.querySelectorAll('tr')).forEach(function (row) {
+                var name = (row.cells[0] ? row.cells[0].textContent : '').toLowerCase();
+                row.style.display = (q && !name.includes(q)) ? 'none' : '';
+            });
+        });
+    })();
+    </script>
+}

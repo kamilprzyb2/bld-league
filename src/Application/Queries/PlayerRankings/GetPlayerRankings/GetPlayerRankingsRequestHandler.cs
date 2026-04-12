@@ -20,7 +20,8 @@ public class GetPlayerRankingsRequestHandler(IUnitOfWork unitOfWork)
                 $"Sezon {r.SingleRound!.Season.SeasonNumber} Kolejka {r.SingleRound.RoundNumber}",
                 r.SingleRound!.Season.Id,
                 r.SingleRound!.Season.SeasonNumber,
-                r.SingleRound!.RoundNumber
+                r.SingleRound!.RoundNumber,
+                r.User.Id
             ))
             .ToList();
 
@@ -39,7 +40,8 @@ public class GetPlayerRankingsRequestHandler(IUnitOfWork unitOfWork)
                 r.AverageSolve2!.Value,
                 r.AverageSolve3!.Value,
                 r.AverageSolve4!.Value,
-                r.AverageSolve5!.Value
+                r.AverageSolve5!.Value,
+                r.User.Id
             ))
             .ToList();
 

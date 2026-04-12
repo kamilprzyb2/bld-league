@@ -68,7 +68,7 @@
         <a asp-page="/Rankings/Rankings" class="text-decoration-none">
             <div class="card h-100 border-0 shadow-sm p-3">
                 <div class="d-flex align-items-center gap-3">
-                    <i class="bi bi-bar-chart-line fs-2 text-info"></i>
+                    <i class="bi bi-bar-chart-line fs-2 text-success"></i>
                     <div>
                         <div class="fw-semibold">Rankingi</div>
                         <div class="text-muted small">Najlepsze ułożenia</div>
@@ -78,15 +78,17 @@
         </a>
     </div>
     <div class="col-12 col-sm-6 col-md-4">
-        <div class="card h-100 border-0 shadow-sm p-3">
-            <div class="d-flex align-items-center gap-3">
-                <i class="bi bi-person-circle fs-2 text-muted"></i>
-                <div>
-                    <div class="fw-semibold">Osoby</div>
-                    <div class="text-muted small">Profile zawodników — wkrótce</div>
+        <a asp-page="/Users/UserList" class="text-decoration-none">
+            <div class="card h-100 border-0 shadow-sm p-3">
+                <div class="d-flex align-items-center gap-3">
+                    <i class="bi bi-person-circle fs-2" style="color: #ed8257"></i>
+                    <div>
+                        <div class="fw-semibold">Osoby</div>
+                        <div class="text-muted small">Profile zawodników</div>
+                    </div>
                 </div>
             </div>
-        </div>
+        </a>
     </div>
     @if (Model.ActiveRoundForm != null)
     {

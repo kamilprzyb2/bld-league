@@ -1,0 +1,513 @@
+@page "/Users/{id:guid}"
+@using BldLeague.Application.Queries.Users.GetRoundResults
+@using System.Text.Json
+@model BldLeague.Web.Pages.Users.UserProfile
+
+<div class="container mt-2">
+
+    @* Profile header *@
+    <div class="text-center mb-4">
+        @if (Model.Profile!.AvatarUrl != null)
+        {
+            <img src="@Model.Profile.AvatarUrl" alt="Avatar" class="rounded-circle mb-2" style="width:96px;height:96px;object-fit:cover;" />
+        }
+        else if (Model.Profile.AvatarThumbnailUrl != null)
+        {
+            <img src="@Model.Profile.AvatarThumbnailUrl" alt="Avatar" class="rounded-circle mb-2" style="width:96px;height:96px;object-fit:cover;" />
+        }
+        else
+        {
+            <i class="bi bi-person-circle" style="font-size:5rem;"></i>
+        }
+        <h2 class="mb-1">@Model.Profile.FullName</h2>
+        @if (Model.Profile.IsAdmin)
+        {
+            <span class="badge bg-primary" style="font-size:.65rem;">Administrator</span>
+        }
+        <a href="https://www.worldcubeassociation.org/persons/@Model.Profile.WcaId"
+           rel="nofollow noreferrer noopener" target="_blank">@Model.Profile.WcaId</a>
+    </div>
+
+    @* Personal Records *@
+    <h4>Rekordy osobiste</h4>
+    <div class="table-responsive mb-4">
+        <table class="table table-bordered align-middle">
+            <thead>
+            <tr>
+                <th>Konkurencja</th>
+                <th title="Rekord ligi">LR (single)</th>
+                <th>Best</th>
+                <th>Średnia</th>
+                <th title="Rekord ligi">LR (avg)</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>
+                    <img src="/images/333bf.svg" alt="3x3 Bez Patrzenia" style="width:20px;height:20px;vertical-align:middle;" class="me-1 event-icon" />
+                    3x3 Bez Patrzenia
+                </td>
+                <td>@(Model.Ranking?.SingleRank?.ToString() ?? "–")</td>
+                <td class="fw-bold">@(Model.Ranking?.BestSingle?.ToString() ?? "–")</td>
+                <td class="fw-bold">@(Model.Ranking?.BestAverage?.ToString() ?? "–")</td>
+                <td>@(Model.Ranking?.AverageRank?.ToString() ?? "–")</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    @* Tabs *@
+    <ul class="nav nav-tabs mb-3" id="profileTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="wyniki-tab" data-bs-toggle="tab" data-bs-target="#wyniki-tab-pane"
+                    type="button" role="tab" aria-controls="wyniki-tab-pane" aria-selected="true">
+                Wyniki
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="mecze-tab" data-bs-toggle="tab" data-bs-target="#mecze-tab-pane"
+                    type="button" role="tab" aria-controls="mecze-tab-pane" aria-selected="false">
+                Mecze
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="sezony-tab" data-bs-toggle="tab" data-bs-target="#sezony-tab-pane"
+                    type="button" role="tab" aria-controls="sezony-tab-pane" aria-selected="false">
+                Klasyfikacja
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="progresja-tab" data-bs-toggle="tab" data-bs-target="#progresja-tab-pane"
+                    type="button" role="tab" aria-controls="progresja-tab-pane" aria-selected="false">
+                Progresja
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="statystyki-tab" data-bs-toggle="tab" data-bs-target="#statystyki-tab-pane"
+                    type="button" role="tab" aria-controls="statystyki-tab-pane" aria-selected="false">
+                Statystyki
+            </button>
+        </li>
+    </ul>
+
+    <div class="tab-content" id="profileTabContent">
+
+        @* Wyniki tab *@
+        <div class="tab-pane fade show active" id="wyniki-tab-pane" role="tabpanel" aria-labelledby="wyniki-tab" tabindex="0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table">
+                    <tr>
+                        <th scope="col">
+                            <span class="d-none d-md-inline">Sezon/Kolejka</span>
+                            <span class="d-inline d-md-none">S/K</span>
+                        </th>
+                        <th scope="col" class="text-center text-nowrap">Poz.</th>
+                        <th scope="col" class="text-nowrap">Best</th>
+                        <th scope="col" class="text-nowrap">Ao5</th>
+                        <th scope="col" class="d-none d-md-table-cell">Ułożenia</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @if (Model.RoundResults.Any())
+                    {
+                        foreach (var result in Model.RoundResults)
+                        {
+                            var placeDisplay = (result.Place == null || result.Place == int.MaxValue) ? "–" : result.Place.ToString()!;
+                            <tr class="js-round-row"
+                                data-season="@result.SeasonName"
+                                data-round="@result.RoundName"
+                                data-league="@result.LeagueIdentifier"
+                                data-place="@placeDisplay"
+                                data-best="@result.Best"
+                                data-avg="@result.Average"
+                                data-s1="@UserProfile.FormatSolveWithParens(result, 0)"
+                                data-s2="@UserProfile.FormatSolveWithParens(result, 1)"
+                                data-s3="@UserProfile.FormatSolveWithParens(result, 2)"
+                                data-s4="@UserProfile.FormatSolveWithParens(result, 3)"
+                                data-s5="@UserProfile.FormatSolveWithParens(result, 4)">
+                                <td>
+                                    <a asp-page="/Rounds/ViewRound" asp-route-SeasonId="@result.SeasonId" asp-route-RoundNumber="@result.RoundNumber">
+                                        <span class="d-none d-md-inline">@result.SeasonName @result.RoundName</span>
+                                        <span class="d-inline d-md-none">S@(result.SeasonNumber) K@(result.RoundNumber)</span>
+                                    </a>
+                                </td>
+                                <td class="text-center">@placeDisplay</td>
+                                <td class="fw-bold">@result.Best</td>
+                                <td>@result.Average</td>
+                                <td class="font-monospace d-none d-md-table-cell">
+                                    @UserProfile.FormatSolveWithParens(result, 0)
+                                    @UserProfile.FormatSolveWithParens(result, 1)
+                                    @UserProfile.FormatSolveWithParens(result, 2)
+                                    @UserProfile.FormatSolveWithParens(result, 3)
+                                    @UserProfile.FormatSolveWithParens(result, 4)
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="5" class="text-center">Brak danych.</td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        @* Mecze tab *@
+        <div class="tab-pane fade" id="mecze-tab-pane" role="tabpanel" aria-labelledby="mecze-tab" tabindex="0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table">
+                    <tr>
+                        <th scope="col" class="text-nowrap">Sezon/Kolejka</th>
+                        <th scope="col" class="text-nowrap d-none d-md-table-cell">Liga</th>
+                        <th scope="col">Zawodnik A</th>
+                        <th scope="col" class="text-center text-nowrap">Wynik</th>
+                        <th scope="col">Zawodnik B</th>
+                        <th scope="col" class="text-nowrap">Szczegóły</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @if (Model.MatchHistory.Any())
+                    {
+                        foreach (var match in Model.MatchHistory)
+                        {
+                            <tr>
+                                <td>
+                                    <a asp-page="/Rounds/ViewRound" asp-route-SeasonId="@match.SeasonId" asp-route-RoundNumber="@match.RoundNumber">
+                                        <span class="d-none d-md-inline">@match.SeasonName @match.RoundName</span>
+                                        <span class="d-inline d-md-none">S@(match.SeasonNumber) K@(match.RoundNumber)</span>
+                                    </a>
+                                </td>
+                                <td class="d-none d-md-table-cell">@match.LeagueIdentifier</td>
+                                <td>@match.ProfileUserFullName</td>
+                                <td class="text-center text-nowrap">
+                                    @if (match.OpponentFullName == null)
+                                    {
+                                        <span>N/A</span>
+                                    }
+                                    else
+                                    {
+                                        <span>@match.ProfileUserScore : @match.OpponentScore</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (match.OpponentId.HasValue)
+                                    {
+                                        <a asp-page="/Users/UserProfile" asp-route-id="@match.OpponentId">@match.OpponentFullName</a>
+                                    }
+                                    else
+                                    {
+                                        @(match.OpponentFullName ?? "BYE")
+                                    }
+                                </td>
+                                <td>
+                                    <a class="btn btn-sm btn-primary" asp-page="/Matches/ViewMatch" asp-route-id="@match.MatchId">Zobacz</a>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="6" class="text-center">Brak danych.</td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        @* Sezony tab *@
+        <div class="tab-pane fade" id="sezony-tab-pane" role="tabpanel" aria-labelledby="sezony-tab" tabindex="0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table">
+                    <tr>
+                        <th scope="col">Sezon</th>
+                        <th scope="col">Liga</th>
+                        <th scope="col" class="text-center">Miejsce</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @if (Model.SeasonHistory.Any())
+                    {
+                        foreach (var history in Model.SeasonHistory)
+                        {
+                            <tr>
+                                <td>@history.SeasonName</td>
+                                <td>@history.LeagueName</td>
+                                <td class="text-center text-nowrap">
+                                    @if (history.Place == 1)
+                                    {
+                                        <i class="bi bi-trophy-fill text-warning me-1"></i>
+                                    }
+                                    else if (history.Place == 2)
+                                    {
+                                        <i class="bi bi-trophy-fill me-1" style="color:#c0c0c0;"></i>
+                                    }
+                                    else if (history.Place == 3)
+                                    {
+                                        <i class="bi bi-trophy-fill me-1" style="color:#cd7f32;"></i>
+                                    }
+                                    @history.Place
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="3" class="text-center">Brak danych.</td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        @* Progresja tab *@
+        <div class="tab-pane fade" id="progresja-tab-pane" role="tabpanel" aria-labelledby="progresja-tab" tabindex="0">
+            @{
+                var validChartPoints = Model.RoundResults
+                    .Where(r => r.Best.IsValid)
+                    .OrderBy(r => r.SeasonNumber)
+                    .ThenBy(r => r.RoundNumber)
+                    .ToList();
+            }
+            @if (validChartPoints.Count < 2)
+            {
+                <p>Za mało danych do wyświetlenia wykresu.</p>
+            }
+            else
+            {
+                <canvas id="progressionChart"></canvas>
+            }
+        </div>
+
+        @* Statystyki tab *@
+        <div class="tab-pane fade" id="statystyki-tab-pane" role="tabpanel" aria-labelledby="statystyki-tab" tabindex="0">
+            @{
+                var totalMatches = Model.Stats.Wins + Model.Stats.Losses + Model.Stats.Draws;
+                var effectivenessStr = Model.Stats.NonDnsSolves > 0
+                    ? $"{(int)Math.Round(100.0 * Model.Stats.ValidSolves / Model.Stats.NonDnsSolves)}%"
+                    : "–";
+            }
+            <div class="row g-4 mt-1">
+                <div class="col-md-6">
+                    <h6 class="fw-semibold border-bottom pb-2 mb-3">Ułożenia</h6>
+                    <table class="table table-sm">
+                        <tbody>
+                        <tr>
+                            <td>Skuteczność</td>
+                            <td class="text-end">
+                                @Model.Stats.ValidSolves/@Model.Stats.NonDnsSolves
+                                <span class="text-muted ms-2">@effectivenessStr</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Średni czas</td>
+                            <td class="text-end fw-semibold">@(Model.Stats.AverageSingle?.ToString() ?? "–")</td>
+                        </tr>
+                        <tr>
+                            <td>Najwięcej sukcesów z rzędu</td>
+                            <td class="text-end fw-semibold">@Model.Stats.LongestSuccessStreak</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="col-md-6">
+                    <h6 class="fw-semibold border-bottom pb-2 mb-3">Mecze</h6>
+                    @{
+                        string WinPct(int n) => totalMatches > 0 ? $"{(int)Math.Round(100.0 * n / totalMatches)}%" : "–";
+                    }
+                    <table class="table table-sm">
+                        <tbody>
+                        <tr>
+                            <td>Zwycięstwa</td>
+                            <td class="text-end">
+                                @Model.Stats.Wins/@totalMatches
+                                <span class="text-muted ms-2">@WinPct(Model.Stats.Wins)</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Porażki</td>
+                            <td class="text-end">
+                                @Model.Stats.Losses/@totalMatches
+                                <span class="text-muted ms-2">@WinPct(Model.Stats.Losses)</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Remisy</td>
+                            <td class="text-end">
+                                @Model.Stats.Draws/@totalMatches
+                                <span class="text-muted ms-2">@WinPct(Model.Stats.Draws)</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Najlepsza passa zwycięstw</td>
+                            <td class="text-end fw-semibold">@Model.Stats.LongestWinStreak</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@* Round detail modal *@
+<div class="modal fade" id="roundDetailModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Szczegóły wyniku</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Zamknij"></button>
+            </div>
+            <div class="modal-body" id="roundDetailBody"></div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        var validChartPoints = Model.RoundResults
+            .Where(r => r.Best.IsValid)
+            .OrderBy(r => r.SeasonNumber)
+            .ThenBy(r => r.RoundNumber)
+            .ToList();
+    }
+    @if (validChartPoints.Count >= 2)
+    {
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@@4"></script>
+        <script>
+            (function () {
+                var labels = @Html.Raw(JsonSerializer.Serialize(validChartPoints.Select(r => $"S{r.SeasonNumber} K{r.RoundNumber}").ToArray()));
+                var singleValues = @Html.Raw(JsonSerializer.Serialize(validChartPoints.Select(r => Math.Round(r.Best.Centiseconds / 100.0, 2)).ToArray()));
+                var avgValues = @Html.Raw(JsonSerializer.Serialize(validChartPoints.Select(r => r.Average.IsValid ? (double?)Math.Round(r.Average.Centiseconds / 100.0, 2) : null).ToArray()));
+
+                function fmtSecs(v) {
+                    if (v === null || v === undefined) return '–';
+                    if (v >= 60) {
+                        var m = Math.floor(v / 60);
+                        var s = v - m * 60;
+                        return m + ':' + (s < 10 ? '0' : '') + s.toFixed(2);
+                    }
+                    return v.toFixed(2) + 's';
+                }
+
+                var sorted = singleValues.slice().sort(function (a, b) { return a - b; });
+                var mid = Math.floor(sorted.length / 2);
+                var medianSingle = sorted.length % 2 !== 0
+                    ? sorted[mid]
+                    : (sorted[mid - 1] + sorted[mid]) / 2;
+
+                var ctx = document.getElementById('progressionChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            {
+                                label: 'Best Single',
+                                data: singleValues,
+                                borderColor: 'rgb(54, 162, 235)',
+                                backgroundColor: 'rgba(54, 162, 235, 0.1)',
+                                tension: 0.3,
+                                fill: false
+                            },
+                            {
+                                label: 'Ao5',
+                                data: avgValues,
+                                borderColor: 'rgb(255, 99, 132)',
+                                backgroundColor: 'rgba(255, 99, 132, 0.1)',
+                                tension: 0.3,
+                                fill: false,
+                                spanGaps: true
+                            },
+                            {
+                                label: 'Mediana singla (' + fmtSecs(medianSingle) + ')',
+                                data: labels.map(function () { return medianSingle; }),
+                                borderColor: 'rgba(75, 192, 75, 0.8)',
+                                backgroundColor: 'transparent',
+                                borderWidth: 2,
+                                borderDash: [6, 4],
+                                pointRadius: 0,
+                                fill: false,
+                                tension: 0,
+                                order: 10
+                            }
+                        ]
+                    },
+                    options: {
+                        scales: {
+                            y: {
+                                ticks: {
+                                    callback: function (v) { return fmtSecs(v); }
+                                }
+                            }
+                        },
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    label: function (context) {
+                                        var val = context.parsed.y;
+                                        return context.dataset.label + ': ' + fmtSecs(val);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            })();
+        </script>
+    }
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('roundDetailModal'));
+            const modalBody = document.getElementById('roundDetailBody');
+
+            function buildDetailDl(fields) {
+                const dl = document.createElement('dl');
+                dl.className = 'row mb-0';
+                fields.forEach(function ([label, value]) {
+                    const dt = document.createElement('dt');
+                    dt.className = 'col-5';
+                    dt.textContent = label;
+                    const dd = document.createElement('dd');
+                    dd.className = 'col-7';
+                    dd.textContent = value;
+                    dl.appendChild(dt);
+                    dl.appendChild(dd);
+                });
+                return dl;
+            }
+
+            document.querySelectorAll('tr.js-round-row').forEach(function (row) {
+                row.addEventListener('click', function () {
+                    if (window.innerWidth >= 768) return;
+                    const d = row.dataset;
+                    modalBody.innerHTML = '';
+                    modalBody.appendChild(buildDetailDl([
+                        ['Sezon', d.season],
+                        ['Kolejka', d.round],
+                        ['Liga', d.league],
+                        ['Pozycja', d.place],
+                        ['Best', d.best],
+                        ['Ao5', d.avg],
+                        ['Ułożenie 1', d.s1],
+                        ['Ułożenie 2', d.s2],
+                        ['Ułożenie 3', d.s3],
+                        ['Ułożenie 4', d.s4],
+                        ['Ułożenie 5', d.s5]
+                    ]));
+                    modal.show();
+                });
+            });
+        });
+    </script>
+}
