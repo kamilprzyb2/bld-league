@@ -221,6 +221,7 @@ Avoid JavaScript by default. Prefer server-side form submissions and page reload
 | User round results | `src/Application/Queries/Users/GetRoundResults/` |
 | User match history | `src/Application/Queries/Users/GetMatchHistory/` |
 | User season history | `src/Application/Queries/Users/GetSeasonHistory/` |
+| User solves (for stats computation) | `src/Application/Queries/Users/GetSolves/` |
 
 ### Infrastructure
 
@@ -247,6 +248,7 @@ Avoid JavaScript by default. Prefer server-side form submissions and page reload
 | Shared layout | `src/Web/Pages/Shared/_Layout.cshtml` |
 | `CsvHelper` (CSV builder, UTF-8 BOM) | `src/Web/Helpers/CsvHelper.cs` |
 | `CsvParser` (CSV `IFormFile` parser) | `src/Web/Helpers/CsvParser.cs` |
+| `SolveFormatHelper` (Ao5 best/worst parentheses formatting) | `src/Web/Helpers/SolveFormatHelper.cs` |
 | `EnvironmentBadgeOptions` (optional navbar env label) | `src/Web/Options/EnvironmentBadgeOptions.cs` |
 | `MatchStatus` enum (Upcoming/InProgress/Finished) | `src/Web/ViewModels/MatchStatus.cs` |
 | ViewModels | `src/Web/ViewModels/` |
