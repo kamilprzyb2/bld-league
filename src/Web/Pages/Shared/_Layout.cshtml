@@ -108,6 +108,22 @@
                             </a>
 
                             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                                @{
+                                    var currentUserId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+                                }
+                                <li>
+                                    <a class="dropdown-item" asp-page="/Users/UserProfile" asp-route-id="@currentUserId">
+                                        <i class="bi bi-person" style="margin-right: 0.5rem;"></i>
+                                        Mój profil
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="/Account/RefreshAvatar">
+                                        <i class="bi bi-arrow-clockwise" style="margin-right: 0.5rem;"></i>
+                                        Odśwież awatar
+                                    </a>
+                                </li>
+                                <li><hr class="dropdown-divider" /></li>
                                 <li>
                                     <form method="post" asp-page="/Account/Logout" class="m-0">
                                         <button type="submit" class="dropdown-item text-danger px-3">
