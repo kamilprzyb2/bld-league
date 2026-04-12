@@ -1,7 +1,7 @@
 ﻿using System.Net.Http.Headers;
 using System.Security.Claims;
 using System.Text.Json;
-using BldLeague.Application.Commands.Users.UpdateAvatar;
+using BldLeague.Application.Commands.Users.Update;
 using BldLeague.Application.Queries.Users.GetById;
 using BldLeague.Application.Queries.Users.GetUserDetailByWcaId;
 using MediatR;
@@ -115,13 +115,13 @@ public static class AuthenticationExtensions
 
                     if (user.AvatarThumbnailUrl != wcaThumbnailUrl || user.AvatarUrl != wcaAvatarUrl)
                     {
-                        await mediator.Send(new UpdateUserAvatarRequest
+                        await mediator.Send(new UpdateUserRequest
                         {
                             UserId = user.Id,
                             FullName = user.FullName,
                             WcaId = user.WcaId,
                             IsAdmin = user.IsAdmin,
-                            AvatarUrl = wcaAvatarUrl,
+                            AvatarImageUrl = wcaAvatarUrl,
                             AvatarThumbnailUrl = wcaThumbnailUrl,
                         }, context.HttpContext.RequestAborted);
                     }
