@@ -27,7 +27,7 @@
         {
             <div class="col-auto d-flex align-items-center gap-3">
                 <p class="mb-0">@Model.RoundDetail.StartDate - @Model.RoundDetail.EndDate</p>
-                @if (Model.RoundDetail.Scrambles.Any())
+                @if (Model.RoundDetail.EndDateUtc < DateTime.UtcNow && Model.RoundDetail.Scrambles.Any())
                 {
                     <button class="btn btn-outline-secondary btn-sm"
                             type="button"
@@ -41,7 +41,7 @@
 
     </form>
 
-    @if (Model.RoundDetail != null && Model.RoundDetail.Scrambles.Any())
+    @if (Model.RoundDetail != null && Model.RoundDetail.EndDateUtc < DateTime.UtcNow && Model.RoundDetail.Scrambles.Any())
     {
         <div class="collapse mt-3" id="scrambleSection">
             <ol>

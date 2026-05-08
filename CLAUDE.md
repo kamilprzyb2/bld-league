@@ -130,7 +130,7 @@ Avoid JavaScript by default. Prefer server-side form submissions and page reload
 - **League** → a division (e.g., "Liga A"). Multiple leagues run simultaneously within a season.
 - **LeagueSeason** → junction of League + Season; holds the roster (`LeagueSeasonUser`). Users can be assigned a `SubleagueGroup` (integer) on their `LeagueSeasonUser` record to split the league into subleagues during a revenge period. Has `PromotionCount`, `RelegationCount`, `PlayoffPromotionCount`, and `PlayoffRelegationCount` (all int, default 0) — when non-zero, the public standings view renders zone icons: filled green ↑ (Awans), outlined yellow ↑ (Baraż), outlined yellow ↓ (Baraż), filled red ↓ (Spadek). Purely visual.
 - **Season** has no start/end dates — it is just a `SeasonNumber`. "Latest season" (highest `SeasonNumber`) is used as the UI default in AddRound and AddMatch. LeagueSeasons are created manually (not auto-generated).
-- **Match** → 1v1 within a Round + League. Each match has exactly 5 solves (`Match.SOLVES_PER_MATCH`) per player. Scoring: 1 point per solve won + 1 bonus point for best single. Scores are computed and stored at match creation time. Matches have a `MatchStatus` (Upcoming/InProgress/Finished) derived from the round's `StartDate`/`EndDate` relative to `DateTime.UtcNow`; scores and solve details are hidden in the UI until the match is Finished.
+- **Match** → 1v1 within a Round + League. Each match has exactly 5 solves (`Match.SOLVES_PER_MATCH`) per player. Scoring: 1 point per solve won + 1 bonus point for best single. Scores are computed and stored at match creation time. Matches have a `MatchStatus` (Upcoming/InProgress/Finished) derived from the round's `StartDate`/`EndDate` relative to `DateTime.UtcNow` and `Match.BothSidesSubmitted`; scores and solve details are hidden in the UI until the match is Finished. Players self-submit via `/Submit/SubmitResults`; submission timestamps (`UserASubmittedAt`, `UserBSubmittedAt`) are set on submission. Round standings are refreshed by a daily background service (`RoundStandingsRefreshBackgroundService`) rather than immediately on submission.
 - **Scramble** → one per solve position (1–`Match.SOLVES_PER_MATCH`) per round; shared across all leagues in that round. Field `Notation` holds the move sequence. A round may have 0–5 scrambles.
 - **RoundStanding** — standings per round per league; refreshed on demand via `RefreshRoundStandingsRequest` (single round) or `RefreshAllRoundStandingsRequest` (all finished rounds). Points: place 1–7 → 50–38 (step -2), place 8–44 → 37–1 (step -1).
 - **LeagueSeasonStanding** — cumulative season standings; refreshed via `RefreshLeagueSeasonStandingsRequest` (single league season) or `RefreshAllLeagueSeasonStandingsRequest` (all league seasons).
@@ -202,6 +202,7 @@ Avoid JavaScript by default. Prefer server-side form submissions and page reload
 | LeagueSeasonUser add/remove/import/set-group | `src/Application/Commands/LeagueSeasonUsers/` |
 | Round create/update/delete/import + scramble update | `src/Application/Commands/Rounds/` |
 | Match create/edit/delete/import | `src/Application/Commands/Matches/` |
+| Match self-service submission | `src/Application/Commands/Matches/Submit/` |
 | User create/update/delete/import | `src/Application/Commands/Users/` |
 | Refresh round standings (single + refresh-all) | `src/Application/Commands/RoundStandings/Refresh/` and `RefreshAll/` |
 | Refresh season standings (single + refresh-all) | `src/Application/Commands/LeagueSeasonStandings/Refresh/` and `RefreshAll/` |
@@ -216,6 +217,7 @@ Avoid JavaScript by default. Prefer server-side form submissions and page reload
 | LeagueSeason queries + DTOs | `src/Application/Queries/LeagueSeasons/` |
 | Round queries + DTOs (incl. `ScrambleDto`, `RoundSummaryDto`) | `src/Application/Queries/Rounds/` |
 | Match queries + DTOs (incl. `SolveDto`, `MatchDetailsDto`, `MatchExportRowDto`) | `src/Application/Queries/Matches/` |
+| Active submission query + `ActiveSubmissionDto` | `src/Application/Queries/Matches/GetActiveSubmission/` |
 | User queries + DTOs (incl. `LeagueSeasonUserDto` for roster queries) | `src/Application/Queries/Users/` |
 | Player rankings query + DTOs (`SingleRankingDto`, `AverageRankingDto`) | `src/Application/Queries/PlayerRankings/` |
 | Player ranking by user ID | `src/Application/Queries/PlayerRankings/GetByUserId/` |
@@ -236,6 +238,8 @@ Avoid JavaScript by default. Prefer server-side form submissions and page reload
 | `EnsureMigratedHelper` (auto-migration on startup) | `src/Infrastructure/Helpers/EnsureMigratedHelper.cs` |
 | EF entity configurations | `src/Infrastructure/Configuration/` |
 | Migrations | `src/Infrastructure/Migrations/` |
+| `RoundStandingsRefreshBackgroundService` (daily cron) | `src/Infrastructure/HostedServices/RoundStandingsRefreshBackgroundService.cs` |
+| `RoundFinalizationOptions` (cron schedule config) | `src/Infrastructure/Options/RoundFinalizationOptions.cs` |
 | DI registration | `src/Infrastructure/ServiceCollectionExtensions.cs` |
 
 ### Web
@@ -266,6 +270,7 @@ Avoid JavaScript by default. Prefer server-side form submissions and page reload
 | Player rankings (single + average) at `/Rankings` | `src/Web/Pages/Rankings/Rankings.cshtml[.cs]` |
 | User list | `src/Web/Pages/Users/UserList.cshtml[.cs]` |
 | User profile | `src/Web/Pages/Users/UserProfile.cshtml[.cs]` |
+| Self-service result submission | `src/Web/Pages/Submit/SubmitResults.cshtml[.cs]` |
 | About / rules | `src/Web/Pages/About/About.cshtml[.cs]` |
 | Season 2 guidelines | `src/Web/Pages/About/Guidelines.cshtml[.cs]` |
 | Season 1 guidelines (archived) | `src/Web/Pages/About/GuidelinesSeason1.cshtml[.cs]` |

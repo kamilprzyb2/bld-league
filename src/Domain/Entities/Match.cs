@@ -87,10 +87,36 @@ public class Match : IIdentifiable
     public SolveResult UserBAverage { get; set; }
     
     /// <summary>
+    /// Timestamp when User A submitted their solves. Null if not yet submitted.
+    /// </summary>
+    public DateTime? UserASubmittedAt { get; set; }
+
+    /// <summary>
+    /// Timestamp when User B submitted their solves. Null if not yet submitted.
+    /// </summary>
+    public DateTime? UserBSubmittedAt { get; set; }
+
+    /// <summary>
     /// All solves belonging to this match.
     /// </summary>
     public ICollection<Solve> Solves { get; set; } = new List<Solve>();
-    
+
+    /// <summary>
+    /// Returns true if the given user has already submitted their solves for this match.
+    /// Returns false if the userId doesn't match either side.
+    /// </summary>
+    public bool HasUserSubmitted(Guid userId)
+    {
+        if (userId == UserAId) return UserASubmittedAt != null;
+        if (userId == UserBId) return UserBSubmittedAt != null;
+        return false;
+    }
+
+    /// <summary>
+    /// Returns true if both sides have submitted (or if it's a walkover and UserA has submitted).
+    /// </summary>
+    public bool BothSidesSubmitted => UserASubmittedAt != null && (UserBId == null || UserBSubmittedAt != null);
+
     /// <summary>
     /// Factory method for creating new <see cref="Match"/>.
     /// </summary>

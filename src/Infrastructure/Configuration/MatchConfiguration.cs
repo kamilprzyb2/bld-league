@@ -51,5 +51,8 @@ public class MatchConfiguration : IEntityTypeConfiguration<Match>
         b.Property(m => m.UserBAverage)
             .HasConversion(new SolveResultConverter())
             .IsRequired();
+
+        b.Property(m => m.UserASubmittedAt);
+        b.Property(m => m.UserBSubmittedAt);
     }
 }

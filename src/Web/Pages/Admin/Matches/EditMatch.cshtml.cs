@@ -34,6 +34,9 @@ public class EditMatch(IMediator mediator) : PageModel
         while (EditMatchRequest.UserBSolves.Count < Match.SOLVES_PER_MATCH)
             EditMatchRequest.UserBSolves.Add(new SolveDto());
 
+        EditMatchRequest.MarkUserASubmitted = MatchDetails.UserASubmittedAt.HasValue;
+        EditMatchRequest.MarkUserBSubmitted = MatchDetails.UserBSubmittedAt.HasValue;
+
         return Page();
     }
 

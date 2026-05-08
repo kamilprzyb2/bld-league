@@ -47,6 +47,29 @@ public class EditMatchRequestHandler(IUnitOfWork unitOfWork, ISender sender)
         // Recreate solves and recalculate scores
         await MatchSolvesProcessor.ProcessAsync(unitOfWork, match, request.UserASolves, request.UserBSolves);
 
+        if (request.MarkUserASubmitted)
+        {
+            if (match.UserASubmittedAt == null)
+                match.UserASubmittedAt = DateTime.UtcNow;
+        }
+        else
+        {
+            match.UserASubmittedAt = null;
+        }
+
+        if (match.UserBId.HasValue)
+        {
+            if (request.MarkUserBSubmitted)
+            {
+                if (match.UserBSubmittedAt == null)
+                    match.UserBSubmittedAt = DateTime.UtcNow;
+            }
+            else
+            {
+                match.UserBSubmittedAt = null;
+            }
+        }
+
         unitOfWork.MatchRepository.Update(match);
 
         await unitOfWork.CommitTransactionAsync();

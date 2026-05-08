@@ -17,7 +17,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddRazorPages();
 
-builder.Services.AddBldLeagueInfrastructure(builder.Configuration.GetConnectionString("Default") ?? string.Empty);
+builder.Services.AddBldLeagueInfrastructure(builder.Configuration.GetConnectionString("Default") ?? string.Empty, builder.Configuration);
 builder.Services.AddBldLeagueApplication(builder.Configuration["MediatR:LicenseKey"]);
 
 builder.Services.Configure<EnvironmentBadgeOptions>(builder.Configuration.GetSection("EnvironmentBadge"));

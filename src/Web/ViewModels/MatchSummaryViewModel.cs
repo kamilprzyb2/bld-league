@@ -18,11 +18,13 @@ public class MatchSummaryViewModel
     public static MatchSummaryViewModel FromDto(MatchSummaryDto dto)
     {
         var now = DateTime.UtcNow;
-        var status = now.Date > dto.RoundEndDate.Date
-            ? MatchStatus.Finished
-            : now.Date >= dto.RoundStartDate.Date
-                ? MatchStatus.InProgress
-                : MatchStatus.Upcoming;
+        MatchStatus status;
+        if (now > dto.RoundEndDate || dto.BothSidesSubmitted)
+            status = MatchStatus.Finished;
+        else if (now >= dto.RoundStartDate)
+            status = MatchStatus.InProgress;
+        else
+            status = MatchStatus.Upcoming;
 
         return new MatchSummaryViewModel
         {

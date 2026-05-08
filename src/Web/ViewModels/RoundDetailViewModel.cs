@@ -7,6 +7,7 @@ public class RoundDetailViewModel
 {
     public required string StartDate { get; set; }
     public required string EndDate { get; set; }
+    public required DateTime EndDateUtc { get; set; }
     public required List<string> Scrambles { get; set; }
     public required List<RoundStandingViewModel> Standings { get; set; }
 
@@ -16,6 +17,7 @@ public class RoundDetailViewModel
         {
             StartDate = dto.StartDate.ToDisplayDate(),
             EndDate = dto.EndDate.ToDisplayDate(),
+            EndDateUtc = dto.EndDate,
             Scrambles = dto.Scrambles
                 .OrderBy(s => s.ScrambleNumber)
                 .Select(s => s.Notation)

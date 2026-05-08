@@ -18,4 +18,5 @@ public interface IMatchRepository : IReadWriteRepository<Match>
     Task<Match?> GetMatchWithSolvesAsync(Guid id);
 
     Task<IReadOnlyCollection<Match>> GetFinishedMatchesByUserIdAsync(Guid userId);
+    Task<Match?> GetActiveMatchForUserAsync(Guid userId, DateTime utcNow);
 }

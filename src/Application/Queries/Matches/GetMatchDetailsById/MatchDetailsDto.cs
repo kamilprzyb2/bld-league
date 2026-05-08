@@ -22,4 +22,6 @@ public class MatchDetailsDto : MatchSummaryDto
     public required SolveResult UserAAverage { get; set; }
     public required SolveResult UserBAverage { get; set; }
     public List<ScrambleDto> Scrambles { get; set; } = new List<ScrambleDto>();
+    public DateTime? UserASubmittedAt { get; set; }
+    public DateTime? UserBSubmittedAt { get; set; }
 }

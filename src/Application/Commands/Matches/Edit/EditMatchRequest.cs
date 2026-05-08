@@ -17,4 +17,7 @@ public class EditMatchRequest : IRequest<CommandResult>
 
     public List<SolveDto> UserASolves { get; set; } = new(Match.SOLVES_PER_MATCH);
     public List<SolveDto> UserBSolves { get; set; } = new(Match.SOLVES_PER_MATCH);
+
+    public bool MarkUserASubmitted { get; set; }
+    public bool MarkUserBSubmitted { get; set; }
 }

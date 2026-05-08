@@ -44,4 +44,9 @@ public class SolveRepository(AppDbContext context) :
             .Select(s => s.Result)
             .ToListAsync();
     }
+
+    public async Task<IReadOnlyCollection<Solve>> GetByMatchIdAsync(Guid matchId)
+        => await DbSet
+            .Where(s => s.MatchId == matchId)
+            .ToListAsync();
 }

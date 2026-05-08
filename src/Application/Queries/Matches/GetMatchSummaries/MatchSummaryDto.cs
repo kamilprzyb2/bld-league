@@ -14,4 +14,5 @@ public class MatchSummaryDto
     public int UserBScore { get; set; }
     public DateTime RoundStartDate { get; set; }
     public DateTime RoundEndDate { get; set; }
+    public bool BothSidesSubmitted { get; set; }
 }

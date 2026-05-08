@@ -92,6 +92,7 @@ public class MatchRepository(AppDbContext context)
                 UserBScore = m.UserBScore,
                 RoundStartDate = m.Round.StartDate,
                 RoundEndDate = m.Round.EndDate,
+                BothSidesSubmitted = m.UserASubmittedAt != null && (m.UserBId == null || m.UserBSubmittedAt != null),
                 UserABest = m.UserABest,
                 UserBBest = m.UserBBest,
                 UserAAverage = m.UserAAverage,
@@ -100,6 +101,8 @@ public class MatchRepository(AppDbContext context)
                     .OrderBy(s => s.ScrambleNumber)
                     .Select(s => new ScrambleDto { ScrambleNumber = s.ScrambleNumber, Notation = s.Notation })
                     .ToList(),
+                UserASubmittedAt = m.UserASubmittedAt,
+                UserBSubmittedAt = m.UserBSubmittedAt,
             })
             .FirstOrDefaultAsync();
 
@@ -129,7 +132,8 @@ public class MatchRepository(AppDbContext context)
                 UserAScore = m.UserAScore,
                 UserBScore = m.UserBScore,
                 RoundStartDate = m.Round.StartDate,
-                RoundEndDate = m.Round.EndDate
+                RoundEndDate = m.Round.EndDate,
+                BothSidesSubmitted = m.UserASubmittedAt != null && (m.UserBId == null || m.UserBSubmittedAt != null)
             })
             .ToListAsync();
     }
@@ -169,4 +173,17 @@ public class MatchRepository(AppDbContext context)
             .ThenByDescending(m => m.Round.RoundNumber)
             .ToListAsync();
     }
+
+    public async Task<Match?> GetActiveMatchForUserAsync(Guid userId, DateTime utcNow)
+        => await DbSet
+            .Include(m => m.Round).ThenInclude(r => r.Season)
+            .Include(m => m.Round).ThenInclude(r => r.Scrambles)
+            .Include(m => m.LeagueSeason).ThenInclude(ls => ls.League)
+            .Include(m => m.UserA)
+            .Include(m => m.UserB)
+            .Include(m => m.Solves)
+            .Where(m => (m.UserAId == userId || m.UserBId == userId)
+                        && m.Round.StartDate <= utcNow
+                        && m.Round.EndDate >= utcNow)
+            .FirstOrDefaultAsync();
 }

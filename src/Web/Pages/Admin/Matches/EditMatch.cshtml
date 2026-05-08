@@ -82,6 +82,33 @@
             }
         </div>
 
+        <hr class="my-4" />
+
+        <h5>Status wgrania wyników</h5>
+        <div class="mb-3 form-check">
+            <input asp-for="EditMatchRequest.MarkUserASubmitted" class="form-check-input" type="checkbox" />
+            <label asp-for="EditMatchRequest.MarkUserASubmitted" class="form-check-label">
+                Oznacz wyniki zawodnika A jako wgrane
+                @if (Model.MatchDetails?.UserASubmittedAt.HasValue == true)
+                {
+                    <span class="text-muted small ms-2">(@Model.MatchDetails.UserASubmittedAt.Value.ToString("yyyy-MM-dd HH:mm") UTC)</span>
+                }
+            </label>
+        </div>
+        @if (Model.MatchDetails?.UserBFullName != null)
+        {
+            <div class="mb-3 form-check">
+                <input asp-for="EditMatchRequest.MarkUserBSubmitted" class="form-check-input" type="checkbox" />
+                <label asp-for="EditMatchRequest.MarkUserBSubmitted" class="form-check-label">
+                    Oznacz wyniki zawodnika B jako wgrane
+                    @if (Model.MatchDetails?.UserBSubmittedAt.HasValue == true)
+                    {
+                        <span class="text-muted small ms-2">(@Model.MatchDetails.UserBSubmittedAt.Value.ToString("yyyy-MM-dd HH:mm") UTC)</span>
+                    }
+                </label>
+            </div>
+        }
+
         <div class="mt-4">
             <button type="submit" class="btn btn-primary">Zapisz</button>
             <a asp-page="/Admin/Matches/AllMatches" class="btn btn-secondary ms-2">Anuluj</a>

@@ -1,4 +1,3 @@
-using BldLeague.Application.Queries.Rounds.GetActiveFormUrl;
 using BldLeague.Application.Queries.Rounds.GetAll;
 using BldLeague.Application.Queries.Rounds.GetAllBySeasonId;
 using BldLeague.Application.Queries.Rounds.GetDetail;
@@ -13,5 +12,4 @@ public interface IRoundRepository : IReadWriteRepository<Round>
     Task<RoundSummaryDto?> GetSummaryByIdAsync(Guid id);
     Task<int?> GetLatestRoundNumberAsync();
     Task<RoundDetailDto?> GetRoundDetailAsync(Guid seasonId, int roundNumber);
-    Task<ActiveRoundFormDto?> GetActiveRoundFormUrlAsync(DateTime utcNow);
 }

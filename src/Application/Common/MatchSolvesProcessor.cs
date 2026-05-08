@@ -18,12 +18,7 @@ public static class MatchSolvesProcessor
         List<SolveDto> userASolves,
         List<SolveDto> userBSolves)
     {
-        int userAScore = 0, userBScore = 0;
-        int userABest = int.MaxValue, userBBest = int.MaxValue;
-
         List<Solve> solvesA = [];
-        // For walkovers (UserBId is null), no Solve entity is created for UserB — results are
-        // tracked as SolveResult values directly to avoid creating a Solve with a dummy UserId.
         List<SolveResult> solvesB = [];
 
         for (var i = 0; i < Match.SOLVES_PER_MATCH; i++)
@@ -42,6 +37,59 @@ public static class MatchSolvesProcessor
             }
 
             solvesB.Add(resultB);
+        }
+
+        ApplyScores(match, solvesA.Select(s => s.Result).ToList(), solvesB);
+    }
+
+    /// <summary>
+    /// Replaces the solves for the given user in the match, then recomputes all scores/bests/averages.
+    /// </summary>
+    public static async Task ReplaceUserSolvesAsync(
+        IUnitOfWork unitOfWork,
+        Match match,
+        Guid userId,
+        List<SolveResult> newSolves)
+    {
+        var existingSolves = await unitOfWork.SolveRepository.GetByMatchIdAsync(match.Id);
+        foreach (var solve in existingSolves.Where(s => s.UserId == userId).ToList())
+            unitOfWork.SolveRepository.Delete(solve);
+
+        for (var i = 0; i < newSolves.Count; i++)
+            await unitOfWork.SolveRepository.AddAsync(Solve.Create(newSolves[i], i + 1, userId, match.Id));
+
+        var remainingSolves = existingSolves
+            .Where(s => s.UserId != userId)
+            .ToList();
+
+        List<SolveResult> solvesA;
+        List<SolveResult> solvesB;
+
+        if (userId == match.UserAId)
+        {
+            solvesA = newSolves;
+            solvesB = match.UserBId.HasValue
+                ? remainingSolves.Where(s => s.UserId == match.UserBId).OrderBy(s => s.Index).Select(s => s.Result).ToList()
+                : [];
+        }
+        else
+        {
+            solvesA = remainingSolves.Where(s => s.UserId == match.UserAId).OrderBy(s => s.Index).Select(s => s.Result).ToList();
+            solvesB = newSolves;
+        }
+
+        ApplyScores(match, solvesA, solvesB);
+    }
+
+    private static void ApplyScores(Match match, List<SolveResult> solvesA, List<SolveResult> solvesB)
+    {
+        int userAScore = 0, userBScore = 0;
+        int userABest = int.MaxValue, userBBest = int.MaxValue;
+
+        for (var i = 0; i < Match.SOLVES_PER_MATCH; i++)
+        {
+            var resultA = i < solvesA.Count ? solvesA[i] : SolveResult.Dns();
+            var resultB = i < solvesB.Count ? solvesB[i] : SolveResult.Dns();
 
             if (resultA.IsValid || resultB.IsValid)
             {
@@ -69,7 +117,7 @@ public static class MatchSolvesProcessor
             userAScore++;
         else if (userBBest < userABest)
             userBScore++;
-        else if (userABest != int.MaxValue) // both equal and valid → tie
+        else if (userABest != int.MaxValue)
         {
             userAScore++;
             userBScore++;
@@ -77,12 +125,12 @@ public static class MatchSolvesProcessor
 
         match.UserABest = userABest < int.MaxValue
             ? SolveResult.FromCentiseconds(userABest)
-            : solvesA.All(s => s.Result.IsDns) ? SolveResult.Dns() : SolveResult.Dnf();
+            : solvesA.All(s => s.IsDns) ? SolveResult.Dns() : SolveResult.Dnf();
         match.UserBBest = userBBest < int.MaxValue
             ? SolveResult.FromCentiseconds(userBBest)
-            : solvesB.All(s => s.IsDns) ? SolveResult.Dns() : SolveResult.Dnf();
-        match.UserAAverage = AverageCalculator.CalculateAo5(solvesA.Select(s => s.Result).ToList());
-        match.UserBAverage = AverageCalculator.CalculateAo5(solvesB);
+            : solvesB.Count == 0 || solvesB.All(s => s.IsDns) ? SolveResult.Dns() : SolveResult.Dnf();
+        match.UserAAverage = AverageCalculator.CalculateAo5(solvesA);
+        match.UserBAverage = AverageCalculator.CalculateAo5(solvesB.Count > 0 ? solvesB : Enumerable.Repeat(SolveResult.Dns(), Match.SOLVES_PER_MATCH).ToList());
         match.UserAScore = userAScore;
         match.UserBScore = userBScore;
     }
