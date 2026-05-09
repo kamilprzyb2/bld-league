@@ -160,19 +160,16 @@ public class MatchRepository(AppDbContext context)
             .Include(m => m.Solves)
             .FirstOrDefaultAsync(m => m.Id == id);
 
-    public async Task<IReadOnlyCollection<Match>> GetFinishedMatchesByUserIdAsync(Guid userId)
-    {
-        var today = DateTime.UtcNow.Date;
-        return await DbSet
+    public async Task<IReadOnlyCollection<Match>> GetFinishedMatchesByUserIdAsync(Guid userId, DateTime localToday)
+        => await DbSet
             .Include(m => m.Round).ThenInclude(r => r.Season)
             .Include(m => m.LeagueSeason).ThenInclude(ls => ls.League)
             .Include(m => m.UserA)
             .Include(m => m.UserB)
-            .Where(m => (m.UserAId == userId || m.UserBId == userId) && m.Round.EndDate < today)
+            .Where(m => (m.UserAId == userId || m.UserBId == userId) && m.Round.EndDate < localToday)
             .OrderByDescending(m => m.Round.Season.SeasonNumber)
             .ThenByDescending(m => m.Round.RoundNumber)
             .ToListAsync();
-    }
 
     public async Task<Match?> GetActiveMatchForUserAsync(Guid userId, DateTime localToday)
         => await DbSet

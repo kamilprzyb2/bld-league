@@ -15,7 +15,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 namespace BldLeague.Web.Pages.Admin.Rounds;
 
 [AdminOnly]
-public class AllRounds(IMediator mediator) : PageModel
+public class AllRounds(IMediator mediator, RoundClock roundClock) : PageModel
 {
     private static readonly string[] RequiredHeaders = ["Season", "Round", "Start Date", "End Date"];
     private static readonly string[] ScrambleHeaders =
@@ -24,6 +24,8 @@ public class AllRounds(IMediator mediator) : PageModel
     public IReadOnlyCollection<RoundAdminSummaryDto> Rounds { get; private set; } = Array.Empty<RoundAdminSummaryDto>();
     public ImportResult? ImportResult { get; private set; }
     public Dictionary<Guid, IReadOnlyCollection<ScrambleDto>> RoundScrambles { get; private set; } = new();
+
+    public bool IsRoundFinished(DateTime endDate) => roundClock.IsRoundFinished(endDate);
 
     [BindProperty] public Guid RemoveRoundId { get; set; } = Guid.Empty;
     [BindProperty] public Guid RefreshStandingsRoundId { get; set; } = Guid.Empty;

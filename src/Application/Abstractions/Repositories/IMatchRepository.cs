@@ -17,6 +17,6 @@ public interface IMatchRepository : IReadWriteRepository<Match>
     Task<IReadOnlyCollection<Match>> GetFinishedMatchesByLeagueSeasonAsync(Guid leagueSeasonId, DateTime cutoff);
     Task<Match?> GetMatchWithSolvesAsync(Guid id);
 
-    Task<IReadOnlyCollection<Match>> GetFinishedMatchesByUserIdAsync(Guid userId);
+    Task<IReadOnlyCollection<Match>> GetFinishedMatchesByUserIdAsync(Guid userId, DateTime localToday);
     Task<Match?> GetActiveMatchForUserAsync(Guid userId, DateTime localToday);
 }

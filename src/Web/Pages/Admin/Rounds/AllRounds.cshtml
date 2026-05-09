@@ -109,7 +109,7 @@
                                asp-route-id="@round.Id">
                                 Edytuj
                             </a>
-                            @if (round.EndDate < DateTime.Now)
+                            @if (Model.IsRoundFinished(round.EndDate))
                             {
                                 <form method="post" asp-page-handler="RefreshStandings">
                                     <input type="hidden" name="RefreshStandingsRoundId" value="@round.Id"/>

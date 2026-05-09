@@ -9,7 +9,7 @@ namespace BldLeague.Application.Commands.LeagueSeasonStandings.Refresh;
 /// <summary>
 /// Handles recalculating cumulative standings for all users in a league season, including match points, bonus points, and best solve.
 /// </summary>
-public class RefreshLeagueSeasonStandingsRequestHandler(IUnitOfWork unitOfWork)
+public class RefreshLeagueSeasonStandingsRequestHandler(IUnitOfWork unitOfWork, RoundClock roundClock)
     : IRequestHandler<RefreshLeagueSeasonStandingsRequest, CommandResult>
 {
     public async Task<CommandResult> Handle(RefreshLeagueSeasonStandingsRequest request, CancellationToken cancellationToken)
@@ -36,7 +36,7 @@ public class RefreshLeagueSeasonStandingsRequestHandler(IUnitOfWork unitOfWork)
 
         // 1. Calculate big points and small points — only from rounds that have ended
         var matches = await unitOfWork.MatchRepository
-            .GetFinishedMatchesByLeagueSeasonAsync(request.LeagueSeasonId, DateTime.UtcNow);
+            .GetFinishedMatchesByLeagueSeasonAsync(request.LeagueSeasonId, roundClock.LocalToday());
         foreach (var user in users)
         {
             standings.Add(user.Id, new Standing());

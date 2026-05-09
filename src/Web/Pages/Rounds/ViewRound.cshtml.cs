@@ -37,7 +37,7 @@ public class ViewRound(IMediator mediator, RoundClock roundClock) : PageModel
             return Page();
 
         if (RoundNumber == 0 || !Rounds.Any(r => r.RoundNumber == RoundNumber))
-            RoundNumber = Rounds.GetDefaultRound(DateTime.Today).RoundNumber;
+            RoundNumber = Rounds.GetDefaultRound(roundClock.LocalToday()).RoundNumber;
 
         var dto = await mediator.Send(new GetRoundDetailRequest(SeasonId, RoundNumber));
         RoundDetail = dto == null ? null : RoundDetailViewModel.FromDto(dto, roundClock);

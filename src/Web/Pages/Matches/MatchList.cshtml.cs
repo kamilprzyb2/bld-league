@@ -42,7 +42,7 @@ public class MatchList(IMediator mediator, RoundClock roundClock) : PageModel
         Rounds = await mediator.Send(new GetAllRoundsBySeasonIdRequest(SeasonId));
 
         if (Rounds.Any() && (RoundNumber == 0 || !Rounds.Any(r => r.RoundNumber == RoundNumber)))
-            RoundNumber = Rounds.GetDefaultRound(DateTime.Today).RoundNumber;
+            RoundNumber = Rounds.GetDefaultRound(roundClock.LocalToday()).RoundNumber;
 
         var dtos = await mediator.Send(new GetMatchSummariesRequest(SeasonId, LeagueId, RoundNumber));
         MatchSummaries = dtos.Select(d => MatchSummaryViewModel.FromDto(d, roundClock)).ToList();

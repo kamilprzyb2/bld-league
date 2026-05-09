@@ -1,14 +1,15 @@
 using BldLeague.Application.Abstractions.Repositories;
+using BldLeague.Application.Common;
 using MediatR;
 
 namespace BldLeague.Application.Queries.Users.GetMatchHistory;
 
-public class GetUserMatchHistoryRequestHandler(IUnitOfWork unitOfWork)
+public class GetUserMatchHistoryRequestHandler(IUnitOfWork unitOfWork, RoundClock roundClock)
     : IRequestHandler<GetUserMatchHistoryRequest, IReadOnlyCollection<UserMatchHistoryDto>>
 {
     public async Task<IReadOnlyCollection<UserMatchHistoryDto>> Handle(GetUserMatchHistoryRequest request, CancellationToken cancellationToken)
     {
-        var matches = await unitOfWork.MatchRepository.GetFinishedMatchesByUserIdAsync(request.UserId);
+        var matches = await unitOfWork.MatchRepository.GetFinishedMatchesByUserIdAsync(request.UserId, roundClock.LocalToday());
 
         return matches
             .Select(m =>
