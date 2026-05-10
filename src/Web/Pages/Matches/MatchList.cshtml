@@ -54,27 +54,44 @@
                 <tr>
                     <td class="text-end"><a asp-page="/Users/UserProfile" asp-route-id="@matchSummary.UserAId">@matchSummary.UserAFullName</a></td>
 
-                    @if (string.IsNullOrEmpty(matchSummary.UserBFullName))
+                    @if (matchSummary.Status == MatchStatus.Finished)
                     {
-                        <td class="text-center" colspan="3">N/A</td>
-                        <td></td>
-                    }
-                    else if (matchSummary.Status == MatchStatus.Finished)
-                    {
-                        <td class="text-center">@matchSummary.UserAScore</td>
-                        <td class="text-center">:</td>
-                        <td class="text-center">@matchSummary.UserBScore</td>
-                        <td><a asp-page="/Users/UserProfile" asp-route-id="@matchSummary.UserBId">@matchSummary.UserBFullName</a></td>
+                        @if (string.IsNullOrEmpty(matchSummary.UserBFullName))
+                        {
+                            <td class="text-center" colspan="3">N/A</td>
+                            <td></td>
+                        }
+                        else
+                        {
+                            <td class="text-center">@matchSummary.UserAScore</td>
+                            <td class="text-center">:</td>
+                            <td class="text-center">@matchSummary.UserBScore</td>
+                            <td><a asp-page="/Users/UserProfile" asp-route-id="@matchSummary.UserBId">@matchSummary.UserBFullName</a></td>
+                        }
                     }
                     else if (matchSummary.Status == MatchStatus.InProgress)
                     {
                         <td class="text-center" colspan="3"><span class="badge text-bg-warning">W trakcie</span></td>
-                        <td><a asp-page="/Users/UserProfile" asp-route-id="@matchSummary.UserBId">@matchSummary.UserBFullName</a></td>
+                        @if (string.IsNullOrEmpty(matchSummary.UserBFullName))
+                        {
+                            <td></td>
+                        }
+                        else
+                        {
+                            <td><a asp-page="/Users/UserProfile" asp-route-id="@matchSummary.UserBId">@matchSummary.UserBFullName</a></td>
+                        }
                     }
                     else
                     {
                         <td class="text-center" colspan="3"><span class="badge text-bg-secondary">Planowany</span></td>
-                        <td><a asp-page="/Users/UserProfile" asp-route-id="@matchSummary.UserBId">@matchSummary.UserBFullName</a></td>
+                        @if (string.IsNullOrEmpty(matchSummary.UserBFullName))
+                        {
+                            <td></td>
+                        }
+                        else
+                        {
+                            <td><a asp-page="/Users/UserProfile" asp-route-id="@matchSummary.UserBId">@matchSummary.UserBFullName</a></td>
+                        }
                     }
 
                     <td>

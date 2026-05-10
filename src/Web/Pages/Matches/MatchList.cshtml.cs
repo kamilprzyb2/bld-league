@@ -1,5 +1,7 @@
+using System.Security.Claims;
 using BldLeague.Application.Common;
 using BldLeague.Application.Queries.Leagues.GetAll;
+using BldLeague.Application.Queries.LeagueSeasons.GetUserLeagueIdForSeason;
 using BldLeague.Application.Queries.Matches.GetMatchSummaries;
 using BldLeague.Application.Queries.Rounds.GetAllBySeasonId;
 using BldLeague.Application.Queries.Seasons.GetAll;
@@ -37,7 +39,11 @@ public class MatchList(IMediator mediator, RoundClock roundClock) : PageModel
             SeasonId = Seasons.First().Id;
 
         if (LeagueId == Guid.Empty || !Leagues.Any(l => l.Id == LeagueId))
-            LeagueId = Leagues.First().Id;
+        {
+            var availableLeagueIds = Leagues.Select(l => l.Id).ToList();
+            LeagueId = await ResolveDefaultLeagueIdAsync(availableLeagueIds, SeasonId)
+                       ?? Leagues.First().Id;
+        }
 
         Rounds = await mediator.Send(new GetAllRoundsBySeasonIdRequest(SeasonId));
 
@@ -49,5 +55,14 @@ public class MatchList(IMediator mediator, RoundClock roundClock) : PageModel
 
         ModelState.Clear();
         return Page();
+    }
+
+    private async Task<Guid?> ResolveDefaultLeagueIdAsync(IReadOnlyCollection<Guid> availableLeagueIds, Guid seasonId)
+    {
+        if (User.Identity?.IsAuthenticated != true) return null;
+        var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!Guid.TryParse(userIdClaim, out var userId)) return null;
+        var userLeagueId = await mediator.Send(new GetUserLeagueIdForSeasonRequest(userId, seasonId));
+        return userLeagueId.HasValue && availableLeagueIds.Contains(userLeagueId.Value) ? userLeagueId : null;
     }
 }

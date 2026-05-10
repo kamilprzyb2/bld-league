@@ -23,10 +23,16 @@
 
         <hr class="my-4" />
 
-        @if (Model.MatchDetails.Status != MatchStatus.Finished)
+        @if (Model.MatchDetails.Status == MatchStatus.Upcoming)
         {
             <div class="alert alert-secondary">
                 Mecz zaplanowany. Wyniki będą dostępne po zakończeniu kolejki.
+            </div>
+        }
+        else if (Model.MatchDetails.Status == MatchStatus.InProgress)
+        {
+            <div class="alert alert-info">
+                Mecz w trakcie. Wyniki będą dostępne po wgraniu wyników przez wszystkich zawodników.
             </div>
         }
         else
