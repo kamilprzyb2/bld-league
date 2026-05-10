@@ -24,4 +24,10 @@ public class LeagueSeasonUserRepository(AppDbContext context) :
         => await DbSet
             .Where(lsu => lsu.LeagueSeasonId == leagueSeasonId && lsu.UserId == userId)
             .FirstOrDefaultAsync();
+
+    public async Task<Guid?> GetUserLeagueIdForSeasonAsync(Guid userId, Guid seasonId)
+        => await DbSet
+            .Where(lsu => lsu.UserId == userId && lsu.LeagueSeason.SeasonId == seasonId)
+            .Select(lsu => (Guid?)lsu.LeagueSeason.LeagueId)
+            .FirstOrDefaultAsync();
 }

@@ -217,6 +217,7 @@ Avoid JavaScript by default. Prefer server-side form submissions and page reload
 | League queries + DTOs | `src/Application/Queries/Leagues/` |
 | Season queries + DTOs | `src/Application/Queries/Seasons/` |
 | LeagueSeason queries + DTOs | `src/Application/Queries/LeagueSeasons/` |
+| User league for a given season (`GetUserLeagueIdForSeasonRequest`) | `src/Application/Queries/LeagueSeasons/GetUserLeagueIdForSeason/` |
 | Round queries + DTOs (incl. `ScrambleDto`, `RoundSummaryDto`) | `src/Application/Queries/Rounds/` |
 | Match queries + DTOs (incl. `SolveDto`, `MatchDetailsDto`, `MatchExportRowDto`) | `src/Application/Queries/Matches/` |
 | Active submission query + `ActiveSubmissionDto` | `src/Application/Queries/Matches/GetActiveSubmission/` |
@@ -255,6 +256,7 @@ Avoid JavaScript by default. Prefer server-side form submissions and page reload
 | `CsvHelper` (CSV builder, UTF-8 BOM) | `src/Web/Helpers/CsvHelper.cs` |
 | `CsvParser` (CSV `IFormFile` parser) | `src/Web/Helpers/CsvParser.cs` |
 | `SolveFormatHelper` (Ao5 best/worst parentheses formatting) | `src/Web/Helpers/SolveFormatHelper.cs` |
+| `PageModelExtensions` (signed-in user league resolution) | `src/Web/Helpers/PageModelExtensions.cs` |
 | `EnvironmentBadgeOptions` (optional navbar env label) | `src/Web/Options/EnvironmentBadgeOptions.cs` |
 | `MatchStatus` enum (Upcoming/InProgress/Finished) | `src/Web/ViewModels/MatchStatus.cs` |
 | ViewModels | `src/Web/ViewModels/` |

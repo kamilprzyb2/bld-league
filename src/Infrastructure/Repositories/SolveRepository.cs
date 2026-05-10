@@ -9,10 +9,10 @@ namespace BldLeague.Infrastructure.Repositories;
 public class SolveRepository(AppDbContext context) : 
     ReadWriteRepositoryBase<Solve>(context), ISolveRepository
 {
-    public async Task<IReadOnlyCollection<(Guid, SolveResult)>> GetBestSolvesForLeagueSeason(Guid leagueSeasonId)
+    public async Task<IReadOnlyCollection<(Guid, SolveResult)>> GetBestSolvesForLeagueSeason(Guid leagueSeasonId, DateTime cutoff)
     {
         var groups = await DbSet
-            .Where(s => s.Match.LeagueSeasonId == leagueSeasonId)
+            .Where(s => s.Match.LeagueSeasonId == leagueSeasonId && s.Match.Round.EndDate < cutoff)
             .GroupBy(s => s.UserId)
             .Select(g => new
             {

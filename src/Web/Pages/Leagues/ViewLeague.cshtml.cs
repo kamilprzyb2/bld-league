@@ -2,6 +2,7 @@ using BldLeague.Application.Queries.LeagueSeasons.GetAll;
 using BldLeague.Application.Queries.LeagueSeasons.GetDetail;
 using BldLeague.Application.Queries.LeagueSeasons.GetLeagueSeasonsForSeasonId;
 using BldLeague.Application.Queries.Seasons.GetAll;
+using BldLeague.Web.Helpers;
 using BldLeague.Web.ViewModels;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -37,7 +38,11 @@ public class ViewLeague(IMediator mediator) : PageModel
             return Page();
 
         if (LeagueId == Guid.Empty || !LeagueSeasons.Any(ls => ls.LeagueId == LeagueId))
-            LeagueId = LeagueSeasons.First().LeagueId;
+        {
+            var availableLeagueIds = LeagueSeasons.Select(ls => ls.LeagueId).ToList();
+            LeagueId = await this.ResolveCurrentUserLeagueIdAsync(mediator, availableLeagueIds, SeasonId)
+                       ?? LeagueSeasons.First().LeagueId;
+        }
 
         var dto = await mediator.Send(new GetLeagueSeasonDetailRequest(SeasonId, LeagueId));
         LeagueSeason = dto == null ? null : LeagueSeasonDetailViewModel.FromDto(dto);

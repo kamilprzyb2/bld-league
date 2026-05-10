@@ -7,4 +7,5 @@ public interface ILeagueSeasonUserRepository : IReadWriteRepository<LeagueSeason
 {
     Task<IReadOnlyCollection<LeagueSeasonUserDto>> GetUsersByLeagueSeasonIdAsync(Guid leagueSeasonId);
     Task<LeagueSeasonUser?> GetAsync(Guid leagueSeasonId, Guid userId);
+    Task<Guid?> GetUserLeagueIdForSeasonAsync(Guid userId, Guid seasonId);
 }

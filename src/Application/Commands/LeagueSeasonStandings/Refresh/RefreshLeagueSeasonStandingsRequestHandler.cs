@@ -106,7 +106,7 @@ public class RefreshLeagueSeasonStandingsRequestHandler(IUnitOfWork unitOfWork, 
 
         // 3. Calculate best solve
         var bestSolves = await unitOfWork.SolveRepository.GetBestSolvesForLeagueSeason(
-            request.LeagueSeasonId);
+            request.LeagueSeasonId, roundClock.LocalToday());
 
         foreach (var bestSolve in bestSolves)
         {
