@@ -3,6 +3,7 @@ using BldLeague.Application.Queries.Matches.GetAll;
 using BldLeague.Application.Queries.Matches.GetMatchDetailsById;
 using BldLeague.Application.Queries.Matches.GetMatchExport;
 using BldLeague.Application.Queries.Matches.GetMatchSummaries;
+using BldLeague.Application.Queries.Matches.GetRecentFinishedMatches;
 using BldLeague.Application.Queries.Rounds.GetScrambles;
 using BldLeague.Domain.Entities;
 using BldLeague.Infrastructure.Context;
@@ -183,4 +184,48 @@ public class MatchRepository(AppDbContext context)
                         && m.Round.StartDate <= localToday
                         && m.Round.EndDate >= localToday)
             .FirstOrDefaultAsync();
+
+    public async Task<IReadOnlyList<RecentMatchDto>> GetRecentFinishedMatchesAsync(int count, DateTime localToday)
+    {
+        var candidates = await DbSet
+            .Where(m => (m.UserASubmittedAt != null && (m.UserBId == null || m.UserBSubmittedAt != null))
+                        || m.Round.EndDate < localToday)
+            .OrderByDescending(m => m.Round.EndDate)
+            .ThenByDescending(m => m.Id)
+            .Take(count * 4)
+            .Select(m => new
+            {
+                m.Id,
+                UserAFullName = m.UserA.FullName,
+                UserBFullName = m.UserB != null ? m.UserB.FullName : null,
+                m.UserAScore,
+                m.UserBScore,
+                m.UserASubmittedAt,
+                m.UserBSubmittedAt,
+                RoundEndDate = m.Round.EndDate,
+            })
+            .ToListAsync();
+
+        return candidates
+            .Select(m =>
+            {
+                var effectiveAt = m.UserASubmittedAt.HasValue && m.UserBSubmittedAt.HasValue
+                    ? (m.UserASubmittedAt > m.UserBSubmittedAt ? m.UserASubmittedAt : m.UserBSubmittedAt)
+                    : m.UserASubmittedAt ?? m.UserBSubmittedAt ?? (DateTime?)m.RoundEndDate;
+
+                return (dto: new RecentMatchDto
+                {
+                    MatchId = m.Id,
+                    UserAFullName = m.UserAFullName,
+                    UserBFullName = m.UserBFullName,
+                    UserAScore = m.UserAScore,
+                    UserBScore = m.UserBScore,
+                }, effectiveAt);
+            })
+            .OrderByDescending(x => x.effectiveAt)
+            .ThenByDescending(x => x.dto.MatchId)
+            .Take(count)
+            .Select(x => x.dto)
+            .ToList();
+    }
 }

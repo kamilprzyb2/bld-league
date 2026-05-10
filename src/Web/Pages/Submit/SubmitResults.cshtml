@@ -3,7 +3,7 @@
 @model BldLeague.Web.Pages.Submit.SubmitResults
 
 <div class="container mt-2">
-    <h2>Mój aktywny mecz</h2>
+    <h2>Aktywny mecz</h2>
 
     @if (TempData["ErrorMessage"] != null)
     {
@@ -13,81 +13,41 @@
     @if (Model.ActiveSubmission != null)
     {
         <p class="text-muted">
-            @Model.ActiveSubmission.RoundName
-            @if (!string.IsNullOrEmpty(Model.ActiveSubmission.LeagueIdentifier))
-            {
-                <span>— @Model.ActiveSubmission.LeagueIdentifier</span>
-            }
             @if (!string.IsNullOrEmpty(Model.ActiveSubmission.OpponentName))
             {
-                <span>— vs @Model.ActiveSubmission.OpponentName</span>
+                <span>Rywal: @Model.ActiveSubmission.OpponentName</span>
             }
             else
             {
-                <span>— BYE</span>
+                <span>BYE</span>
             }
         </p>
 
-        @if (!Model.HasSubmitted)
-        {
-            <form method="post">
-                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
-
-                @for (var i = 0; i < Match.SOLVES_PER_MATCH; i++)
-                {
-                    var scramble = i < Model.ActiveSubmission.Scrambles.Count
-                        ? Model.ActiveSubmission.Scrambles[i]
-                        : null;
-
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Ułożenie @(i + 1)</label>
-                        @if (scramble != null)
-                        {
-                            <div class="font-monospace text-muted mb-1 small">@scramble.Notation</div>
-                        }
-                        <input asp-for="Solves[i].Result"
-                               class="form-control"
-                               placeholder="np. 12.34 lub DNF" />
-                        <span asp-validation-for="Solves[i].Result" class="text-danger"></span>
-                    </div>
-                }
-
-                <button type="submit" class="btn btn-primary"
-                        onclick="return confirm('Czy na pewno chcesz wgrać wyniki? Tej operacji nie można cofnąć.');">Wgraj wyniki</button>
-                <a asp-page="/Index" class="btn btn-outline-secondary ms-2">Anuluj</a>
-            </form>
-        }
-        else
-        {
-            <div class="alert alert-info">
-                Wyniki zostały wgrane
-                @if (Model.SubmittedAtLocal != null)
-                {
-                    <span>(@Model.SubmittedAtLocal)</span>
-                }
-                . Skontaktuj się z administratorem, jeśli musisz je poprawić.
-            </div>
+        <form method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
             @for (var i = 0; i < Match.SOLVES_PER_MATCH; i++)
             {
                 var scramble = i < Model.ActiveSubmission.Scrambles.Count
                     ? Model.ActiveSubmission.Scrambles[i]
                     : null;
-                var result = i < Model.ActiveSubmission.SubmittedSolves.Count
-                    ? Model.ActiveSubmission.SubmittedSolves[i]
-                    : "—";
 
                 <div class="mb-3">
-                    <div class="fw-semibold">Ułożenie @(i + 1)</div>
+                    <label class="form-label fw-semibold">Ułożenie @(i + 1)</label>
                     @if (scramble != null)
                     {
-                        <div class="font-monospace text-muted small">@scramble.Notation</div>
+                        <div class="font-monospace text-muted mb-1 small">@scramble.Notation</div>
                     }
-                    <div>@result</div>
+                    <input asp-for="Solves[i].Result"
+                           class="form-control"
+                           placeholder="np. 12.34 lub DNF" />
+                    <span asp-validation-for="Solves[i].Result" class="text-danger"></span>
                 </div>
             }
 
-            <a asp-page="/Index" class="btn btn-outline-secondary">Powrót</a>
-        }
+            <button type="submit" class="btn btn-primary"
+                    onclick="return confirm('Czy na pewno chcesz wgrać wyniki? Tej operacji nie można cofnąć.');">Wgraj wyniki</button>
+            <a asp-page="/Index" class="btn btn-outline-secondary ms-2">Anuluj</a>
+        </form>
     }
 </div>

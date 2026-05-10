@@ -2,6 +2,7 @@ using BldLeague.Application.Queries.Matches.GetAll;
 using BldLeague.Application.Queries.Matches.GetMatchDetailsById;
 using BldLeague.Application.Queries.Matches.GetMatchExport;
 using BldLeague.Application.Queries.Matches.GetMatchSummaries;
+using BldLeague.Application.Queries.Matches.GetRecentFinishedMatches;
 using BldLeague.Domain.Entities;
 
 namespace BldLeague.Application.Abstractions.Repositories;
@@ -19,4 +20,5 @@ public interface IMatchRepository : IReadWriteRepository<Match>
 
     Task<IReadOnlyCollection<Match>> GetFinishedMatchesByUserIdAsync(Guid userId, DateTime localToday);
     Task<Match?> GetActiveMatchForUserAsync(Guid userId, DateTime localToday);
+    Task<IReadOnlyList<RecentMatchDto>> GetRecentFinishedMatchesAsync(int count, DateTime localToday);
 }

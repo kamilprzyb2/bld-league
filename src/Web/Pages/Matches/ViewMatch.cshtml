@@ -34,16 +34,15 @@
             <div class="alert alert-info">
                 Mecz w trakcie. Wyniki będą dostępne po wgraniu wyników przez wszystkich zawodników.
             </div>
+            @if (Model.ViewerSubmittedAt != null)
+            {
+                <div class="alert alert-info">
+                    Wyniki zostały wgrane (@Model.ViewerSubmittedAt). Skontaktuj się z administratorem, jeśli musisz je poprawić.
+                </div>
+            }
         }
         else
         {
-
-        @if (!Model.MatchDetails.IsRoundFinished)
-        {
-            <div class="alert alert-info">
-                Scramble będą dostępne po zakończeniu kolejki.
-            </div>
-        }
 
         <div>
             <table class="table table-hover align-middle">
@@ -137,6 +136,19 @@
                 </tbody>
             </table>
         </div>
+
+        @if (!Model.MatchDetails.IsRoundFinished)
+        {
+            <div class="alert alert-info">
+                Scramble będą dostępne po zakończeniu kolejki.
+            </div>
+        }
+        @if (Model.ViewerSubmittedAt != null)
+        {
+            <div class="alert alert-info">
+                Wyniki zostały wgrane (@Model.ViewerSubmittedAt). Skontaktuj się z administratorem, jeśli musisz je poprawić.
+            </div>
+        }
         }
     }
 </div>

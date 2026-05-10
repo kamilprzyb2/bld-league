@@ -1,4 +1,4 @@
-﻿@page
+@page
 @model IndexModel
 <div class="row align-items-center py-5 mb-2">
     <div class="col-md-7">
@@ -21,6 +21,16 @@
         <img src="images/blder_head.png" alt="Speedcuber wearing a blindfold icon" width="256" />
     </div>
 </div>
+
+@if (Model.ActiveRound != null)
+{
+    <div id="round-countdown"
+         class="small text-muted mb-2"
+         data-ends-at="@Model.ActiveRound.EndsAtUtc.ToString("o")">
+        <i class="bi bi-clock me-1"></i>
+        Kolejka @Model.ActiveRound.RoundNumber kończy się za <strong id="round-countdown-text"></strong>
+    </div>
+}
 
 <hr class="mb-4">
 
@@ -93,30 +103,115 @@
     @if (Model.ActiveSubmission != null)
     {
         <div class="col-12 col-sm-6 col-md-4">
-            <a asp-page="/Submit/SubmitResults" class="text-decoration-none">
-                <div class="card h-100 border-0 shadow-sm p-3">
-                    <div class="d-flex align-items-center gap-3">
-                        <i class="bi bi-pencil-square fs-2" style="color: var(--bs-purple)"></i>
-                        <div>
-                            <div class="fw-semibold">Mój aktywny mecz</div>
-                            <div class="text-muted small">
-                                @Model.ActiveSubmission.RoundName —
-                                @(string.IsNullOrEmpty(Model.ActiveSubmission.OpponentName) ? "BYE" : Model.ActiveSubmission.OpponentName)
+            @if (Model.ActiveSubmission.HasSubmitted)
+            {
+                <a asp-page="/Matches/ViewMatch" asp-route-id="@Model.ActiveSubmission.MatchId" class="text-decoration-none">
+                    <div class="card h-100 border-0 shadow-sm p-3">
+                        <div class="d-flex align-items-center gap-3">
+                            <i class="bi bi-pencil-square fs-2" style="color: var(--bs-purple)"></i>
+                            <div>
+                                <div class="fw-semibold">Aktywny mecz</div>
+                                <div class="text-muted small">
+                                    @if (string.IsNullOrEmpty(Model.ActiveSubmission.OpponentName))
+                                    {
+                                        <span>BYE</span>
+                                    }
+                                    else
+                                    {
+                                        <span>Rywal: @Model.ActiveSubmission.OpponentName</span>
+                                    }
+                                </div>
+                                <div class="mt-1">
+                                    <span class="badge bg-secondary">Zobacz</span>
+                                </div>
                             </div>
-                            <div class="mt-1">
-                                @if (!Model.ActiveSubmission.HasSubmitted)
-                                {
+                        </div>
+                    </div>
+                </a>
+            }
+            else
+            {
+                <a asp-page="/Submit/SubmitResults" class="text-decoration-none">
+                    <div class="card h-100 border-0 shadow-sm p-3">
+                        <div class="d-flex align-items-center gap-3">
+                            <i class="bi bi-pencil-square fs-2" style="color: var(--bs-purple)"></i>
+                            <div>
+                                <div class="fw-semibold">Aktywny mecz</div>
+                                <div class="text-muted small">
+                                    @if (string.IsNullOrEmpty(Model.ActiveSubmission.OpponentName))
+                                    {
+                                        <span>BYE</span>
+                                    }
+                                    else
+                                    {
+                                        <span>Rywal: @Model.ActiveSubmission.OpponentName</span>
+                                    }
+                                </div>
+                                <div class="mt-1">
                                     <span class="badge bg-primary">Wgraj wyniki</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            }
+        </div>
+    }
+</div>
+
+@if (Model.RecentMatches.Count > 0)
+{
+    <h5 class="mt-4 mb-3">Ostatnie mecze</h5>
+    <div class="row g-3">
+        @foreach (var m in Model.RecentMatches)
+        {
+            <div class="col-12 col-sm-6 col-md-4">
+                <a asp-page="/Matches/ViewMatch" asp-route-id="@m.MatchId" class="text-decoration-none">
+                    <div class="card h-100 border-0 shadow-sm p-3">
+                        <div class="d-flex align-items-center gap-3">
+                            <i class="bi bi-stopwatch fs-2 text-secondary"></i>
+                            <div>
+                                @if (string.IsNullOrEmpty(m.UserBFullName))
+                                {
+                                    <div class="fw-semibold">@m.UserAFullName</div>
+                                    <div class="text-muted small">wolny los</div>
                                 }
                                 else
                                 {
-                                    <span class="badge bg-secondary">Zobacz</span>
+                                    <div class="fw-semibold">@m.UserAFullName @m.UserAScore:@m.UserBScore @m.UserBFullName</div>
                                 }
                             </div>
                         </div>
                     </div>
-                </div>
-            </a>
-        </div>
-    }
-</div>
+                </a>
+            </div>
+        }
+    </div>
+}
+
+@section Scripts {
+    <script>
+        (function () {
+            const el = document.getElementById('round-countdown');
+            if (!el) return;
+            const endsAt = new Date(el.dataset.endsAt).getTime();
+            const txt = document.getElementById('round-countdown-text');
+            function tick() {
+                const ms = endsAt - Date.now();
+                if (ms <= 0) { el.hidden = true; clearInterval(t); return; }
+                const s = Math.floor(ms / 1000);
+                const days = Math.floor(s / 86400);
+                const hours = Math.floor((s % 86400) / 3600);
+                const minutes = Math.floor((s % 3600) / 60);
+                const seconds = s % 60;
+                txt.textContent =
+                    (days > 0 ? days + 'd ' : '') +
+                    String(hours).padStart(2, '0') + ':' +
+                    String(minutes).padStart(2, '0') + ':' +
+                    String(seconds).padStart(2, '0');
+            }
+            tick();
+            const t = setInterval(tick, 1000);
+        })();
+    </script>
+}

@@ -1,4 +1,5 @@
 using BldLeague.Application.Abstractions.Repositories;
+using BldLeague.Application.Queries.Rounds.GetActiveRound;
 using BldLeague.Application.Queries.Rounds.GetAll;
 using BldLeague.Application.Queries.Rounds.GetAllBySeasonId;
 using BldLeague.Application.Queries.Rounds.GetDetail;
@@ -69,4 +70,17 @@ public class RoundRepository(AppDbContext context) :
                     .ToList()
             })
             .FirstOrDefaultAsync();
+
+    public async Task<IReadOnlyCollection<ActiveRoundSummaryDto>> GetRoundsActiveOnDateAsync(DateTime localToday)
+        => await DbSet
+            .Where(r => r.StartDate <= localToday && r.EndDate >= localToday)
+            .Select(r => new ActiveRoundSummaryDto
+            {
+                RoundId = r.Id,
+                RoundNumber = r.RoundNumber,
+                SeasonNumber = r.Season.SeasonNumber,
+                StartDate = r.StartDate,
+                EndDate = r.EndDate,
+            })
+            .ToListAsync();
 }

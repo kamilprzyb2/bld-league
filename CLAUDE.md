@@ -221,6 +221,8 @@ Avoid JavaScript by default. Prefer server-side form submissions and page reload
 | Round queries + DTOs (incl. `ScrambleDto`, `RoundSummaryDto`) | `src/Application/Queries/Rounds/` |
 | Match queries + DTOs (incl. `SolveDto`, `MatchDetailsDto`, `MatchExportRowDto`) | `src/Application/Queries/Matches/` |
 | Active submission query + `ActiveSubmissionDto` | `src/Application/Queries/Matches/GetActiveSubmission/` |
+| Recent finished matches query + `RecentMatchDto` | `src/Application/Queries/Matches/GetRecentFinishedMatches/` |
+| Active round query + `ActiveRoundDto` | `src/Application/Queries/Rounds/GetActiveRound/` |
 | User queries + DTOs (incl. `LeagueSeasonUserDto` for roster queries) | `src/Application/Queries/Users/` |
 | Player rankings query + DTOs (`SingleRankingDto`, `AverageRankingDto`) | `src/Application/Queries/PlayerRankings/` |
 | Player ranking by user ID | `src/Application/Queries/PlayerRankings/GetByUserId/` |

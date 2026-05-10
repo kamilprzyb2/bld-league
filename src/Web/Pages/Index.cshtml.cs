@@ -1,5 +1,7 @@
 using System.Security.Claims;
 using BldLeague.Application.Queries.Matches.GetActiveSubmission;
+using BldLeague.Application.Queries.Matches.GetRecentFinishedMatches;
+using BldLeague.Application.Queries.Rounds.GetActiveRound;
 using MediatR;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
@@ -12,6 +14,8 @@ public class IndexModel(IMediator mediator) : PageModel
     public string? Role { get; set; }
     public string? ThumbnailUrl { get; set; }
     public ActiveSubmissionDto? ActiveSubmission { get; set; }
+    public IReadOnlyList<RecentMatchDto> RecentMatches { get; set; } = [];
+    public ActiveRoundDto? ActiveRound { get; set; }
 
     public async Task OnGet()
     {
@@ -28,5 +32,8 @@ public class IndexModel(IMediator mediator) : PageModel
                 ActiveSubmission = await mediator.Send(new GetActiveSubmissionRequest(userId));
             }
         }
+
+        RecentMatches = await mediator.Send(new GetRecentFinishedMatchesRequest(3));
+        ActiveRound = await mediator.Send(new GetActiveRoundRequest());
     }
 }

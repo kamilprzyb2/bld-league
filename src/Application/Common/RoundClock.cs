@@ -25,4 +25,9 @@ public class RoundClock(TimeZoneInfo timeZone)
 
     public DateTime ToLocal(DateTime utc)
         => TimeZoneInfo.ConvertTimeFromUtc(DateTime.SpecifyKind(utc, DateTimeKind.Utc), timeZone);
+
+    public DateTime LocalDayEndToUtc(DateTime localEndDate)
+        => TimeZoneInfo.ConvertTimeToUtc(
+            DateTime.SpecifyKind(localEndDate.Date.AddDays(1), DateTimeKind.Unspecified),
+            timeZone);
 }
