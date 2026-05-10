@@ -1,3 +1,5 @@
+using BldLeague.Application.Common;
+
 namespace BldLeague.Application.Queries.Rounds.GetAllBySeasonId;
 
 /// <summary>
@@ -19,9 +21,9 @@ public static class RoundSummaryDtoExtensions
     ///
     /// Returns the currently active round if one exists; otherwise falls back to the round with the highest RoundNumber.
     /// </summary>
-    public static RoundSummaryDto GetDefaultRound(this IReadOnlyCollection<RoundSummaryDto> rounds, DateTime today)
+    public static RoundSummaryDto GetDefaultRound(this IReadOnlyCollection<RoundSummaryDto> rounds, RoundClock clock)
     {
-        var active = rounds.FirstOrDefault(r => r.StartDate <= today && today <= r.EndDate);
+        var active = rounds.FirstOrDefault(r => clock.IsRoundActive(r.StartDate, r.EndDate));
         return active ?? rounds.Last();
     }
 }

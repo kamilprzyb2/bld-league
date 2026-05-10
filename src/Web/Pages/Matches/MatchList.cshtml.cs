@@ -1,10 +1,9 @@
-using System.Security.Claims;
 using BldLeague.Application.Common;
 using BldLeague.Application.Queries.Leagues.GetAll;
-using BldLeague.Application.Queries.LeagueSeasons.GetUserLeagueIdForSeason;
 using BldLeague.Application.Queries.Matches.GetMatchSummaries;
 using BldLeague.Application.Queries.Rounds.GetAllBySeasonId;
 using BldLeague.Application.Queries.Seasons.GetAll;
+using BldLeague.Web.Helpers;
 using BldLeague.Web.ViewModels;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -41,28 +40,19 @@ public class MatchList(IMediator mediator, RoundClock roundClock) : PageModel
         if (LeagueId == Guid.Empty || !Leagues.Any(l => l.Id == LeagueId))
         {
             var availableLeagueIds = Leagues.Select(l => l.Id).ToList();
-            LeagueId = await ResolveDefaultLeagueIdAsync(availableLeagueIds, SeasonId)
+            LeagueId = await this.ResolveCurrentUserLeagueIdAsync(mediator, availableLeagueIds, SeasonId)
                        ?? Leagues.First().Id;
         }
 
         Rounds = await mediator.Send(new GetAllRoundsBySeasonIdRequest(SeasonId));
 
         if (Rounds.Any() && (RoundNumber == 0 || !Rounds.Any(r => r.RoundNumber == RoundNumber)))
-            RoundNumber = Rounds.GetDefaultRound(roundClock.LocalToday()).RoundNumber;
+            RoundNumber = Rounds.GetDefaultRound(roundClock).RoundNumber;
 
         var dtos = await mediator.Send(new GetMatchSummariesRequest(SeasonId, LeagueId, RoundNumber));
         MatchSummaries = dtos.Select(d => MatchSummaryViewModel.FromDto(d, roundClock)).ToList();
 
         ModelState.Clear();
         return Page();
-    }
-
-    private async Task<Guid?> ResolveDefaultLeagueIdAsync(IReadOnlyCollection<Guid> availableLeagueIds, Guid seasonId)
-    {
-        if (User.Identity?.IsAuthenticated != true) return null;
-        var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (!Guid.TryParse(userIdClaim, out var userId)) return null;
-        var userLeagueId = await mediator.Send(new GetUserLeagueIdForSeasonRequest(userId, seasonId));
-        return userLeagueId.HasValue && availableLeagueIds.Contains(userLeagueId.Value) ? userLeagueId : null;
     }
 }
