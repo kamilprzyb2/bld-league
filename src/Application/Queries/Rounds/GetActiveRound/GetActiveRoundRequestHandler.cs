@@ -23,9 +23,7 @@ public class GetActiveRoundRequestHandler(IUnitOfWork unitOfWork, RoundClock rou
 
         return new ActiveRoundDto
         {
-            RoundId = round.RoundId,
             RoundNumber = round.RoundNumber,
-            SeasonNumber = round.SeasonNumber,
             EndsAtUtc = roundClock.LocalDayEndToUtc(round.EndDate),
         };
     }

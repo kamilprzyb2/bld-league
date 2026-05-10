@@ -25,14 +25,10 @@
 @if (Model.ActiveRound != null)
 {
     <div id="round-countdown"
-         class="alert alert-secondary alert-dismissible d-flex align-items-center gap-2 mb-3"
-         data-round-id="@Model.ActiveRound.RoundId"
-         data-ends-at="@Model.ActiveRound.EndsAtUtc.ToString("o")"
-         hidden>
+         class="small text-muted mb-2"
+         data-ends-at="@Model.ActiveRound.EndsAtUtc.ToString("o")">
         <i class="bi bi-clock me-1"></i>
-        Kolejka @Model.ActiveRound.RoundNumber kończy się za
-        <strong id="round-countdown-text"></strong>
-        <button type="button" class="btn-close ms-auto" aria-label="Zamknij"></button>
+        Kolejka @Model.ActiveRound.RoundNumber kończy się za <strong id="round-countdown-text"></strong>
     </div>
 }
 
@@ -198,10 +194,6 @@
         (function () {
             const el = document.getElementById('round-countdown');
             if (!el) return;
-            const roundId = el.dataset.roundId;
-            const hiddenKey = 'bld-countdown-hidden:' + roundId;
-            if (localStorage.getItem(hiddenKey) === '1') return;
-            el.hidden = false;
             const endsAt = new Date(el.dataset.endsAt).getTime();
             const txt = document.getElementById('round-countdown-text');
             function tick() {
@@ -220,11 +212,6 @@
             }
             tick();
             const t = setInterval(tick, 1000);
-            el.querySelector('.btn-close').addEventListener('click', function () {
-                localStorage.setItem(hiddenKey, '1');
-                el.hidden = true;
-                clearInterval(t);
-            });
         })();
     </script>
 }
