@@ -7,13 +7,13 @@
 
     @* Profile header *@
     <div class="text-center mb-4">
-        @if (Model.Profile!.AvatarUrl != null)
-        {
-            <img src="@Model.Profile.AvatarUrl" alt="Avatar" class="mb-2" style="max-width:200px;height:auto;" />
-        }
-        else if (Model.Profile.AvatarThumbnailUrl != null)
+        @if (Model.Profile!.AvatarThumbnailUrl != null)
         {
             <img src="@Model.Profile.AvatarThumbnailUrl" alt="Avatar" class="mb-2" style="max-width:200px;height:auto;" />
+        }
+        else if (Model.Profile.AvatarUrl != null)
+        {
+            <img src="@Model.Profile.AvatarUrl" alt="Avatar" class="mb-2" style="max-width:200px;height:auto;" />
         }
         else
         {
