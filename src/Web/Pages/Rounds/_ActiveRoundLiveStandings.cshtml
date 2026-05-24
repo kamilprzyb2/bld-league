@@ -16,9 +16,6 @@
     </thead>
 
     <tbody>
-        <tr class="table-light">
-            <td colspan="9" class="fw-bold text-uppercase text-muted small">Wyniki</td>
-        </tr>
         @if (Model.FinishedRows.Any())
         {
             foreach (var row in Model.FinishedRows)
@@ -45,56 +42,27 @@
     </tbody>
 
     <tbody>
-        <tr class="table-light">
-            <td colspan="9" class="fw-bold text-uppercase text-muted small">Wgrane, oczekuje na przeciwnika</td>
-        </tr>
-        @if (Model.SubmittedAloneRows.Any())
+        @foreach (var row in Model.SubmittedAloneRows)
         {
-            foreach (var row in Model.SubmittedAloneRows)
+            var submittedAloneModel = new BldLeague.Web.ViewModels.LiveRoundIdentityRowViewModel
             {
-                var submittedAloneModel = new BldLeague.Web.ViewModels.LiveRoundIdentityRowViewModel
-                {
-                    Row = row,
-                    RowCssClass = "table-warning",
-                    BadgeCssClass = "text-bg-success",
-                    IconCssClass = "bi-check-circle",
-                    BadgeText = "Wgrane, oczekuje na przeciwnika",
-                };
-                <partial name="_LiveRoundIdentityRow" model="submittedAloneModel" />
-            }
+                Row = row,
+                BadgeCssClass = "text-bg-success",
+                IconCssClass = "bi-check-circle",
+                BadgeText = "Wgrane, oczekuje na przeciwnika",
+            };
+            <partial name="_LiveRoundIdentityRow" model="submittedAloneModel" />
         }
-        else
+        @foreach (var row in Model.PendingRows)
         {
-            <tr>
-                <td colspan="9" class="text-center text-muted">Brak.</td>
-            </tr>
-        }
-    </tbody>
-
-    <tbody>
-        <tr class="table-light">
-            <td colspan="9" class="fw-bold text-uppercase text-muted small">Brak wyniku</td>
-        </tr>
-        @if (Model.PendingRows.Any())
-        {
-            foreach (var row in Model.PendingRows)
+            var pendingModel = new BldLeague.Web.ViewModels.LiveRoundIdentityRowViewModel
             {
-                var pendingModel = new BldLeague.Web.ViewModels.LiveRoundIdentityRowViewModel
-                {
-                    Row = row,
-                    RowCssClass = "table-secondary",
-                    BadgeCssClass = "text-bg-secondary",
-                    IconCssClass = "bi-hourglass-split",
-                    BadgeText = "Brak wyniku",
-                };
-                <partial name="_LiveRoundIdentityRow" model="pendingModel" />
-            }
-        }
-        else
-        {
-            <tr>
-                <td colspan="9" class="text-center text-muted">Brak.</td>
-            </tr>
+                Row = row,
+                BadgeCssClass = "text-bg-secondary",
+                IconCssClass = "bi-hourglass-split",
+                BadgeText = "Brak wyniku",
+            };
+            <partial name="_LiveRoundIdentityRow" model="pendingModel" />
         }
     </tbody>
 </table>

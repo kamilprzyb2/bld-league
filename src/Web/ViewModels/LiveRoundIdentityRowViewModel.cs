@@ -8,7 +8,6 @@ namespace BldLeague.Web.ViewModels;
 public class LiveRoundIdentityRowViewModel
 {
     public required ActiveRoundLiveRowViewModel Row { get; set; }
-    public required string RowCssClass { get; set; }
     public required string BadgeCssClass { get; set; }
     public required string IconCssClass { get; set; }
     public required string BadgeText { get; set; }
