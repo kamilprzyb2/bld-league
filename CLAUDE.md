@@ -221,7 +221,7 @@ Avoid JavaScript by default. Prefer server-side form submissions and page reload
 | Round queries + DTOs (incl. `ScrambleDto`, `RoundSummaryDto`) | `src/Application/Queries/Rounds/` |
 | Match queries + DTOs (incl. `SolveDto`, `MatchDetailsDto`, `MatchExportRowDto`) | `src/Application/Queries/Matches/` |
 | Active submission query + `ActiveSubmissionDto` | `src/Application/Queries/Matches/GetActiveSubmission/` |
-| Recent finished matches query + `RecentMatchDto` | `src/Application/Queries/Matches/GetRecentFinishedMatches/` |
+| Recent finished matches query + `RecentMatchDto` (+ internal `RecentMatchProjection`) | `src/Application/Queries/Matches/GetRecentFinishedMatches/` |
 | Active round query + `ActiveRoundDto` | `src/Application/Queries/Rounds/GetActiveRound/` |
 | User queries + DTOs (incl. `LeagueSeasonUserDto` for roster queries) | `src/Application/Queries/Users/` |
 | Player rankings query + DTOs (`SingleRankingDto`, `AverageRankingDto`) | `src/Application/Queries/PlayerRankings/` |
@@ -259,6 +259,7 @@ Avoid JavaScript by default. Prefer server-side form submissions and page reload
 | `CsvParser` (CSV `IFormFile` parser) | `src/Web/Helpers/CsvParser.cs` |
 | `SolveFormatHelper` (Ao5 best/worst parentheses formatting) | `src/Web/Helpers/SolveFormatHelper.cs` |
 | `PageModelExtensions` (signed-in user league resolution) | `src/Web/Helpers/PageModelExtensions.cs` |
+| `LeagueColorHelper` (deterministic league identifier → Bootstrap bg class) | `src/Web/Helpers/LeagueColorHelper.cs` |
 | `EnvironmentBadgeOptions` (optional navbar env label) | `src/Web/Options/EnvironmentBadgeOptions.cs` |
 | `MatchStatus` enum (Upcoming/InProgress/Finished) | `src/Web/ViewModels/MatchStatus.cs` |
 | ViewModels | `src/Web/ViewModels/` |
@@ -271,6 +272,8 @@ Avoid JavaScript by default. Prefer server-side form submissions and page reload
 | View league season standings | `src/Web/Pages/Leagues/ViewLeague.cshtml[.cs]` |
 | View round results | `src/Web/Pages/Rounds/ViewRound.cshtml[.cs]` |
 | Match list | `src/Web/Pages/Matches/MatchList.cshtml[.cs]` |
+| Recent matches grid (21 tiles, public, route `/Matches/Recent`) | `src/Web/Pages/Matches/Recent.cshtml[.cs]` |
+| Recent match tile (partial, used by home page + `/Matches/Recent`) | `src/Web/Pages/Shared/_RecentMatchTile.cshtml` |
 | Match detail | `src/Web/Pages/Matches/ViewMatch.cshtml[.cs]` |
 | Player rankings (single + average) at `/Rankings` | `src/Web/Pages/Rankings/Rankings.cshtml[.cs]` |
 | User list | `src/Web/Pages/Users/UserList.cshtml[.cs]` |

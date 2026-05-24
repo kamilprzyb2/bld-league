@@ -1,6 +1,10 @@
 namespace BldLeague.Application.Queries.Matches.GetRecentFinishedMatches;
 
-public class RecentMatchDto
+/// <summary>
+/// Repository-level projection of a recent finished match. Carries the round date window
+/// so the handler can compute <see cref="RecentMatchDto.IsFromActiveRound"/> via <see cref="Common.RoundClock"/>.
+/// </summary>
+public class RecentMatchProjection
 {
     public Guid MatchId { get; init; }
     public required string UserAFullName { get; init; }
@@ -10,5 +14,6 @@ public class RecentMatchDto
     public required string LeagueIdentifier { get; init; }
     public int SeasonNumber { get; init; }
     public int RoundNumber { get; init; }
-    public bool IsFromActiveRound { get; set; }
+    public DateTime RoundStartDate { get; init; }
+    public DateTime RoundEndDate { get; init; }
 }
