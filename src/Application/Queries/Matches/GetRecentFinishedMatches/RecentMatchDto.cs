@@ -10,5 +10,5 @@ public class RecentMatchDto
     public required string LeagueIdentifier { get; init; }
     public int SeasonNumber { get; init; }
     public int RoundNumber { get; init; }
-    public bool IsFromActiveRound { get; set; }
+    public bool IsFromActiveRound { get; init; }
 }
