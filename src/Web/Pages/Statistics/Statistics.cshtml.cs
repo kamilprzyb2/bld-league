@@ -4,7 +4,6 @@ using BldLeague.Application.Queries.Statistics.GetSeasonRecords;
 using BldLeague.Application.Queries.Statistics.GetSolveDurationHistogram;
 using BldLeague.Application.Queries.Statistics.GetStatisticsSummary;
 using BldLeague.Application.Queries.Statistics.GetStreakLeaders;
-using BldLeague.Application.Queries.Statistics.GetSubmissionDeadlineDistance;
 using BldLeague.Application.Queries.Statistics.GetSubmissionHeatmap;
 using BldLeague.Application.Queries.Statistics.GetSubmissionHourHistogram;
 using BldLeague.Web.ViewModels;
@@ -25,7 +24,6 @@ public class Statistics(IMediator mediator) : PageModel
         var hourHistogram = await mediator.Send(new GetSubmissionHourHistogramRequest());
         var heatmap = await mediator.Send(new GetSubmissionHeatmapRequest());
         var durations = await mediator.Send(new GetSolveDurationHistogramRequest());
-        var deadlines = await mediator.Send(new GetSubmissionDeadlineDistanceRequest());
         var scores = await mediator.Send(new GetMatchScoreDistributionRequest());
         var seasonRecords = await mediator.Send(new GetSeasonRecordsRequest());
         var leagueRecords = await mediator.Send(new GetLeagueRecordsAndAveragesRequest());
@@ -37,7 +35,6 @@ public class Statistics(IMediator mediator) : PageModel
             HourHistogram = hourHistogram,
             Heatmap = heatmap,
             SolveDurations = durations,
-            DeadlineDistances = deadlines,
             ScoreDistribution = scores,
             SeasonRecords = seasonRecords,
             LeagueRecords = leagueRecords,

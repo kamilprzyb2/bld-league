@@ -232,7 +232,7 @@ Avoid JavaScript by default. Prefer server-side form submissions and page reload
 | User match history | `src/Application/Queries/Users/GetMatchHistory/` |
 | User season history | `src/Application/Queries/Users/GetSeasonHistory/` |
 | User solves (for stats computation) | `src/Application/Queries/Users/GetSolves/` |
-| Global statistics summary + 8 chart/record/streak queries | `src/Application/Queries/Statistics/` |
+| Global statistics summary + 7 chart/record/streak queries | `src/Application/Queries/Statistics/` |
 
 ### Infrastructure
 

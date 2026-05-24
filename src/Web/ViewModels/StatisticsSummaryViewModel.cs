@@ -13,20 +13,20 @@ public class StatisticsSummaryViewModel
         Tiles =
         [
             new StatTileViewModel(
-                IconClass: "bi-puzzle",
+                IconClass: "bi-grid-3x3-gap-fill",
                 IconColorClass: "text-info",
                 PrimaryText: $"{summary.ValidSolves} / {summary.Attempts}",
-                Subtitle: "ułożone / próby"),
+                Subtitle: "Ułożonych kostek"),
             new StatTileViewModel(
-                IconClass: "bi-trophy",
+                IconClass: "bi-bullseye",
                 IconColorClass: "text-warning",
                 PrimaryText: summary.Matches.ToString(),
-                Subtitle: "rozegranych meczów"),
+                Subtitle: "Rozegranych meczów"),
             new StatTileViewModel(
                 IconClass: "bi-people-fill",
                 IconColorClass: "text-success",
                 PrimaryText: summary.Participants.ToString(),
-                Subtitle: "zawodników"),
+                Subtitle: "Osób wzięło udział"),
         ];
     }
 

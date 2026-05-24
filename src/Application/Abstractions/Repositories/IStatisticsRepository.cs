@@ -23,17 +23,13 @@ public interface IStatisticsRepository
     Task<SubmissionTimestampsProjection> GetSubmissionTimestampsAsync(DateTime localToday);
 
     /// <summary>
-    /// Returns (submittedAtUtc, roundEndDate) tuples for the submission-vs-deadline histogram.
-    /// </summary>
-    Task<IReadOnlyList<SubmissionWithDeadline>> GetSubmissionWithDeadlineAsync(DateTime localToday);
-
-    /// <summary>
     /// Returns the raw centisecond values of every valid solve (not DNF, not DNS) in finished matches.
     /// </summary>
     Task<IReadOnlyList<int>> GetValidSolveCentisecondsAsync(DateTime localToday);
 
     /// <summary>
-    /// Returns (UserAScore, UserBScore) for every finished match (BYE matches included).
+    /// Returns (UserAScore, UserBScore) for every finished match vs a real opponent.
+    /// BYE matches (UserBId == null) are excluded.
     /// </summary>
     Task<IReadOnlyList<(int UserAScore, int UserBScore)>> GetFinishedMatchScoresAsync(DateTime localToday);
 
@@ -66,11 +62,6 @@ public record SubmissionTimestampsProjection(
     IReadOnlyList<DateTime> Timestamps,
     int IncludedMatches,
     int TotalMatches);
-
-/// <summary>
-/// Submission with its round end date (for deadline distance computation).
-/// </summary>
-public record SubmissionWithDeadline(DateTime SubmittedAtUtc, DateTime RoundEndDate);
 
 /// <summary>
 /// All chronologically-ordered solves performed by a single user across finished matches.

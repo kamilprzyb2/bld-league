@@ -26,84 +26,55 @@
             }
         </div>
 
-        <!-- 2.2 Submission hour-of-day histogram -->
-        <h5 class="mt-4 mb-3">Godziny wgrywania wyników</h5>
-        <div class="card border-0 shadow-sm p-3">
-            <canvas id="hour-histogram"
-                    data-labels='@Html.Raw(JsonSerializer.Serialize(Enumerable.Range(0, 24).Select(h => h.ToString("00")).ToArray()))'
-                    data-values='@Html.Raw(JsonSerializer.Serialize(Model.Data.HourHistogram.Counts))'></canvas>
-            <div class="text-muted small mt-2">
-                na podstawie @Model.Data.HourHistogram.IncludedMatches z @Model.Data.HourHistogram.TotalMatches meczów
-            </div>
-        </div>
-
-        <!-- 2.3 Day-of-week × hour-of-day heatmap -->
-        <h5 class="mt-4 mb-3">Rozkład wgrywania (dzień × godzina)</h5>
-        <div class="card border-0 shadow-sm p-3">
-            <div class="table-responsive">
-                <table class="table table-bordered table-sm mb-0" style="font-size: 0.75rem; text-align: center;">
-                    <thead>
-                        <tr>
-                            <th></th>
-                            @for (int h = 0; h < 24; h++)
+        <!-- 2.9 Streak leaders -->
+        <h5 class="mt-4 mb-3">Najdłuższe serie</h5>
+        <div class="row g-3 mb-4">
+            <div class="col-12 col-md-6">
+                <div class="card h-100 border-0 shadow-sm p-3">
+                    <div class="d-flex align-items-center gap-3">
+                        <i class="bi bi-fire fs-2 text-danger"></i>
+                        <div>
+                            <div class="fw-semibold">Najdłuższa seria ułożeń</div>
+                            @if (Model.Data.StreakLeaders.Solve != null)
                             {
-                                <th>@h.ToString("00")</th>
+                                <div class="text-muted small">
+                                    <a asp-page="/Users/UserProfile" asp-route-id="@Model.Data.StreakLeaders.Solve.UserId">@Model.Data.StreakLeaders.Solve.FullName</a>
+                                    — @Model.Data.StreakLeaders.Solve.Length ułożeń
+                                </div>
                             }
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @for (int d = 0; d < 7; d++)
-                        {
-                            <tr>
-                                <th>@dayNames[d]</th>
-                                @for (int h = 0; h < 24; h++)
-                                {
-                                    var count = Model.Data.Heatmap.Matrix[d, h];
-                                    double alpha = Model.Data.Heatmap.MaxCount > 0
-                                        ? (double)count / Model.Data.Heatmap.MaxCount
-                                        : 0.0;
-                                    var alphaStr = alpha.ToString("0.00", CultureInfo.InvariantCulture);
-                                    var bg = count > 0
-                                        ? $"background-color: rgba(13,110,253,{alphaStr});"
-                                        : string.Empty;
-                                    <td style="@bg" title="@dayNames[d] @h.ToString("00"):00 — @count">@(count > 0 ? count.ToString() : "")</td>
-                                }
-                            </tr>
-                        }
-                    </tbody>
-                </table>
+                            else
+                            {
+                                <div class="text-muted small">Brak danych.</div>
+                            }
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="text-muted small mt-2">
-                na podstawie @Model.Data.Heatmap.IncludedMatches z @Model.Data.Heatmap.TotalMatches meczów
+            <div class="col-12 col-md-6">
+                <div class="card h-100 border-0 shadow-sm p-3">
+                    <div class="d-flex align-items-center gap-3">
+                        <i class="bi bi-trophy-fill fs-2 text-warning"></i>
+                        <div>
+                            <div class="fw-semibold">Najdłuższa seria zwycięstw</div>
+                            @if (Model.Data.StreakLeaders.Win != null)
+                            {
+                                <div class="text-muted small">
+                                    <a asp-page="/Users/UserProfile" asp-route-id="@Model.Data.StreakLeaders.Win.UserId">@Model.Data.StreakLeaders.Win.FullName</a>
+                                    — @Model.Data.StreakLeaders.Win.Length zwycięstw
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="text-muted small">Brak danych.</div>
+                            }
+                        </div>
+                    </div>
+                </div>
             </div>
-        </div>
-
-        <!-- 2.4 Solve duration histogram -->
-        <h5 class="mt-4 mb-3">Rozkład czasów ułożeń</h5>
-        <div class="card border-0 shadow-sm p-3">
-            <canvas id="duration-histogram"
-                    data-labels='@Html.Raw(JsonSerializer.Serialize(Model.Data.SolveDurations.Buckets.Select(b => b.Label).ToArray()))'
-                    data-values='@Html.Raw(JsonSerializer.Serialize(Model.Data.SolveDurations.Buckets.Select(b => b.Count).ToArray()))'></canvas>
-        </div>
-
-        <!-- 2.5 Submission-vs-deadline histogram -->
-        <h5 class="mt-4 mb-3">Czas do końca rundy przy wgraniu wyników</h5>
-        <div class="card border-0 shadow-sm p-3">
-            <canvas id="deadline-histogram"
-                    data-labels='@Html.Raw(JsonSerializer.Serialize(Model.Data.DeadlineDistances.Buckets.Select(b => b.Label).ToArray()))'
-                    data-values='@Html.Raw(JsonSerializer.Serialize(Model.Data.DeadlineDistances.Buckets.Select(b => b.Count).ToArray()))'></canvas>
-        </div>
-
-        <!-- 2.6 Match score distribution -->
-        <h5 class="mt-4 mb-3">Rozkład wyników meczów</h5>
-        <div class="card border-0 shadow-sm p-3">
-            <canvas id="score-distribution"
-                    data-labels='@Html.Raw(JsonSerializer.Serialize(Model.Data.ScoreDistribution.Buckets.Select(b => b.Label).ToArray()))'
-                    data-values='@Html.Raw(JsonSerializer.Serialize(Model.Data.ScoreDistribution.Buckets.Select(b => b.Count).ToArray()))'></canvas>
         </div>
 
         <!-- 2.7 Per-season records table -->
-        <h5 class="mt-4 mb-3">Rekordy sezonowe</h5>
+        <h5 class="mt-4 mb-3">Statystyki sezonów</h5>
         <div class="table-responsive">
             <table class="table table-hover align-middle">
                 <thead>
@@ -113,12 +84,14 @@
                         <th>Zawodnik</th>
                         <th class="text-nowrap">Najlepsza Ao5</th>
                         <th>Zawodnik</th>
+                        <th>Zawodników</th>
+                        <th>Ułożenia</th>
                     </tr>
                 </thead>
                 <tbody>
                 @if (Model.Data.SeasonRecords.Count == 0)
                 {
-                    <tr><td colspan="5" class="text-center">Brak danych.</td></tr>
+                    <tr><td colspan="7" class="text-center">Brak danych.</td></tr>
                 }
                 else
                 {
@@ -148,6 +121,8 @@
                                     <span class="text-muted">-</span>
                                 }
                             </td>
+                            <td>@row.ParticipantCount</td>
+                            <td class="text-nowrap">@row.ValidSolves / @row.Attempts</td>
                         </tr>
                     }
                 }
@@ -156,7 +131,7 @@
         </div>
 
         <!-- 2.8 Per-league records and averages table -->
-        <h5 class="mt-4 mb-3">Rekordy i średnie lig</h5>
+        <h5 class="mt-4 mb-3">Statystyki lig</h5>
         <div class="table-responsive">
             <table class="table table-hover align-middle">
                 <thead>
@@ -210,51 +185,81 @@
             </table>
         </div>
 
-        <!-- 2.9 Streak leaders -->
-        <h5 class="mt-4 mb-3">Najdłuższe serie</h5>
-        <div class="row g-3 mb-4">
-            <div class="col-12 col-md-6">
-                <div class="card h-100 border-0 shadow-sm p-3">
-                    <div class="d-flex align-items-center gap-3">
-                        <i class="bi bi-fire fs-2 text-danger"></i>
-                        <div>
-                            <div class="fw-semibold">Najdłuższa seria ułożeń</div>
-                            @if (Model.Data.StreakLeaders.Solve != null)
-                            {
-                                <div class="text-muted small">
-                                    <a asp-page="/Users/UserProfile" asp-route-id="@Model.Data.StreakLeaders.Solve.UserId">@Model.Data.StreakLeaders.Solve.FullName</a>
-                                    — @Model.Data.StreakLeaders.Solve.Length ułożeń
-                                </div>
-                            }
-                            else
-                            {
-                                <div class="text-muted small">Brak danych.</div>
-                            }
-                        </div>
-                    </div>
-                </div>
+        <!-- 2.4 Solve duration histogram -->
+        <h5 class="mt-4 mb-3">Rozkład czasów ułożeń</h5>
+        <div class="card border-0 shadow-sm p-3">
+            <canvas id="duration-histogram"
+                    data-labels='@Html.Raw(JsonSerializer.Serialize(Model.Data.SolveDurations.Buckets.Select(b => b.Label).ToArray()))'
+                    data-values='@Html.Raw(JsonSerializer.Serialize(Model.Data.SolveDurations.Buckets.Select(b => b.Count).ToArray()))'></canvas>
+        </div>
+
+        <!-- 2.2 Submission hour-of-day histogram -->
+        <h5 class="mt-4 mb-3">Godziny wgrywania wyników</h5>
+        <div class="card border-0 shadow-sm p-3">
+            <canvas id="hour-histogram"
+                    data-labels='@Html.Raw(JsonSerializer.Serialize(Enumerable.Range(0, 24).Select(h => h.ToString("00")).ToArray()))'
+                    data-values='@Html.Raw(JsonSerializer.Serialize(Model.Data.HourHistogram.Counts))'></canvas>
+            <div class="text-muted small mt-2">
+                na podstawie @Model.Data.HourHistogram.IncludedMatches z @Model.Data.HourHistogram.TotalMatches meczów
             </div>
-            <div class="col-12 col-md-6">
-                <div class="card h-100 border-0 shadow-sm p-3">
-                    <div class="d-flex align-items-center gap-3">
-                        <i class="bi bi-trophy-fill fs-2 text-warning"></i>
-                        <div>
-                            <div class="fw-semibold">Najdłuższa seria zwycięstw</div>
-                            @if (Model.Data.StreakLeaders.Win != null)
+        </div>
+
+        <!-- 2.3 Day-of-week × hour-of-day heatmap -->
+        <h5 class="mt-4 mb-3">Rozkład wgrywania (dzień × godzina)</h5>
+        <div class="card border-0 shadow-sm p-3">
+            <div class="table-responsive">
+                <table class="table table-bordered table-sm mb-0" style="font-size: 0.75rem; text-align: center;">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            @for (int h = 0; h < 24; h++)
                             {
-                                <div class="text-muted small">
-                                    <a asp-page="/Users/UserProfile" asp-route-id="@Model.Data.StreakLeaders.Win.UserId">@Model.Data.StreakLeaders.Win.FullName</a>
-                                    — @Model.Data.StreakLeaders.Win.Length zwycięstw
-                                </div>
+                                <th>@h.ToString("00")</th>
                             }
-                            else
-                            {
-                                <div class="text-muted small">Brak danych.</div>
-                            }
-                        </div>
-                    </div>
-                </div>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (int d = 0; d < 7; d++)
+                        {
+                            <tr>
+                                <th>@dayNames[d]</th>
+                                @for (int h = 0; h < 24; h++)
+                                {
+                                    var count = Model.Data.Heatmap.Matrix[d, h];
+                                    double alpha = Model.Data.Heatmap.MaxCount > 0
+                                        ? (double)count / Model.Data.Heatmap.MaxCount
+                                        : 0.0;
+                                    string bg;
+                                    if (count > 0)
+                                    {
+                                        double hue = 60 - 60 * alpha;
+                                        double lightness = 88 - 40 * alpha;
+                                        var hueStr = hue.ToString("0.0", CultureInfo.InvariantCulture);
+                                        var lightStr = lightness.ToString("0.0", CultureInfo.InvariantCulture);
+                                        bg = $"background-color: hsl({hueStr}, 100%, {lightStr}%);";
+                                    }
+                                    else
+                                    {
+                                        bg = string.Empty;
+                                    }
+                                    <td style="@bg" title="@dayNames[d] @h.ToString("00"):00 — @count"></td>
+                                }
+                            </tr>
+                        }
+                    </tbody>
+                </table>
             </div>
+            <div class="text-muted small mt-2">
+                na podstawie @Model.Data.Heatmap.IncludedMatches z @Model.Data.Heatmap.TotalMatches meczów
+            </div>
+        </div>
+
+        <!-- 2.6 Match score distribution -->
+        <h5 class="mt-4 mb-3">Rozkład wyników meczów</h5>
+        <div class="card border-0 shadow-sm p-3">
+            <canvas id="score-distribution"
+                    data-labels='@Html.Raw(JsonSerializer.Serialize(Model.Data.ScoreDistribution.Buckets.Select(b => b.Label).ToArray()))'
+                    data-values='@Html.Raw(JsonSerializer.Serialize(Model.Data.ScoreDistribution.Buckets.Select(b => b.Count).ToArray()))'></canvas>
         </div>
     }
 </div>
@@ -292,7 +297,6 @@
 
             renderBar('hour-histogram');
             renderBar('duration-histogram');
-            renderBar('deadline-histogram');
             renderBar('score-distribution');
         })();
     </script>

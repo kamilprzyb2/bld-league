@@ -13,4 +13,7 @@ public record SeasonRecordDto(
     string? BestSingleUserFullName,
     SolveResult? BestAverage,
     Guid? BestAverageUserId,
-    string? BestAverageUserFullName);
+    string? BestAverageUserFullName,
+    int ParticipantCount,
+    int ValidSolves,
+    int Attempts);

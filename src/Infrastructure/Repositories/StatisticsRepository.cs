@@ -66,28 +66,6 @@ public class StatisticsRepository(AppDbContext context) : IStatisticsRepository
         return new SubmissionTimestampsProjection(timestamps, included, totalMatches);
     }
 
-    public async Task<IReadOnlyList<SubmissionWithDeadline>> GetSubmissionWithDeadlineAsync(DateTime localToday)
-    {
-        var rows = await FinishedMatches(localToday)
-            .Select(m => new
-            {
-                m.UserASubmittedAt,
-                m.UserBSubmittedAt,
-                EndDate = m.Round.EndDate,
-            })
-            .ToListAsync();
-
-        var result = new List<SubmissionWithDeadline>(rows.Count * 2);
-        foreach (var r in rows)
-        {
-            if (r.UserASubmittedAt.HasValue)
-                result.Add(new SubmissionWithDeadline(DateTime.SpecifyKind(r.UserASubmittedAt.Value, DateTimeKind.Utc), r.EndDate));
-            if (r.UserBSubmittedAt.HasValue)
-                result.Add(new SubmissionWithDeadline(DateTime.SpecifyKind(r.UserBSubmittedAt.Value, DateTimeKind.Utc), r.EndDate));
-        }
-        return result;
-    }
-
     public async Task<IReadOnlyList<int>> GetValidSolveCentisecondsAsync(DateTime localToday)
         => await FinishedSolves(localToday)
             .Where(s => s.Result >= 0)
@@ -97,6 +75,7 @@ public class StatisticsRepository(AppDbContext context) : IStatisticsRepository
     public async Task<IReadOnlyList<(int UserAScore, int UserBScore)>> GetFinishedMatchScoresAsync(DateTime localToday)
     {
         var rows = await FinishedMatches(localToday)
+            .Where(m => m.UserBId != null)
             .Select(m => new { m.UserAScore, m.UserBScore })
             .ToListAsync();
         return rows.Select(r => (r.UserAScore, r.UserBScore)).ToList();
@@ -139,6 +118,21 @@ public class StatisticsRepository(AppDbContext context) : IStatisticsRepository
 
             var bestAo5 = PickBestAverage(aoCandidates.Select(c => (c.UserAId, c.UserBId, c.UserAFullName, c.UserBFullName, c.AverageACs, c.AverageBCs)));
 
+            // Distinct participants in this season's finished matches — UserAId always present,
+            // UserBId only counted when non-null (BYEs don't add a phantom participant).
+            var participantsA = FinishedMatches(localToday)
+                .Where(m => m.Round.SeasonId == season.Id)
+                .Select(m => m.UserAId);
+            var participantsB = FinishedMatches(localToday)
+                .Where(m => m.Round.SeasonId == season.Id && m.UserBId != null)
+                .Select(m => m.UserBId!.Value);
+            var participantCount = await participantsA.Union(participantsB).CountAsync();
+
+            var validSolves = await FinishedSolves(localToday)
+                .CountAsync(s => s.Match.Round.SeasonId == season.Id && s.Result >= 0);
+            var attempts = await FinishedSolves(localToday)
+                .CountAsync(s => s.Match.Round.SeasonId == season.Id && s.Result != -2);
+
             results.Add(new SeasonRecordDto(
                 SeasonNumber: season.SeasonNumber,
                 SeasonName: $"Sezon {season.SeasonNumber}",
@@ -147,7 +141,10 @@ public class StatisticsRepository(AppDbContext context) : IStatisticsRepository
                 BestSingleUserFullName: bestSingle?.FullName,
                 BestAverage: bestAo5 != null ? SolveResult.FromCentiseconds(bestAo5.Value.cs) : null,
                 BestAverageUserId: bestAo5?.userId,
-                BestAverageUserFullName: bestAo5?.fullName));
+                BestAverageUserFullName: bestAo5?.fullName,
+                ParticipantCount: participantCount,
+                ValidSolves: validSolves,
+                Attempts: attempts));
         }
 
         return results;
