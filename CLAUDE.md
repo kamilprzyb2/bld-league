@@ -267,7 +267,6 @@ Avoid JavaScript by default. Prefer server-side form submissions and page reload
 | `CsvParser` (CSV `IFormFile` parser) | `src/Web/Helpers/CsvParser.cs` |
 | `SolveFormatHelper` (Ao5 best/worst parentheses formatting) | `src/Web/Helpers/SolveFormatHelper.cs` |
 | `PageModelExtensions` (signed-in user league resolution) | `src/Web/Helpers/PageModelExtensions.cs` |
-| `LeagueColorHelper` (deterministic league identifier → Bootstrap bg class) | `src/Web/Helpers/LeagueColorHelper.cs` |
 | `EnvironmentBadgeOptions` (optional navbar env label) | `src/Web/Options/EnvironmentBadgeOptions.cs` |
 | `MatchStatus` enum (Upcoming/InProgress/Finished) | `src/Web/ViewModels/MatchStatus.cs` |
 | ViewModels | `src/Web/ViewModels/` |
