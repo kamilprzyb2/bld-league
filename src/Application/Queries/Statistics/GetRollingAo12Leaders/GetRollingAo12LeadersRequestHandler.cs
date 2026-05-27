@@ -10,7 +10,6 @@ public class GetRollingAo12LeadersRequestHandler(IUnitOfWork unitOfWork, RoundCl
     : IRequestHandler<GetRollingAo12LeadersRequest, RollingAo12LeadersDto>
 {
     private const int WindowSize = 12;
-    private const int TopN = 5;
 
     public async Task<RollingAo12LeadersDto> Handle(GetRollingAo12LeadersRequest request, CancellationToken cancellationToken)
     {
@@ -47,14 +46,14 @@ public class GetRollingAo12LeadersRequestHandler(IUnitOfWork unitOfWork, RoundCl
             entries.Add((group.UserId, group.FullName, bestAo12.Value, bestWindow, group.Solves.Count));
         }
 
-        var top = entries
+        // Return every qualifier; the view decides how many to surface.
+        var sorted = entries
             .OrderBy(e => e.Best.Centiseconds)
             .ThenByDescending(e => e.TotalSolves)
             .ThenBy(e => e.UserId)
-            .Take(TopN)
             .Select(e => new RollingAo12EntryDto(e.UserId, e.FullName, e.Best, e.Window))
             .ToList();
 
-        return new RollingAo12LeadersDto(top);
+        return new RollingAo12LeadersDto(sorted);
     }
 }

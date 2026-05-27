@@ -56,11 +56,12 @@ public interface IStatisticsRepository
     Task<IReadOnlyList<UserMatchStreakGroup>> GetMatchesGroupedByUserAsync(DateTime localToday);
 
     /// <summary>
-    /// Returns the top accuracy leaders — users sorted by ValidSolves / Attempts ratio descending,
+    /// Returns the accuracy leaders — users sorted by ValidSolves / Attempts ratio descending,
     /// then by Attempts descending, then by UserId ascending. Only users with at least
-    /// <paramref name="minAttempts"/> attempts (non-DNS solves) are included. Limited to <paramref name="top"/> rows.
+    /// <paramref name="minAttempts"/> attempts (non-DNS solves) are included. Returns every qualifier;
+    /// the view decides how many to surface.
     /// </summary>
-    Task<IReadOnlyList<AccuracyEntryDto>> GetAccuracyLeadersAsync(DateTime localToday, int minAttempts, int top);
+    Task<IReadOnlyList<AccuracyEntryDto>> GetAccuracyLeadersAsync(DateTime localToday, int minAttempts);
 
     /// <summary>
     /// Returns non-DNS solves grouped by user, ordered chronologically (season → round → solve index) within each user,

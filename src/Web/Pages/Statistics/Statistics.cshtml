@@ -79,26 +79,15 @@
         </div>
 
         <!-- Accuracy leaders -->
-        <h5 class="mt-4 mb-3">Najlepsza skuteczność</h5>
+        <h5 class="mt-4 mb-2">Najlepsza skuteczność</h5>
         @if (Model.Data.AccuracyLeaders.Entries.Count == 0)
         {
             <p class="text-muted">Brak danych.</p>
         }
         else
         {
-            var leader = Model.Data.AccuracyLeaders.Entries[0];
-            <div class="card border-0 shadow-sm p-3 mb-3">
-                <div class="d-flex align-items-center gap-3">
-                    <i class="bi bi-bullseye fs-2 text-success"></i>
-                    <div>
-                        <div class="fw-semibold">
-                            <a asp-page="/Users/UserProfile" asp-route-id="@leader.UserId">@leader.FullName</a>
-                        </div>
-                        <div class="fs-3 fw-bold">@Pct(leader.ValidSolves, leader.Attempts)</div>
-                        <div class="text-muted small">@leader.ValidSolves / @leader.Attempts</div>
-                    </div>
-                </div>
-            </div>
+            var accuracyTotal = Model.Data.AccuracyLeaders.Entries.Count;
+            var accuracyHidden = Math.Max(0, accuracyTotal - 5);
             <div class="table-responsive">
                 <table class="table table-hover align-middle">
                     <thead>
@@ -110,10 +99,12 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @for (int i = 0; i < Model.Data.AccuracyLeaders.Entries.Count; i++)
+                        @for (int i = 0; i < accuracyTotal; i++)
                         {
                             var entry = Model.Data.AccuracyLeaders.Entries[i];
-                            <tr>
+                            var rowClass = i >= 5 ? "stats-extra-row accuracy-extra" : null;
+                            var rowStyle = i >= 5 ? "display: none;" : null;
+                            <tr class="@rowClass" style="@rowStyle">
                                 <td>@(i + 1)</td>
                                 <td>
                                     <a asp-page="/Users/UserProfile" asp-route-id="@entry.UserId">@entry.FullName</a>
@@ -125,39 +116,23 @@
                     </tbody>
                 </table>
             </div>
+            @if (accuracyHidden > 0)
+            {
+                <a href="#" class="stats-show-more" data-target="accuracy-extra" data-more-text="Pokaż więcej (@accuracyHidden)" data-less-text="Zwiń">Pokaż więcej (@accuracyHidden)</a>
+            }
         }
 
         <!-- Rolling Ao12 leaders -->
-        <h5 class="mt-4 mb-3">Najlepsze Ao12</h5>
+        <h5 class="mt-4 mb-1">Krocząca Ao12</h5>
+        <div class="text-muted small mb-2">spośród 12 kolejnych ułożeń z różnych rund</div>
         @if (Model.Data.RollingAo12Leaders.Entries.Count == 0)
         {
             <p class="text-muted">Brak danych.</p>
         }
         else
         {
-            var topAo12 = Model.Data.RollingAo12Leaders.Entries[0];
-            var topWindow = topAo12.Window.ToArray();
-            <div class="card border-0 shadow-sm p-3 mb-3">
-                <div class="d-flex align-items-center gap-3">
-                    <i class="bi bi-lightning-charge-fill fs-2 text-warning"></i>
-                    <div>
-                        <div class="fw-semibold">
-                            <a asp-page="/Users/UserProfile" asp-route-id="@topAo12.UserId">@topAo12.FullName</a>
-                        </div>
-                        <div class="fs-3 fw-bold">@topAo12.BestAo12.ToString()</div>
-                        <div class="text-muted small">
-                            @{
-                                var parts = new List<string>(topWindow.Length);
-                                for (int i = 0; i < topWindow.Length; i++)
-                                {
-                                    parts.Add(SolveFormatHelper.FormatWithParens(topWindow, i));
-                                }
-                            }
-                            @string.Join(", ", parts)
-                        </div>
-                    </div>
-                </div>
-            </div>
+            var ao12Total = Model.Data.RollingAo12Leaders.Entries.Count;
+            var ao12Hidden = Math.Max(0, ao12Total - 5);
             <div class="table-responsive">
                 <table class="table table-hover align-middle">
                     <thead>
@@ -165,22 +140,58 @@
                             <th>#</th>
                             <th>Zawodnik</th>
                             <th class="text-nowrap">Ao12</th>
+                            <th class="d-none d-md-table-cell">Wyniki</th>
+                            <th class="d-md-none"></th>
                         </tr>
                     </thead>
                     <tbody>
-                        @for (int i = 0; i < Model.Data.RollingAo12Leaders.Entries.Count; i++)
+                        @for (int i = 0; i < ao12Total; i++)
                         {
                             var entry = Model.Data.RollingAo12Leaders.Entries[i];
-                            <tr>
+                            var window = entry.Window.ToArray();
+                            var parts = new List<string>(window.Length);
+                            for (int j = 0; j < window.Length; j++)
+                            {
+                                parts.Add(SolveFormatHelper.FormatWithParens(window, j));
+                            }
+                            var solvesText = string.Join(", ", parts);
+                            var rowClass = i >= 5 ? "stats-extra-row ao12-extra" : null;
+                            var rowStyle = i >= 5 ? "display: none;" : null;
+                            <tr class="@rowClass" style="@rowStyle">
                                 <td>@(i + 1)</td>
                                 <td>
                                     <a asp-page="/Users/UserProfile" asp-route-id="@entry.UserId">@entry.FullName</a>
                                 </td>
                                 <td class="fw-bold text-nowrap">@entry.BestAo12.ToString()</td>
+                                <td class="d-none d-md-table-cell">@solvesText</td>
+                                <td class="d-md-none text-end">
+                                    <button type="button" class="btn btn-link btn-sm p-0"
+                                            data-bs-toggle="modal" data-bs-target="#ao12SolvesModal"
+                                            data-solves="@solvesText" data-player="@entry.FullName"
+                                            aria-label="Pokaż ułożenia">
+                                        <i class="bi bi-list-ul"></i>
+                                    </button>
+                                </td>
                             </tr>
                         }
                     </tbody>
                 </table>
+            </div>
+            @if (ao12Hidden > 0)
+            {
+                <a href="#" class="stats-show-more" data-target="ao12-extra" data-more-text="Pokaż więcej (@ao12Hidden)" data-less-text="Zwiń">Pokaż więcej (@ao12Hidden)</a>
+            }
+
+            <div class="modal fade" id="ao12SolvesModal" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="ao12SolvesModalLabel">Ułożenia</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Zamknij"></button>
+                        </div>
+                        <div class="modal-body" id="ao12SolvesModalBody"></div>
+                    </div>
+                </div>
             </div>
         }
 
@@ -305,7 +316,7 @@
         </div>
 
         <!-- 2.3 Day-of-week × hour-of-day heatmap -->
-        <h5 class="mt-4 mb-3">Rozkład wgrywania (dzień × godzina)</h5>
+        <h5 class="mt-4 mb-3">Rozkład godzinowy wgrywania wyników</h5>
         <div class="card border-0 shadow-sm p-3">
             <div class="table-responsive">
                 <table class="table table-bordered table-sm mb-0" style="font-size: 0.75rem; text-align: center;">
@@ -431,6 +442,36 @@
 
             renderBar('duration-histogram');
             renderHorizontalBar('score-distribution');
+
+            // Collapsible "show more" links for the accuracy + Ao12 leaderboards.
+            var links = document.querySelectorAll('.stats-show-more');
+            for (var i = 0; i < links.length; i++) {
+                links[i].addEventListener('click', function (ev) {
+                    ev.preventDefault();
+                    var link = ev.currentTarget;
+                    var targetClass = link.getAttribute('data-target');
+                    if (!targetClass) return;
+                    var rows = document.getElementsByClassName(targetClass);
+                    var hidden = rows.length > 0 && rows[0].style.display === 'none';
+                    for (var r = 0; r < rows.length; r++) {
+                        rows[r].style.display = hidden ? '' : 'none';
+                    }
+                    link.textContent = hidden
+                        ? (link.getAttribute('data-less-text') || 'Zwiń')
+                        : (link.getAttribute('data-more-text') || 'Pokaż więcej');
+                });
+            }
+
+            // Ao12 mobile modal — copy the data-* payload from the clicked button into the modal body.
+            var modalEl = document.getElementById('ao12SolvesModal');
+            if (modalEl) {
+                modalEl.addEventListener('show.bs.modal', function (ev) {
+                    var btn = ev.relatedTarget;
+                    if (!btn) return;
+                    document.getElementById('ao12SolvesModalLabel').textContent = btn.getAttribute('data-player') || 'Ułożenia';
+                    document.getElementById('ao12SolvesModalBody').textContent = btn.getAttribute('data-solves') || '';
+                });
+            }
         })();
     </script>
 }

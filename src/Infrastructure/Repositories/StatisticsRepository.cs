@@ -286,7 +286,7 @@ public class StatisticsRepository(AppDbContext context) : IStatisticsRepository
             .ToList();
     }
 
-    public async Task<IReadOnlyList<AccuracyEntryDto>> GetAccuracyLeadersAsync(DateTime localToday, int minAttempts, int top)
+    public async Task<IReadOnlyList<AccuracyEntryDto>> GetAccuracyLeadersAsync(DateTime localToday, int minAttempts)
     {
         // Group all attempts (non-DNS solves) per user and count valid (non-negative) entries.
         // Server-side projection — ratio comparison and tie-break by Guid all expressible in EF Core.
@@ -307,7 +307,6 @@ public class StatisticsRepository(AppDbContext context) : IStatisticsRepository
             .OrderByDescending(r => (double)r.ValidSolves / r.Attempts)
             .ThenByDescending(r => r.Attempts)
             .ThenBy(r => r.UserId)
-            .Take(top)
             .Select(r => new AccuracyEntryDto(r.UserId, r.FullName, r.ValidSolves, r.Attempts))
             .ToList();
     }
