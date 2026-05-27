@@ -20,11 +20,19 @@ public class StatisticsRepository(AppDbContext context) : IStatisticsRepository
 
     public async Task<StatisticsSummaryDto> GetSummaryAsync(DateTime localToday)
     {
-        // SolveResult stores -1 for DNF and -2 for DNS; valid solves have non-negative centiseconds.
-        var validCount = await FinishedSolves(localToday).CountAsync(s => s.Result >= 0);
-        var attemptsCount = await FinishedSolves(localToday).CountAsync(s => s.Result != -2);
-        var matchCount = await FinishedMatches(localToday).CountAsync();
+        // Live: any submitted solve, regardless of round status. SolveResult stores -1 for DNF and -2 for DNS;
+        // valid solves have non-negative centiseconds.
+        var validCount = await context.Set<Solve>().CountAsync(s => s.Result >= 0);
+        var attemptsCount = await context.Set<Solve>().CountAsync(s => s.Result != -2);
 
+        // Live: a match is "played" when its round has ended OR both sides have submitted.
+        // The OR-clause mirrors Match.BothSidesSubmitted; inlined here so EF translates it to SQL.
+        var matchCount = await context.Set<Match>()
+            .CountAsync(m =>
+                m.Round.EndDate < localToday
+                || (m.UserASubmittedAt != null && (m.UserBId == null || m.UserBSubmittedAt != null)));
+
+        // Unchanged: finished-only distinct participants.
         var participantsA = FinishedMatches(localToday).Select(m => m.UserAId);
         var participantsB = FinishedMatches(localToday)
             .Where(m => m.UserBId != null)

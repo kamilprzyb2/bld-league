@@ -7,14 +7,18 @@ using BldLeague.Domain.ValueObjects;
 namespace BldLeague.Application.Abstractions.Repositories;
 
 /// <summary>
-/// Raw projections for the global statistics surface. All queries are scoped to
-/// finished rounds only — callers pass <c>localToday</c> from <c>RoundClock.LocalToday()</c>
-/// and the repository applies <c>round.EndDate &lt; localToday</c>.
+/// Raw projections for the global statistics surface. Most queries are scoped to
+/// finished rounds only — see per-method docs. Callers pass <c>localToday</c> from
+/// <c>RoundClock.LocalToday()</c> and the repository applies <c>round.EndDate &lt; localToday</c>
+/// (or a per-match equivalent) where appropriate.
 /// </summary>
 public interface IStatisticsRepository
 {
     /// <summary>
-    /// Returns aggregate counters (valid solves, attempts, finished matches, distinct participants).
+    /// Returns aggregate counters with mixed semantics: <c>ValidSolves</c> and <c>Attempts</c>
+    /// are live (every submitted solve counts, regardless of round status); <c>Matches</c> is
+    /// live too — counted when the round has ended or both sides have submitted; <c>Participants</c>
+    /// stays finished-only (distinct users with at least one finished-match appearance).
     /// </summary>
     Task<StatisticsSummaryDto> GetSummaryAsync(DateTime localToday);
 
