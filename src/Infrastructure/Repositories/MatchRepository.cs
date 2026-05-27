@@ -203,8 +203,6 @@ public class MatchRepository(AppDbContext context)
                 m.UserASubmittedAt,
                 m.UserBSubmittedAt,
                 LeagueIdentifier = m.LeagueSeason.League.LeagueIdentifier,
-                LeagueName = m.LeagueSeason.League.LeagueName,
-                SeasonNumber = m.LeagueSeason.Season.SeasonNumber,
                 RoundNumber = m.Round.RoundNumber,
                 IsFromActiveRound = m.Round.StartDate <= localToday && m.Round.EndDate >= localToday,
                 RoundEndDate = m.Round.EndDate,
@@ -226,8 +224,6 @@ public class MatchRepository(AppDbContext context)
                     UserAScore = m.UserAScore,
                     UserBScore = m.UserBScore,
                     LeagueIdentifier = m.LeagueIdentifier,
-                    LeagueName = m.LeagueName,
-                    SeasonNumber = m.SeasonNumber,
                     RoundNumber = m.RoundNumber,
                     IsFromActiveRound = m.IsFromActiveRound,
                 }, effectiveAt);
