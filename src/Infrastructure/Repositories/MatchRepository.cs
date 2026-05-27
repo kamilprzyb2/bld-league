@@ -202,6 +202,9 @@ public class MatchRepository(AppDbContext context)
                 m.UserBScore,
                 m.UserASubmittedAt,
                 m.UserBSubmittedAt,
+                LeagueIdentifier = m.LeagueSeason.League.LeagueIdentifier,
+                RoundNumber = m.Round.RoundNumber,
+                IsFromActiveRound = m.Round.StartDate <= localToday && m.Round.EndDate >= localToday,
                 RoundEndDate = m.Round.EndDate,
             })
             .ToListAsync();
@@ -220,6 +223,9 @@ public class MatchRepository(AppDbContext context)
                     UserBFullName = m.UserBFullName,
                     UserAScore = m.UserAScore,
                     UserBScore = m.UserBScore,
+                    LeagueIdentifier = m.LeagueIdentifier,
+                    RoundNumber = m.RoundNumber,
+                    IsFromActiveRound = m.IsFromActiveRound,
                 }, effectiveAt);
             })
             .OrderByDescending(x => x.effectiveAt)

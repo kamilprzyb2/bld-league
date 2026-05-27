@@ -8,8 +8,5 @@ public class GetRecentFinishedMatchesRequestHandler(IUnitOfWork unitOfWork, Roun
     : IRequestHandler<GetRecentFinishedMatchesRequest, IReadOnlyList<RecentMatchDto>>
 {
     public async Task<IReadOnlyList<RecentMatchDto>> Handle(GetRecentFinishedMatchesRequest request, CancellationToken cancellationToken)
-    {
-        var localToday = roundClock.LocalToday();
-        return await unitOfWork.MatchRepository.GetRecentFinishedMatchesAsync(request.Count, localToday);
-    }
+        => await unitOfWork.MatchRepository.GetRecentFinishedMatchesAsync(request.Count, roundClock.LocalToday());
 }

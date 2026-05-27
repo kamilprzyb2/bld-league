@@ -116,6 +116,14 @@ Concretely:
 - Pages inspect `result.Success` / `result.IsGeneralError` and route accordingly (add to `ModelState` or set `TempData`).
 - Never `throw` to indicate that a user-facing operation could not be completed.
 
+### English Identifiers Only
+All code identifiers — variables, methods, classes, parameters, properties, fields, namespaces, file names — must be in English. The UI is Polish (the league is Polish-speaking), but the codebase is English-only. Polish words appear **only** in Razor view text content, user-facing string literals, `[Display]` attributes, and CSS/icon labels — never as a symbol name in C# or Razor `@{}` blocks.
+
+Concretely:
+- `roundBadgeClass`, not `kolejkaBadgeClass`.
+- `seasonNumber`, not `numerSezonu`.
+- A Razor block may render the word "Kolejka" as on-screen text, but the C# variable holding that string is named in English.
+
 ## UI Principles
 
 ### Plain, Simple Razor Pages
@@ -261,6 +269,7 @@ Avoid JavaScript by default. Prefer server-side form submissions and page reload
 | `SolveFormatHelper` (Ao5 best/worst parentheses formatting) | `src/Web/Helpers/SolveFormatHelper.cs` |
 | `PageModelExtensions` (signed-in user league resolution) | `src/Web/Helpers/PageModelExtensions.cs` |
 | `EnvironmentBadgeOptions` (optional navbar env label) | `src/Web/Options/EnvironmentBadgeOptions.cs` |
+| `LeagueColorHelper` (A–F cycle through icon colors) | `src/Web/Helpers/LeagueColorHelper.cs` |
 | `MatchStatus` enum (Upcoming/InProgress/Finished) | `src/Web/ViewModels/MatchStatus.cs` |
 | ViewModels | `src/Web/ViewModels/` |
 
@@ -275,6 +284,8 @@ Avoid JavaScript by default. Prefer server-side form submissions and page reload
 | Active-round three-section live table (partial) | `src/Web/Pages/Rounds/_ActiveRoundLiveStandings.cshtml` |
 | Shared identity row for the two no-reveal sections of the live table (partial) | `src/Web/Pages/Rounds/_LiveRoundIdentityRow.cshtml` |
 | Match list | `src/Web/Pages/Matches/MatchList.cshtml[.cs]` |
+| Recent matches grid (21 tiles, public, route `/Matches/Recent`) | `src/Web/Pages/Matches/Recent.cshtml[.cs]` |
+| Recent match tile (partial, used by home page + `/Matches/Recent`) | `src/Web/Pages/Shared/_RecentMatchTile.cshtml` |
 | Match detail | `src/Web/Pages/Matches/ViewMatch.cshtml[.cs]` |
 | Player rankings (single + average) at `/Rankings` | `src/Web/Pages/Rankings/Rankings.cshtml[.cs]` |
 | User list | `src/Web/Pages/Users/UserList.cshtml[.cs]` |
