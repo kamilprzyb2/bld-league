@@ -144,7 +144,6 @@
                             <th>Zawodnik</th>
                             <th class="text-nowrap">Ao12</th>
                             <th class="d-none d-md-table-cell">Wyniki</th>
-                            <th class="d-md-none"></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -158,23 +157,22 @@
                                 parts.Add(SolveFormatHelper.FormatWithParens(window, j));
                             }
                             var solvesText = string.Join(", ", parts);
-                            var rowClass = i >= 5 ? "stats-extra-row ao12-extra" : null;
+                            var classes = new List<string> { "js-stats-solves-row" };
+                            if (i >= 5)
+                            {
+                                classes.Add("stats-extra-row");
+                                classes.Add("ao12-extra");
+                            }
+                            var rowClass = string.Join(" ", classes);
                             var rowStyle = i >= 5 ? "display: none;" : null;
-                            <tr class="@rowClass" style="@rowStyle">
+                            <tr class="@rowClass" style="@rowStyle"
+                                data-solves="@solvesText" data-player="@entry.FullName">
                                 <td>@(i + 1)</td>
                                 <td>
                                     <a asp-page="/Users/UserProfile" asp-route-id="@entry.UserId">@entry.FullName</a>
                                 </td>
                                 <td class="fw-bold text-nowrap">@entry.BestAo12.ToString()</td>
                                 <td class="d-none d-md-table-cell">@solvesText</td>
-                                <td class="d-md-none text-end">
-                                    <button type="button" class="btn btn-link btn-sm p-0"
-                                            data-bs-toggle="modal" data-bs-target="#solvesModal"
-                                            data-solves="@solvesText" data-player="@entry.FullName"
-                                            aria-label="Pokaż ułożenia">
-                                        <i class="bi bi-list-ul"></i>
-                                    </button>
-                                </td>
                             </tr>
                         }
                     </tbody>
@@ -207,7 +205,6 @@
                             <th>Zawodnik</th>
                             <th class="text-nowrap">Ao25</th>
                             <th class="d-none d-md-table-cell">Wyniki</th>
-                            <th class="d-md-none"></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -221,23 +218,22 @@
                                 parts.Add(SolveFormatHelper.FormatWithParens(window, j, dropCount: 2));
                             }
                             var solvesText = string.Join(", ", parts);
-                            var rowClass = i >= 5 ? "stats-extra-row ao25-extra" : null;
+                            var classes = new List<string> { "js-stats-solves-row" };
+                            if (i >= 5)
+                            {
+                                classes.Add("stats-extra-row");
+                                classes.Add("ao25-extra");
+                            }
+                            var rowClass = string.Join(" ", classes);
                             var rowStyle = i >= 5 ? "display: none;" : null;
-                            <tr class="@rowClass" style="@rowStyle">
+                            <tr class="@rowClass" style="@rowStyle"
+                                data-solves="@solvesText" data-player="@entry.FullName">
                                 <td>@(i + 1)</td>
                                 <td>
                                     <a asp-page="/Users/UserProfile" asp-route-id="@entry.UserId">@entry.FullName</a>
                                 </td>
                                 <td class="fw-bold text-nowrap">@entry.BestAo25.ToString()</td>
                                 <td class="d-none d-md-table-cell">@solvesText</td>
-                                <td class="d-md-none text-end">
-                                    <button type="button" class="btn btn-link btn-sm p-0"
-                                            data-bs-toggle="modal" data-bs-target="#solvesModal"
-                                            data-solves="@solvesText" data-player="@entry.FullName"
-                                            aria-label="Pokaż ułożenia">
-                                        <i class="bi bi-list-ul"></i>
-                                    </button>
-                                </td>
                             </tr>
                         }
                     </tbody>
@@ -449,6 +445,14 @@
     }
 </div>
 
+@section Styles {
+    <style>
+        @@media (max-width: 767.98px) {
+            tr.js-stats-solves-row { cursor: pointer; }
+        }
+    </style>
+}
+
 @section HeadScripts {
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 }
@@ -526,15 +530,21 @@
                 });
             }
 
-            // Shared solves modal — copy the data-* payload from the clicked button into the modal body.
+            // Shared solves modal — open on row click (mobile only), reading data-* attributes from the row.
+            // Mirrors the js-round-row pattern on UserProfile: clicks on inner <a> still navigate (link wins).
             var modalEl = document.getElementById('solvesModal');
             if (modalEl) {
-                modalEl.addEventListener('show.bs.modal', function (ev) {
-                    var btn = ev.relatedTarget;
-                    if (!btn) return;
-                    document.getElementById('solvesModalLabel').textContent = btn.getAttribute('data-player') || 'Ułożenia';
-                    document.getElementById('solvesModalBody').textContent = btn.getAttribute('data-solves') || '';
-                });
+                var modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+                var rows = document.querySelectorAll('tr.js-stats-solves-row');
+                for (var rIdx = 0; rIdx < rows.length; rIdx++) {
+                    rows[rIdx].addEventListener('click', function (ev) {
+                        if (window.innerWidth >= 768) return;
+                        var row = ev.currentTarget;
+                        document.getElementById('solvesModalLabel').textContent = row.getAttribute('data-player') || 'Ułożenia';
+                        document.getElementById('solvesModalBody').textContent = row.getAttribute('data-solves') || '';
+                        modal.show();
+                    });
+                }
             }
         })();
     </script>

@@ -59,11 +59,12 @@
                             Wyniki <i class="bi bi-chevron-down nav-chevron"></i>
                         </a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" asp-area="" asp-page="/Leagues/ViewLeague">Ligi</a></li>
-                            <li><a class="dropdown-item" asp-area="" asp-page="/Rounds/ViewRound">Kolejki</a></li>
-                            <li><a class="dropdown-item" asp-area="" asp-page="/Matches/MatchList">Mecze</a></li>
-                            <li><a class="dropdown-item" asp-area="" asp-page="/Rankings/Rankings">Rankingi</a></li>
-                            <li><a class="dropdown-item" asp-area="" asp-page="/Users/UserList">Osoby</a></li>
+                            <li><a class="dropdown-item" asp-area="" asp-page="/Leagues/ViewLeague"><i class="bi bi-trophy text-warning" style="margin-right: 0.5rem;"></i>Ligi</a></li>
+                            <li><a class="dropdown-item" asp-area="" asp-page="/Rounds/ViewRound"><i class="bi bi-calendar3 text-primary" style="margin-right: 0.5rem;"></i>Kolejki</a></li>
+                            <li><a class="dropdown-item" asp-area="" asp-page="/Matches/MatchList"><i class="bi bi-stopwatch text-danger" style="margin-right: 0.5rem;"></i>Mecze</a></li>
+                            <li><a class="dropdown-item" asp-area="" asp-page="/Rankings/Rankings"><i class="bi bi-bar-chart-line text-success" style="margin-right: 0.5rem;"></i>Rankingi</a></li>
+                            <li><a class="dropdown-item" asp-area="" asp-page="/Users/UserList"><i class="bi bi-person-circle" style="margin-right: 0.5rem; color: #ed8257"></i>Osoby</a></li>
+                            <li><a class="dropdown-item" asp-area="" asp-page="/Statistics/Statistics"><i class="bi bi-pie-chart text-info" style="margin-right: 0.5rem;"></i>Statystyki</a></li>
                         </ul>
                     </li>
                     <li class="nav-item dropdown">
@@ -72,9 +73,9 @@
                             Informacje <i class="bi bi-chevron-down nav-chevron"></i>
                         </a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" asp-area="" asp-page="/About/Guidelines">Zasady</a></li>
-                            <li><a class="dropdown-item" asp-area="" asp-page="/About/About">O projekcie</a></li>
-                            <li><a class="dropdown-item" asp-area="" asp-page="/About/Privacy">Polityka prywatności</a></li>
+                            <li><a class="dropdown-item" asp-area="" asp-page="/About/Guidelines"><i class="bi bi-journal-text text-warning" style="margin-right: 0.5rem;"></i>Zasady</a></li>
+                            <li><a class="dropdown-item" asp-area="" asp-page="/About/About"><i class="bi bi-info-circle text-info" style="margin-right: 0.5rem;"></i>O projekcie</a></li>
+                            <li><a class="dropdown-item" asp-area="" asp-page="/About/Privacy"><i class="bi bi-shield-lock text-success" style="margin-right: 0.5rem;"></i>Polityka prywatności</a></li>
                         </ul>
                     </li>
                     @if (User.IsInRole("Admin"))
@@ -85,13 +86,13 @@
                                 Zarządzanie <i class="bi bi-chevron-down nav-chevron"></i>
                             </a>
                             <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" asp-area="" asp-page="/Admin/Users/AllUsers">Użytkownicy</a></li>
-                                <li><a class="dropdown-item" asp-area="" asp-page="/Admin/Leagues/AllLeagues">Ligi</a></li>
-                                <li><a class="dropdown-item" asp-area="" asp-page="/Admin/Seasons/AllSeasons">Sezony</a></li>
-                                <li><a class="dropdown-item" asp-area="" asp-page="/Admin/Rounds/AllRounds">Kolejki</a></li>
-                                <li><a class="dropdown-item" asp-area="" asp-page="/Admin/LeagueSeasons/AllLeagueSeasons">Ligo-sezony</a></li>
-                                <li><a class="dropdown-item" asp-area="" asp-page="/Admin/Matches/AllMatches">Mecze</a></li>
-                                <li><a class="dropdown-item" asp-area="" asp-page="/Admin/Rankings/Rankings">Rankingi</a></li>
+                                <li><a class="dropdown-item" asp-area="" asp-page="/Admin/Users/AllUsers"><i class="bi bi-gear" style="margin-right: 0.5rem;"></i>Użytkownicy</a></li>
+                                <li><a class="dropdown-item" asp-area="" asp-page="/Admin/Leagues/AllLeagues"><i class="bi bi-gear" style="margin-right: 0.5rem;"></i>Ligi</a></li>
+                                <li><a class="dropdown-item" asp-area="" asp-page="/Admin/Seasons/AllSeasons"><i class="bi bi-gear" style="margin-right: 0.5rem;"></i>Sezony</a></li>
+                                <li><a class="dropdown-item" asp-area="" asp-page="/Admin/Rounds/AllRounds"><i class="bi bi-gear" style="margin-right: 0.5rem;"></i>Kolejki</a></li>
+                                <li><a class="dropdown-item" asp-area="" asp-page="/Admin/LeagueSeasons/AllLeagueSeasons"><i class="bi bi-gear" style="margin-right: 0.5rem;"></i>Ligo-sezony</a></li>
+                                <li><a class="dropdown-item" asp-area="" asp-page="/Admin/Matches/AllMatches"><i class="bi bi-gear" style="margin-right: 0.5rem;"></i>Mecze</a></li>
+                                <li><a class="dropdown-item" asp-area="" asp-page="/Admin/Rankings/Rankings"><i class="bi bi-gear" style="margin-right: 0.5rem;"></i>Rankingi</a></li>
                             </ul>
                         </li>
                     }
@@ -185,6 +186,7 @@
         <a asp-page="/About/About">O projekcie</a>
         <span class="mx-2">|</span>
         <a asp-page="/About/Privacy">Polityka prywatności</a>
+        <div class="small mt-1">&copy; 2026 Kamil Przybylski</div>
     </div>
 </footer>
 
