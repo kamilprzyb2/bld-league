@@ -223,6 +223,7 @@ Avoid JavaScript by default. Prefer server-side form submissions and page reload
 | Active submission query + `ActiveSubmissionDto` | `src/Application/Queries/Matches/GetActiveSubmission/` |
 | Recent finished matches query + `RecentMatchDto` | `src/Application/Queries/Matches/GetRecentFinishedMatches/` |
 | Active round query + `ActiveRoundDto` | `src/Application/Queries/Rounds/GetActiveRound/` |
+| Active round live detail (three-section snapshot) + `ActiveRoundLiveDetailDto`, `LiveRoundRowDto` | `src/Application/Queries/Rounds/GetActiveRoundLiveDetail/` |
 | User queries + DTOs (incl. `LeagueSeasonUserDto` for roster queries) | `src/Application/Queries/Users/` |
 | Player rankings query + DTOs (`SingleRankingDto`, `AverageRankingDto`) | `src/Application/Queries/PlayerRankings/` |
 | Player ranking by user ID | `src/Application/Queries/PlayerRankings/GetByUserId/` |
@@ -269,7 +270,10 @@ Avoid JavaScript by default. Prefer server-side form submissions and page reload
 |---|---|
 | Home / standings index | `src/Web/Pages/Index.cshtml[.cs]` |
 | View league season standings | `src/Web/Pages/Leagues/ViewLeague.cshtml[.cs]` |
-| View round results | `src/Web/Pages/Rounds/ViewRound.cshtml[.cs]` |
+| View round results (finished vs. active branches) | `src/Web/Pages/Rounds/ViewRound.cshtml[.cs]` |
+| Finished-round standings table (partial) | `src/Web/Pages/Rounds/_FinishedRoundStandings.cshtml` |
+| Active-round three-section live table (partial) | `src/Web/Pages/Rounds/_ActiveRoundLiveStandings.cshtml` |
+| Shared identity row for the two no-reveal sections of the live table (partial) | `src/Web/Pages/Rounds/_LiveRoundIdentityRow.cshtml` |
 | Match list | `src/Web/Pages/Matches/MatchList.cshtml[.cs]` |
 | Match detail | `src/Web/Pages/Matches/ViewMatch.cshtml[.cs]` |
 | Player rankings (single + average) at `/Rankings` | `src/Web/Pages/Rankings/Rankings.cshtml[.cs]` |

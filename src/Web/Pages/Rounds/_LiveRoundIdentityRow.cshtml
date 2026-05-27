@@ -1,0 +1,13 @@
+@model BldLeague.Web.ViewModels.LiveRoundIdentityRowViewModel
+
+<tr>
+    <td>
+        <a asp-page="/Users/UserProfile" asp-route-id="@Model.Row.UserId">@Model.Row.UserFullName</a>
+    </td>
+    <td class="d-none d-md-table-cell">@Model.Row.LeagueIdentifier</td>
+    <td colspan="7" class="text-center">
+        <span class="badge @Model.BadgeCssClass">
+            <i class="bi @Model.IconCssClass"></i> @Model.BadgeText
+        </span>
+    </td>
+</tr>

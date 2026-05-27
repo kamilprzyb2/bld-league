@@ -1,4 +1,5 @@
 using BldLeague.Application.Common;
+using BldLeague.Application.Queries.Rounds.GetActiveRoundLiveDetail;
 using BldLeague.Application.Queries.Rounds.GetAllBySeasonId;
 using BldLeague.Application.Queries.Rounds.GetDetail;
 using BldLeague.Application.Queries.Seasons.GetAll;
@@ -20,6 +21,7 @@ public class ViewRound(IMediator mediator, RoundClock roundClock) : PageModel
     public int RoundNumber { get; set; } = 0;
 
     public RoundDetailViewModel? RoundDetail { get; set; }
+    public ActiveRoundLiveDetailViewModel? ActiveRoundDetail { get; set; }
 
     public async Task<IActionResult> OnGet()
     {
@@ -39,8 +41,18 @@ public class ViewRound(IMediator mediator, RoundClock roundClock) : PageModel
         if (RoundNumber == 0 || !Rounds.Any(r => r.RoundNumber == RoundNumber))
             RoundNumber = Rounds.GetDefaultRound(roundClock).RoundNumber;
 
-        var dto = await mediator.Send(new GetRoundDetailRequest(SeasonId, RoundNumber));
-        RoundDetail = dto == null ? null : RoundDetailViewModel.FromDto(dto, roundClock);
+        var selectedRound = Rounds.First(r => r.RoundNumber == RoundNumber);
+
+        if (roundClock.IsRoundFinished(selectedRound.EndDate))
+        {
+            var dto = await mediator.Send(new GetRoundDetailRequest(SeasonId, RoundNumber));
+            RoundDetail = dto == null ? null : RoundDetailViewModel.FromDto(dto, roundClock);
+        }
+        else
+        {
+            var dto = await mediator.Send(new GetActiveRoundLiveDetailRequest(SeasonId, RoundNumber));
+            ActiveRoundDetail = dto == null ? null : ActiveRoundLiveDetailViewModel.FromDto(dto);
+        }
 
         ModelState.Clear();
         return Page();
