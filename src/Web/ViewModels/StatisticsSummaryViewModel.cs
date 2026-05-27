@@ -18,7 +18,7 @@ public class StatisticsSummaryViewModel
                 PrimaryText: $"{summary.ValidSolves} / {summary.Attempts}",
                 Subtitle: "Ułożonych kostek"),
             new StatTileViewModel(
-                IconClass: "bi-bullseye",
+                IconClass: "bi-calendar-check",
                 IconColorClass: "text-warning",
                 PrimaryText: summary.Matches.ToString(),
                 Subtitle: "Rozegranych meczów"),
@@ -26,7 +26,7 @@ public class StatisticsSummaryViewModel
                 IconClass: "bi-people-fill",
                 IconColorClass: "text-success",
                 PrimaryText: summary.Participants.ToString(),
-                Subtitle: "Osób wzięło udział"),
+                Subtitle: "Uczestników"),
         ];
     }
 

@@ -1,3 +1,4 @@
+using BldLeague.Application.Queries.Statistics.GetAccuracyLeaders;
 using BldLeague.Application.Queries.Statistics.GetLeagueRecordsAndAverages;
 using BldLeague.Application.Queries.Statistics.GetSeasonRecords;
 using BldLeague.Application.Queries.Statistics.GetStatisticsSummary;
@@ -53,6 +54,19 @@ public interface IStatisticsRepository
     /// BYE matches are excluded (skipped in win-streak logic per spec).
     /// </summary>
     Task<IReadOnlyList<UserMatchStreakGroup>> GetMatchesGroupedByUserAsync(DateTime localToday);
+
+    /// <summary>
+    /// Returns the top accuracy leaders — users sorted by ValidSolves / Attempts ratio descending,
+    /// then by Attempts descending, then by UserId ascending. Only users with at least
+    /// <paramref name="minAttempts"/> attempts (non-DNS solves) are included. Limited to <paramref name="top"/> rows.
+    /// </summary>
+    Task<IReadOnlyList<AccuracyEntryDto>> GetAccuracyLeadersAsync(DateTime localToday, int minAttempts, int top);
+
+    /// <summary>
+    /// Returns non-DNS solves grouped by user, ordered chronologically (season → round → solve index) within each user,
+    /// across all finished matches. Used to compute rolling Ao12 windows.
+    /// </summary>
+    Task<IReadOnlyList<UserSolveLeagueGroup>> GetNonDnsSolvesGroupedByUserAsync(DateTime localToday);
 }
 
 /// <summary>
@@ -72,3 +86,9 @@ public record UserSolveStreakGroup(Guid UserId, string FullName, IReadOnlyList<S
 /// All chronologically-ordered matches vs a real opponent for a single user across finished matches.
 /// </summary>
 public record UserMatchStreakGroup(Guid UserId, string FullName, IReadOnlyList<(int Self, int Opponent)> Matches);
+
+/// <summary>
+/// All non-DNS solves performed by a single user across finished matches, ordered by league sequence
+/// (season number → round number → solve index).
+/// </summary>
+public record UserSolveLeagueGroup(Guid UserId, string FullName, IReadOnlyList<SolveResult> Solves);

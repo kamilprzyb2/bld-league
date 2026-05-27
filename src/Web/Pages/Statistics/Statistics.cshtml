@@ -1,12 +1,17 @@
 @page "/Statistics"
 @using System.Globalization
 @using System.Text.Json
+@using BldLeague.Web.Helpers
 @using BldLeague.Web.Pages.Statistics
 @model BldLeague.Web.Pages.Statistics.Statistics
 
 @{
     ViewData["Title"] = "Statystyki";
     var dayNames = Statistics.PolishDayNames();
+
+    string Pct(int valid, int attempts) => attempts > 0
+        ? $"{(100.0 * valid / attempts).ToString("0.0", CultureInfo.InvariantCulture)}%"
+        : "—";
 }
 
 <div class="container mt-2">
@@ -72,6 +77,112 @@
                 </div>
             </div>
         </div>
+
+        <!-- Accuracy leaders -->
+        <h5 class="mt-4 mb-3">Najlepsza skuteczność</h5>
+        @if (Model.Data.AccuracyLeaders.Entries.Count == 0)
+        {
+            <p class="text-muted">Brak danych.</p>
+        }
+        else
+        {
+            var leader = Model.Data.AccuracyLeaders.Entries[0];
+            <div class="card border-0 shadow-sm p-3 mb-3">
+                <div class="d-flex align-items-center gap-3">
+                    <i class="bi bi-bullseye fs-2 text-success"></i>
+                    <div>
+                        <div class="fw-semibold">
+                            <a asp-page="/Users/UserProfile" asp-route-id="@leader.UserId">@leader.FullName</a>
+                        </div>
+                        <div class="fs-3 fw-bold">@Pct(leader.ValidSolves, leader.Attempts)</div>
+                        <div class="text-muted small">@leader.ValidSolves / @leader.Attempts</div>
+                    </div>
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Zawodnik</th>
+                            <th class="text-nowrap">Skuteczność</th>
+                            <th class="text-nowrap">Próby</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (int i = 0; i < Model.Data.AccuracyLeaders.Entries.Count; i++)
+                        {
+                            var entry = Model.Data.AccuracyLeaders.Entries[i];
+                            <tr>
+                                <td>@(i + 1)</td>
+                                <td>
+                                    <a asp-page="/Users/UserProfile" asp-route-id="@entry.UserId">@entry.FullName</a>
+                                </td>
+                                <td class="fw-bold text-nowrap">@Pct(entry.ValidSolves, entry.Attempts)</td>
+                                <td class="text-nowrap">@entry.ValidSolves / @entry.Attempts</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+
+        <!-- Rolling Ao12 leaders -->
+        <h5 class="mt-4 mb-3">Najlepsze Ao12</h5>
+        @if (Model.Data.RollingAo12Leaders.Entries.Count == 0)
+        {
+            <p class="text-muted">Brak danych.</p>
+        }
+        else
+        {
+            var topAo12 = Model.Data.RollingAo12Leaders.Entries[0];
+            var topWindow = topAo12.Window.ToArray();
+            <div class="card border-0 shadow-sm p-3 mb-3">
+                <div class="d-flex align-items-center gap-3">
+                    <i class="bi bi-lightning-charge-fill fs-2 text-warning"></i>
+                    <div>
+                        <div class="fw-semibold">
+                            <a asp-page="/Users/UserProfile" asp-route-id="@topAo12.UserId">@topAo12.FullName</a>
+                        </div>
+                        <div class="fs-3 fw-bold">@topAo12.BestAo12.ToString()</div>
+                        <div class="text-muted small">
+                            @{
+                                var parts = new List<string>(topWindow.Length);
+                                for (int i = 0; i < topWindow.Length; i++)
+                                {
+                                    parts.Add(SolveFormatHelper.FormatWithParens(topWindow, i));
+                                }
+                            }
+                            @string.Join(", ", parts)
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Zawodnik</th>
+                            <th class="text-nowrap">Ao12</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (int i = 0; i < Model.Data.RollingAo12Leaders.Entries.Count; i++)
+                        {
+                            var entry = Model.Data.RollingAo12Leaders.Entries[i];
+                            <tr>
+                                <td>@(i + 1)</td>
+                                <td>
+                                    <a asp-page="/Users/UserProfile" asp-route-id="@entry.UserId">@entry.FullName</a>
+                                </td>
+                                <td class="fw-bold text-nowrap">@entry.BestAo12.ToString()</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
 
         <!-- 2.7 Per-season records table -->
         <h5 class="mt-4 mb-3">Statystyki sezonów</h5>
@@ -193,17 +304,6 @@
                     data-values='@Html.Raw(JsonSerializer.Serialize(Model.Data.SolveDurations.Buckets.Select(b => b.Count).ToArray()))'></canvas>
         </div>
 
-        <!-- 2.2 Submission hour-of-day histogram -->
-        <h5 class="mt-4 mb-3">Godziny wgrywania wyników</h5>
-        <div class="card border-0 shadow-sm p-3">
-            <canvas id="hour-histogram"
-                    data-labels='@Html.Raw(JsonSerializer.Serialize(Enumerable.Range(0, 24).Select(h => h.ToString("00")).ToArray()))'
-                    data-values='@Html.Raw(JsonSerializer.Serialize(Model.Data.HourHistogram.Counts))'></canvas>
-            <div class="text-muted small mt-2">
-                na podstawie @Model.Data.HourHistogram.IncludedMatches z @Model.Data.HourHistogram.TotalMatches meczów
-            </div>
-        </div>
-
         <!-- 2.3 Day-of-week × hour-of-day heatmap -->
         <h5 class="mt-4 mb-3">Rozkład wgrywania (dzień × godzina)</h5>
         <div class="card border-0 shadow-sm p-3">
@@ -242,7 +342,7 @@
                                     {
                                         bg = string.Empty;
                                     }
-                                    <td style="@bg" title="@dayNames[d] @h.ToString("00"):00 — @count"></td>
+                                    <td style="@bg"></td>
                                 }
                             </tr>
                         }
@@ -250,16 +350,24 @@
                 </table>
             </div>
             <div class="text-muted small mt-2">
-                na podstawie @Model.Data.Heatmap.IncludedMatches z @Model.Data.Heatmap.TotalMatches meczów
+                na podstawie @Model.Data.Heatmap.IncludedMatches meczów
             </div>
         </div>
 
         <!-- 2.6 Match score distribution -->
         <h5 class="mt-4 mb-3">Rozkład wyników meczów</h5>
         <div class="card border-0 shadow-sm p-3">
-            <canvas id="score-distribution"
-                    data-labels='@Html.Raw(JsonSerializer.Serialize(Model.Data.ScoreDistribution.Buckets.Select(b => b.Label).ToArray()))'
-                    data-values='@Html.Raw(JsonSerializer.Serialize(Model.Data.ScoreDistribution.Buckets.Select(b => b.Count).ToArray()))'></canvas>
+            @{
+                var observedBuckets = Model.Data.ScoreDistribution.Buckets.Where(b => b.Count > 0).ToList();
+                var observedLabels = observedBuckets.Select(b => b.Label).ToArray();
+                var observedValues = observedBuckets.Select(b => b.Count).ToArray();
+                var chartHeight = Math.Max(180, observedBuckets.Count * 28);
+            }
+            <div style="height: @(chartHeight)px;">
+                <canvas id="score-distribution"
+                        data-labels='@Html.Raw(JsonSerializer.Serialize(observedLabels))'
+                        data-values='@Html.Raw(JsonSerializer.Serialize(observedValues))'></canvas>
+            </div>
         </div>
     }
 </div>
@@ -295,9 +403,34 @@
                 });
             }
 
-            renderBar('hour-histogram');
+            function renderHorizontalBar(canvasId) {
+                var el = document.getElementById(canvasId);
+                if (!el) return;
+                var labels = JSON.parse(el.dataset.labels || '[]');
+                var values = JSON.parse(el.dataset.values || '[]');
+                new Chart(el, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: values,
+                            backgroundColor: 'rgba(13,110,253,0.6)',
+                            borderColor: 'rgba(13,110,253,1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: { x: { beginAtZero: true, ticks: { precision: 0 } } }
+                    }
+                });
+            }
+
             renderBar('duration-histogram');
-            renderBar('score-distribution');
+            renderHorizontalBar('score-distribution');
         })();
     </script>
 }

@@ -1,4 +1,5 @@
 using BldLeague.Application.Abstractions.Repositories;
+using BldLeague.Application.Queries.Statistics.GetAccuracyLeaders;
 using BldLeague.Application.Queries.Statistics.GetLeagueRecordsAndAverages;
 using BldLeague.Application.Queries.Statistics.GetSeasonRecords;
 using BldLeague.Application.Queries.Statistics.GetStatisticsSummary;
@@ -282,6 +283,60 @@ public class StatisticsRepository(AppDbContext context) : IStatisticsRepository
                     .ThenBy(e => e.Round)
                     .Select(e => (e.Self, e.Opponent))
                     .ToList()))
+            .ToList();
+    }
+
+    public async Task<IReadOnlyList<AccuracyEntryDto>> GetAccuracyLeadersAsync(DateTime localToday, int minAttempts, int top)
+    {
+        // Group all attempts (non-DNS solves) per user and count valid (non-negative) entries.
+        // Server-side projection — ratio comparison and tie-break by Guid all expressible in EF Core.
+        var rows = await FinishedSolves(localToday)
+            .Where(s => s.Result != -2)
+            .GroupBy(s => new { s.UserId, FullName = s.User.FullName })
+            .Select(g => new
+            {
+                g.Key.UserId,
+                g.Key.FullName,
+                Attempts = g.Count(),
+                ValidSolves = g.Count(s => s.Result >= 0),
+            })
+            .Where(r => r.Attempts >= minAttempts)
+            .ToListAsync();
+
+        return rows
+            .OrderByDescending(r => (double)r.ValidSolves / r.Attempts)
+            .ThenByDescending(r => r.Attempts)
+            .ThenBy(r => r.UserId)
+            .Take(top)
+            .Select(r => new AccuracyEntryDto(r.UserId, r.FullName, r.ValidSolves, r.Attempts))
+            .ToList();
+    }
+
+    public async Task<IReadOnlyList<UserSolveLeagueGroup>> GetNonDnsSolvesGroupedByUserAsync(DateTime localToday)
+    {
+        var rows = await FinishedSolves(localToday)
+            .Where(s => s.Result != -2)
+            .Select(s => new
+            {
+                s.UserId,
+                FullName = s.User.FullName,
+                SeasonNumber = s.Match.Round.Season.SeasonNumber,
+                RoundNumber = s.Match.Round.RoundNumber,
+                s.Index,
+                ResultCs = (int)s.Result,
+            })
+            .ToListAsync();
+
+        return rows
+            .GroupBy(r => new { r.UserId, r.FullName })
+            .Select(g => new UserSolveLeagueGroup(
+                g.Key.UserId,
+                g.Key.FullName,
+                g.OrderBy(r => r.SeasonNumber)
+                 .ThenBy(r => r.RoundNumber)
+                 .ThenBy(r => r.Index)
+                 .Select(r => SolveResult.FromCentiseconds(r.ResultCs))
+                 .ToList()))
             .ToList();
     }
 
