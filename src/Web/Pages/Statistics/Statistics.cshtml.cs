@@ -2,6 +2,7 @@ using BldLeague.Application.Queries.Statistics.GetAccuracyLeaders;
 using BldLeague.Application.Queries.Statistics.GetLeagueRecordsAndAverages;
 using BldLeague.Application.Queries.Statistics.GetMatchScoreDistribution;
 using BldLeague.Application.Queries.Statistics.GetRollingAo12Leaders;
+using BldLeague.Application.Queries.Statistics.GetRollingAo25Leaders;
 using BldLeague.Application.Queries.Statistics.GetSeasonRecords;
 using BldLeague.Application.Queries.Statistics.GetSolveDurationHistogram;
 using BldLeague.Application.Queries.Statistics.GetStatisticsSummary;
@@ -30,6 +31,7 @@ public class Statistics(IMediator mediator) : PageModel
         var streaks = await mediator.Send(new GetStreakLeadersRequest());
         var accuracy = await mediator.Send(new GetAccuracyLeadersRequest());
         var rollingAo12 = await mediator.Send(new GetRollingAo12LeadersRequest());
+        var rollingAo25 = await mediator.Send(new GetRollingAo25LeadersRequest());
 
         Data = new StatisticsViewModel
         {
@@ -42,6 +44,7 @@ public class Statistics(IMediator mediator) : PageModel
             StreakLeaders = streaks,
             AccuracyLeaders = accuracy,
             RollingAo12Leaders = rollingAo12,
+            RollingAo25Leaders = rollingAo25,
         };
     }
 

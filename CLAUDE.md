@@ -68,7 +68,7 @@ The solution follows a **Clean Architecture** with four projects:
 Pure domain layer with no external dependencies.
 - **Entities**: `League`, `Season`, `LeagueSeason`, `LeagueSeasonUser`, `Round`, `Match`, `Solve`, `Scramble`, `RoundStanding`, `LeagueSeasonStanding`, `User`. All implement `IIdentifiable` and use static `Create()` factory methods with `Guid.CreateVersion7()`.
 - **ValueObjects**: `SolveResult` — a `readonly record struct` representing a timed result (ms), DNF (`-1`), or DNS (`-2`). Supports `ToString()`, `FromString()`, and implicit `int` conversion.
-- **Scoring**: `AverageCalculator.CalculateAo5()` and `CalculateAo12()` — WCA-rules averages (drop best/worst, DNF if >1 invalid solve).
+- **Scoring**: `AverageCalculator.CalculateAo5()`, `CalculateAo12()`, and `CalculateAo25()` — WCA-style averages (drop best/worst, DNF if too many invalid solves).
 
 ### Application (`src/Application`)
 Business logic via **MediatR** (CQRS). No EF Core dependencies — only repository interfaces.
@@ -154,7 +154,7 @@ Avoid JavaScript by default. Prefer server-side form submissions and page reload
 | `PlayerRanking` entity | `src/Domain/Entities/PlayerRanking.cs` |
 | `User` entity | `src/Domain/Entities/User.cs` |
 | `SolveResult` value object | `src/Domain/ValueObjects/SolveResult.cs` |
-| `AverageCalculator` (Ao5 + Ao12 logic) | `src/Domain/Scoring/AverageCalculator.cs` |
+| `AverageCalculator` (Ao5 / Ao12 / Ao25 logic) | `src/Domain/Scoring/AverageCalculator.cs` |
 | `IIdentifiable` interface | `src/Domain/Interfaces/IIdentifiable.cs` |
 
 ### Application — infrastructure
@@ -232,7 +232,7 @@ Avoid JavaScript by default. Prefer server-side form submissions and page reload
 | User match history | `src/Application/Queries/Users/GetMatchHistory/` |
 | User season history | `src/Application/Queries/Users/GetSeasonHistory/` |
 | User solves (for stats computation) | `src/Application/Queries/Users/GetSolves/` |
-| Global statistics summary + 8 chart/record/streak/leader queries (heatmap, solve durations, score distribution, season records, league records, streak leaders, accuracy leaders, rolling Ao12 leaders) | `src/Application/Queries/Statistics/` |
+| Global statistics summary + 9 chart/record/streak/leader queries (heatmap, solve durations, score distribution, season records, league records, streak leaders, accuracy leaders, rolling Ao12 leaders, rolling Ao25 leaders) | `src/Application/Queries/Statistics/` |
 
 ### Infrastructure
 

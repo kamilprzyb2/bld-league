@@ -79,7 +79,8 @@
         </div>
 
         <!-- Accuracy leaders -->
-        <h5 class="mt-4 mb-2">Najlepsza skuteczność</h5>
+        <h5 class="mt-4 mb-1">Najlepsza skuteczność</h5>
+        <div class="text-muted small mb-2">minimum 10 prób</div>
         @if (Model.Data.AccuracyLeaders.Entries.Count == 0)
         {
             <p class="text-muted">Brak danych.</p>
@@ -118,7 +119,9 @@
             </div>
             @if (accuracyHidden > 0)
             {
-                <a href="#" class="stats-show-more" data-target="accuracy-extra" data-more-text="Pokaż więcej (@accuracyHidden)" data-less-text="Zwiń">Pokaż więcej (@accuracyHidden)</a>
+                <div class="text-end mt-2">
+                    <a href="#" class="stats-show-more" data-target="accuracy-extra">Pokaż więcej</a>
+                </div>
             }
         }
 
@@ -166,7 +169,7 @@
                                 <td class="d-none d-md-table-cell">@solvesText</td>
                                 <td class="d-md-none text-end">
                                     <button type="button" class="btn btn-link btn-sm p-0"
-                                            data-bs-toggle="modal" data-bs-target="#ao12SolvesModal"
+                                            data-bs-toggle="modal" data-bs-target="#solvesModal"
                                             data-solves="@solvesText" data-player="@entry.FullName"
                                             aria-label="Pokaż ułożenia">
                                         <i class="bi bi-list-ul"></i>
@@ -179,21 +182,87 @@
             </div>
             @if (ao12Hidden > 0)
             {
-                <a href="#" class="stats-show-more" data-target="ao12-extra" data-more-text="Pokaż więcej (@ao12Hidden)" data-less-text="Zwiń">Pokaż więcej (@ao12Hidden)</a>
+                <div class="text-end mt-2">
+                    <a href="#" class="stats-show-more" data-target="ao12-extra">Pokaż więcej</a>
+                </div>
             }
+        }
 
-            <div class="modal fade" id="ao12SolvesModal" tabindex="-1" aria-hidden="true">
-                <div class="modal-dialog modal-dialog-centered">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="ao12SolvesModalLabel">Ułożenia</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Zamknij"></button>
-                        </div>
-                        <div class="modal-body" id="ao12SolvesModalBody"></div>
+        <!-- Rolling Ao25 leaders -->
+        <h5 class="mt-4 mb-1">Krocząca Ao25</h5>
+        <div class="text-muted small mb-2">spośród 25 kolejnych ułożeń z różnych rund</div>
+        @if (Model.Data.RollingAo25Leaders.Entries.Count == 0)
+        {
+            <p class="text-muted">Brak danych.</p>
+        }
+        else
+        {
+            var ao25Total = Model.Data.RollingAo25Leaders.Entries.Count;
+            var ao25Hidden = Math.Max(0, ao25Total - 5);
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Zawodnik</th>
+                            <th class="text-nowrap">Ao25</th>
+                            <th class="d-none d-md-table-cell">Wyniki</th>
+                            <th class="d-md-none"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (int i = 0; i < ao25Total; i++)
+                        {
+                            var entry = Model.Data.RollingAo25Leaders.Entries[i];
+                            var window = entry.Window.ToArray();
+                            var parts = new List<string>(window.Length);
+                            for (int j = 0; j < window.Length; j++)
+                            {
+                                parts.Add(SolveFormatHelper.FormatWithParens(window, j));
+                            }
+                            var solvesText = string.Join(", ", parts);
+                            var rowClass = i >= 5 ? "stats-extra-row ao25-extra" : null;
+                            var rowStyle = i >= 5 ? "display: none;" : null;
+                            <tr class="@rowClass" style="@rowStyle">
+                                <td>@(i + 1)</td>
+                                <td>
+                                    <a asp-page="/Users/UserProfile" asp-route-id="@entry.UserId">@entry.FullName</a>
+                                </td>
+                                <td class="fw-bold text-nowrap">@entry.BestAo25.ToString()</td>
+                                <td class="d-none d-md-table-cell">@solvesText</td>
+                                <td class="d-md-none text-end">
+                                    <button type="button" class="btn btn-link btn-sm p-0"
+                                            data-bs-toggle="modal" data-bs-target="#solvesModal"
+                                            data-solves="@solvesText" data-player="@entry.FullName"
+                                            aria-label="Pokaż ułożenia">
+                                        <i class="bi bi-list-ul"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            @if (ao25Hidden > 0)
+            {
+                <div class="text-end mt-2">
+                    <a href="#" class="stats-show-more" data-target="ao25-extra">Pokaż więcej</a>
+                </div>
+            }
+        }
+
+        <!-- Shared solves modal — populated by both the Ao12 and Ao25 mobile triggers. -->
+        <div class="modal fade" id="solvesModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="solvesModalLabel">Ułożenia</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Zamknij"></button>
                     </div>
+                    <div class="modal-body" id="solvesModalBody"></div>
                 </div>
             </div>
-        }
+        </div>
 
         <!-- 2.7 Per-season records table -->
         <h5 class="mt-4 mb-3">Statystyki sezonów</h5>
@@ -360,9 +429,6 @@
                     </tbody>
                 </table>
             </div>
-            <div class="text-muted small mt-2">
-                na podstawie @Model.Data.Heatmap.IncludedMatches meczów
-            </div>
         </div>
 
         <!-- 2.6 Match score distribution -->
@@ -443,7 +509,7 @@
             renderBar('duration-histogram');
             renderHorizontalBar('score-distribution');
 
-            // Collapsible "show more" links for the accuracy + Ao12 leaderboards.
+            // Collapsible "show more" links for the accuracy + Ao12 + Ao25 leaderboards.
             var links = document.querySelectorAll('.stats-show-more');
             for (var i = 0; i < links.length; i++) {
                 links[i].addEventListener('click', function (ev) {
@@ -456,20 +522,18 @@
                     for (var r = 0; r < rows.length; r++) {
                         rows[r].style.display = hidden ? '' : 'none';
                     }
-                    link.textContent = hidden
-                        ? (link.getAttribute('data-less-text') || 'Zwiń')
-                        : (link.getAttribute('data-more-text') || 'Pokaż więcej');
+                    link.textContent = hidden ? 'Zwiń' : 'Pokaż więcej';
                 });
             }
 
-            // Ao12 mobile modal — copy the data-* payload from the clicked button into the modal body.
-            var modalEl = document.getElementById('ao12SolvesModal');
+            // Shared solves modal — copy the data-* payload from the clicked button into the modal body.
+            var modalEl = document.getElementById('solvesModal');
             if (modalEl) {
                 modalEl.addEventListener('show.bs.modal', function (ev) {
                     var btn = ev.relatedTarget;
                     if (!btn) return;
-                    document.getElementById('ao12SolvesModalLabel').textContent = btn.getAttribute('data-player') || 'Ułożenia';
-                    document.getElementById('ao12SolvesModalBody').textContent = btn.getAttribute('data-solves') || '';
+                    document.getElementById('solvesModalLabel').textContent = btn.getAttribute('data-player') || 'Ułożenia';
+                    document.getElementById('solvesModalBody').textContent = btn.getAttribute('data-solves') || '';
                 });
             }
         })();

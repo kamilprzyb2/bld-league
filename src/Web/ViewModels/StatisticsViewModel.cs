@@ -2,6 +2,7 @@ using BldLeague.Application.Queries.Statistics.GetAccuracyLeaders;
 using BldLeague.Application.Queries.Statistics.GetLeagueRecordsAndAverages;
 using BldLeague.Application.Queries.Statistics.GetMatchScoreDistribution;
 using BldLeague.Application.Queries.Statistics.GetRollingAo12Leaders;
+using BldLeague.Application.Queries.Statistics.GetRollingAo25Leaders;
 using BldLeague.Application.Queries.Statistics.GetSeasonRecords;
 using BldLeague.Application.Queries.Statistics.GetSolveDurationHistogram;
 using BldLeague.Application.Queries.Statistics.GetStreakLeaders;
@@ -23,4 +24,5 @@ public class StatisticsViewModel
     public required StreakLeadersDto StreakLeaders { get; init; }
     public required AccuracyLeadersDto AccuracyLeaders { get; init; }
     public required RollingAo12LeadersDto RollingAo12Leaders { get; init; }
+    public required RollingAo25LeadersDto RollingAo25Leaders { get; init; }
 }
