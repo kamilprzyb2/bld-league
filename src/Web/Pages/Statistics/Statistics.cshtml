@@ -218,7 +218,7 @@
                             var parts = new List<string>(window.Length);
                             for (int j = 0; j < window.Length; j++)
                             {
-                                parts.Add(SolveFormatHelper.FormatWithParens(window, j));
+                                parts.Add(SolveFormatHelper.FormatWithParens(window, j, dropCount: 2));
                             }
                             var solvesText = string.Join(", ", parts);
                             var rowClass = i >= 5 ? "stats-extra-row ao25-extra" : null;
