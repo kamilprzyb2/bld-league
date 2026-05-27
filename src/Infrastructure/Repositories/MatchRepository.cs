@@ -189,7 +189,8 @@ public class MatchRepository(AppDbContext context)
     {
         var candidates = await DbSet
             .Where(m => (m.UserASubmittedAt != null && (m.UserBId == null || m.UserBSubmittedAt != null))
-                        || m.Round.EndDate < localToday)
+                        || (m.Round.EndDate < localToday
+                            && (m.UserASubmittedAt != null || m.UserBSubmittedAt != null)))
             .OrderByDescending(m => m.Round.EndDate)
             .ThenByDescending(m => m.Id)
             .Take(count * 4)
