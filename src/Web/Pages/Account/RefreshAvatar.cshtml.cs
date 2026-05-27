@@ -16,7 +16,8 @@ public class RefreshAvatar : PageModel
         await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
         return Challenge(new AuthenticationProperties
         {
-            RedirectUri = userId != null ? $"/Users/{userId}" : "/"
+            RedirectUri = userId != null ? $"/Users/{userId}" : "/",
+            IsPersistent = true
         }, "WCA");
     }
 }

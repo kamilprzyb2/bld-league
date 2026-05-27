@@ -189,7 +189,8 @@ public class MatchRepository(AppDbContext context)
     {
         var candidates = await DbSet
             .Where(m => (m.UserASubmittedAt != null && (m.UserBId == null || m.UserBSubmittedAt != null))
-                        || m.Round.EndDate < localToday)
+                        || (m.Round.EndDate < localToday
+                            && (m.UserASubmittedAt != null || m.UserBSubmittedAt != null)))
             .OrderByDescending(m => m.Round.EndDate)
             .ThenByDescending(m => m.Id)
             .Take(count * 4)
@@ -202,6 +203,9 @@ public class MatchRepository(AppDbContext context)
                 m.UserBScore,
                 m.UserASubmittedAt,
                 m.UserBSubmittedAt,
+                LeagueIdentifier = m.LeagueSeason.League.LeagueIdentifier,
+                RoundNumber = m.Round.RoundNumber,
+                IsFromActiveRound = m.Round.StartDate <= localToday && m.Round.EndDate >= localToday,
                 RoundEndDate = m.Round.EndDate,
             })
             .ToListAsync();
@@ -220,6 +224,9 @@ public class MatchRepository(AppDbContext context)
                     UserBFullName = m.UserBFullName,
                     UserAScore = m.UserAScore,
                     UserBScore = m.UserBScore,
+                    LeagueIdentifier = m.LeagueIdentifier,
+                    RoundNumber = m.RoundNumber,
+                    IsFromActiveRound = m.IsFromActiveRound,
                 }, effectiveAt);
             })
             .OrderByDescending(x => x.effectiveAt)

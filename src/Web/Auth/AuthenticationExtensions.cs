@@ -4,6 +4,7 @@ using System.Text.Json;
 using BldLeague.Application.Commands.Users.UpdateAvatar;
 using BldLeague.Application.Queries.Users.GetById;
 using BldLeague.Application.Queries.Users.GetUserDetailByWcaId;
+using BldLeague.Web.Options;
 using MediatR;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -13,12 +14,15 @@ namespace BldLeague.Web.Auth;
 
 public static class AuthenticationExtensions
 {
-    private static readonly TimeSpan ClaimsRefreshInterval = TimeSpan.FromMinutes(5);
-
-    public static AuthenticationBuilder AddRefreshingCookie(this AuthenticationBuilder builder)
+    public static AuthenticationBuilder AddRefreshingCookie(this AuthenticationBuilder builder, AuthOptions authOptions)
     {
+        var claimsRefreshInterval = TimeSpan.FromMinutes(authOptions.ClaimsRefreshMinutes);
+        var cookieExpireTimeSpan = TimeSpan.FromDays(authOptions.CookieExpireDays);
+
         return builder.AddCookie(options =>
         {
+            options.ExpireTimeSpan = cookieExpireTimeSpan;
+            options.SlidingExpiration = true;
             options.Events = new CookieAuthenticationEvents
             {
                 OnValidatePrincipal = async context =>
@@ -26,7 +30,7 @@ public static class AuthenticationExtensions
                     var refreshedAtValue = context.Principal?.FindFirstValue("claims_refreshed_at");
                     if (refreshedAtValue != null
                         && DateTime.TryParse(refreshedAtValue, null, System.Globalization.DateTimeStyles.RoundtripKind, out var lastRefresh)
-                        && DateTime.UtcNow - lastRefresh < ClaimsRefreshInterval)
+                        && DateTime.UtcNow - lastRefresh < claimsRefreshInterval)
                     {
                         return;
                     }

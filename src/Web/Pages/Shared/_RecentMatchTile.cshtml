@@ -1,0 +1,47 @@
+@model BldLeague.Application.Queries.Matches.GetRecentFinishedMatches.RecentMatchDto
+@{
+    var (leagueBg, leagueTextClass) = LeagueColorHelper.GetTileColors(Model.LeagueIdentifier);
+    var leagueLetter = string.IsNullOrEmpty(Model.LeagueIdentifier)
+        ? string.Empty
+        : char.ToUpperInvariant(Model.LeagueIdentifier[0]).ToString();
+    var isWalkover = string.IsNullOrEmpty(Model.UserBFullName);
+    var tie = !isWalkover && Model.UserAScore == Model.UserBScore;
+    var userAWon = !isWalkover && Model.UserAScore > Model.UserBScore;
+    var userBWon = !isWalkover && Model.UserBScore > Model.UserAScore;
+
+    string ChipClass(bool win) => tie ? "bg-warning text-dark" : (win ? "bg-success text-white" : "bg-secondary text-white");
+
+    var roundBadgeClass = Model.IsFromActiveRound ? "bg-primary text-white" : "bg-light text-dark";
+}
+
+<a asp-page="/Matches/ViewMatch" asp-route-id="@Model.MatchId" class="text-decoration-none">
+    <div class="card h-100 border-0 shadow-sm p-3">
+        <div class="d-flex align-items-stretch gap-3">
+            <div class="d-flex align-items-center justify-content-center fw-bold @leagueTextClass rounded flex-shrink-0"
+                 style="width: 1.75rem; height: 1.75rem; background-color: @leagueBg; font-size: 0.85rem;">
+                @leagueLetter
+            </div>
+            <div class="flex-grow-1" style="min-width: 0;">
+                @if (isWalkover)
+                {
+                    <div class="fw-semibold text-truncate">@Model.UserAFullName</div>
+                    <div class="text-muted small">wolny los</div>
+                }
+                else
+                {
+                    <div class="d-flex justify-content-between align-items-center gap-2">
+                        <span class="fw-semibold text-truncate">@Model.UserAFullName</span>
+                        <span class="badge @ChipClass(userAWon) flex-shrink-0" style="min-width: 2rem;">@Model.UserAScore</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center gap-2">
+                        <span class="fw-semibold text-truncate">@Model.UserBFullName</span>
+                        <span class="badge @ChipClass(userBWon) flex-shrink-0" style="min-width: 2rem;">@Model.UserBScore</span>
+                    </div>
+                }
+                <div class="mt-2 d-flex gap-1">
+                    <span class="badge @roundBadgeClass">Kolejka @Model.RoundNumber</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</a>

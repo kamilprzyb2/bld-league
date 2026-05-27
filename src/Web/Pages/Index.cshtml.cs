@@ -2,6 +2,8 @@ using System.Security.Claims;
 using BldLeague.Application.Queries.Matches.GetActiveSubmission;
 using BldLeague.Application.Queries.Matches.GetRecentFinishedMatches;
 using BldLeague.Application.Queries.Rounds.GetActiveRound;
+using BldLeague.Application.Queries.Statistics.GetStatisticsSummary;
+using BldLeague.Web.ViewModels;
 using MediatR;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
@@ -16,6 +18,7 @@ public class IndexModel(IMediator mediator) : PageModel
     public ActiveSubmissionDto? ActiveSubmission { get; set; }
     public IReadOnlyList<RecentMatchDto> RecentMatches { get; set; } = [];
     public ActiveRoundDto? ActiveRound { get; set; }
+    public StatisticsSummaryViewModel? StatisticsSummary { get; set; }
 
     public async Task OnGet()
     {
@@ -35,5 +38,8 @@ public class IndexModel(IMediator mediator) : PageModel
 
         RecentMatches = await mediator.Send(new GetRecentFinishedMatchesRequest(3));
         ActiveRound = await mediator.Send(new GetActiveRoundRequest());
+
+        var summary = await mediator.Send(new GetStatisticsSummaryRequest());
+        StatisticsSummary = new StatisticsSummaryViewModel(summary);
     }
 }

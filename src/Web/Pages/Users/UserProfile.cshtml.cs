@@ -1,3 +1,4 @@
+using BldLeague.Application.Common;
 using BldLeague.Application.Queries.PlayerRankings.GetByUserId;
 using BldLeague.Application.Queries.Users.GetAll;
 using BldLeague.Application.Queries.Users.GetById;
@@ -51,13 +52,7 @@ public class UserProfile(IMediator mediator) : PageModel
             ? SolveResult.FromCentiseconds((int)Math.Round(validSolves.Average(s => (double)s.Centiseconds)))
             : null;
 
-        int longestSuccessStreak = 0, currentSuccessStreak = 0;
-        foreach (var s in solves)
-        {
-            if (s.IsDns) continue;
-            if (s.IsValid) { currentSuccessStreak++; longestSuccessStreak = Math.Max(longestSuccessStreak, currentSuccessStreak); }
-            else currentSuccessStreak = 0;
-        }
+        int longestSuccessStreak = StreakCalculator.LongestSuccessStreak(solves);
 
         // Matches vs real opponents (exclude BYE), in chronological order
         var vsOpponent = matchHistory.Where(m => m.OpponentFullName != null).Reverse().ToList();
@@ -65,12 +60,8 @@ public class UserProfile(IMediator mediator) : PageModel
         int losses = vsOpponent.Count(m => m.ProfileUserScore < m.OpponentScore);
         int draws = vsOpponent.Count(m => m.ProfileUserScore == m.OpponentScore);
 
-        int longestWinStreak = 0, currentWinStreak = 0;
-        foreach (var m in vsOpponent)
-        {
-            if (m.ProfileUserScore > m.OpponentScore) { currentWinStreak++; longestWinStreak = Math.Max(longestWinStreak, currentWinStreak); }
-            else currentWinStreak = 0;
-        }
+        int longestWinStreak = StreakCalculator.LongestWinStreak(
+            vsOpponent.Select(m => (m.ProfileUserScore, m.OpponentScore)));
 
         return new UserStatsViewModel(validSolves.Count, nonDnsSolves.Count, averageSingle, wins, losses, draws, longestSuccessStreak, longestWinStreak);
     }

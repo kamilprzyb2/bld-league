@@ -1,0 +1,68 @@
+@model BldLeague.Web.ViewModels.ActiveRoundLiveDetailViewModel
+
+<table class="table table-hover align-middle">
+    <thead class="table">
+        <tr>
+            <th scope="col">Zawodnik</th>
+            <th scope="col" class="d-none d-md-table-cell">Liga</th>
+            <th scope="col">Best</th>
+            <th scope="col">Ao5</th>
+            <th scope="col" class="d-none d-md-table-cell">A1</th>
+            <th scope="col" class="d-none d-md-table-cell">A2</th>
+            <th scope="col" class="d-none d-md-table-cell">A3</th>
+            <th scope="col" class="d-none d-md-table-cell">A4</th>
+            <th scope="col" class="d-none d-md-table-cell">A5</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        @if (Model.FinishedRows.Any())
+        {
+            foreach (var row in Model.FinishedRows)
+            {
+                <tr>
+                    <td><a asp-page="/Users/UserProfile" asp-route-id="@row.UserId">@row.UserFullName</a></td>
+                    <td class="d-none d-md-table-cell">@row.LeagueIdentifier</td>
+                    <td class="fw-bold">@row.Best</td>
+                    <td>@row.Average</td>
+                    <td class="d-none d-md-table-cell">@row.Solve1</td>
+                    <td class="d-none d-md-table-cell">@row.Solve2</td>
+                    <td class="d-none d-md-table-cell">@row.Solve3</td>
+                    <td class="d-none d-md-table-cell">@row.Solve4</td>
+                    <td class="d-none d-md-table-cell">@row.Solve5</td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="9" class="text-center text-muted">Brak ukończonych meczów.</td>
+            </tr>
+        }
+    </tbody>
+
+    <tbody>
+        @foreach (var row in Model.SubmittedAloneRows)
+        {
+            var submittedAloneModel = new BldLeague.Web.ViewModels.LiveRoundIdentityRowViewModel
+            {
+                Row = row,
+                BadgeCssClass = "text-bg-success",
+                IconCssClass = "bi-check-circle",
+                BadgeText = "Wgrane, oczekuje na przeciwnika",
+            };
+            <partial name="_LiveRoundIdentityRow" model="submittedAloneModel" />
+        }
+        @foreach (var row in Model.PendingRows)
+        {
+            var pendingModel = new BldLeague.Web.ViewModels.LiveRoundIdentityRowViewModel
+            {
+                Row = row,
+                BadgeCssClass = "text-bg-secondary",
+                IconCssClass = "bi-hourglass-split",
+                BadgeText = "Brak wyniku",
+            };
+            <partial name="_LiveRoundIdentityRow" model="pendingModel" />
+        }
+    </tbody>
+</table>

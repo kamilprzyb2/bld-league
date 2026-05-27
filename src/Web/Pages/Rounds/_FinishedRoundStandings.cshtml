@@ -1,0 +1,69 @@
+@model BldLeague.Web.ViewModels.RoundDetailViewModel
+
+<table class="table table-hover align-middle">
+    <thead class="table">
+        <tr>
+            <th scope="col" class="text-center">Pozycja</th>
+            <th scope="col">Zawodnik</th>
+            <th scope="col" class="d-none d-md-table-cell">Liga</th>
+            <th scope="col">Best</th>
+            <th scope="col">Ao5</th>
+            <th scope="col" class="d-none d-md-table-cell">A1</th>
+            <th scope="col" class="d-none d-md-table-cell">A2</th>
+            <th scope="col" class="d-none d-md-table-cell">A3</th>
+            <th scope="col" class="d-none d-md-table-cell">A4</th>
+            <th scope="col" class="d-none d-md-table-cell">A5</th>
+            <th scope="col" class="text-center">Punkty</th>
+        </tr>
+    </thead>
+    <tbody>
+    @if (Model.Standings.Any())
+    {
+        foreach (var standing in Model.Standings)
+        {
+            <tr class="js-detail-row"
+                data-place="@standing.Place"
+                data-name="@standing.UserFullName"
+                data-league="@standing.LeagueIdentifier"
+                data-best="@standing.Best"
+                data-avg="@standing.Average"
+                data-s1="@standing.Solve1"
+                data-s2="@standing.Solve2"
+                data-s3="@standing.Solve3"
+                data-s4="@standing.Solve4"
+                data-s5="@standing.Solve5"
+                data-pts="@standing.Points">
+                <td class="text-center">@standing.Place</td>
+                <td><a asp-page="/Users/UserProfile" asp-route-id="@standing.UserId">@standing.UserFullName</a></td>
+                <td class="d-none d-md-table-cell">@standing.LeagueIdentifier</td>
+                <td class="fw-bold">@standing.Best</td>
+                <td>@standing.Average</td>
+                <td class="d-none d-md-table-cell">@standing.Solve1</td>
+                <td class="d-none d-md-table-cell">@standing.Solve2</td>
+                <td class="d-none d-md-table-cell">@standing.Solve3</td>
+                <td class="d-none d-md-table-cell">@standing.Solve4</td>
+                <td class="d-none d-md-table-cell">@standing.Solve5</td>
+                <td class="text-center">@standing.Points</td>
+            </tr>
+        }
+    }
+    else
+    {
+        <tr>
+            <td colspan="11" class="text-center">Brak danych.</td>
+        </tr>
+    }
+    </tbody>
+</table>
+
+<div class="modal fade" id="rowDetailModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Szczegóły zawodnika</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Zamknij"></button>
+            </div>
+            <div class="modal-body" id="rowDetailBody"></div>
+        </div>
+    </div>
+</div>

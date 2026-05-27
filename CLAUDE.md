@@ -68,7 +68,7 @@ The solution follows a **Clean Architecture** with four projects:
 Pure domain layer with no external dependencies.
 - **Entities**: `League`, `Season`, `LeagueSeason`, `LeagueSeasonUser`, `Round`, `Match`, `Solve`, `Scramble`, `RoundStanding`, `LeagueSeasonStanding`, `User`. All implement `IIdentifiable` and use static `Create()` factory methods with `Guid.CreateVersion7()`.
 - **ValueObjects**: `SolveResult` — a `readonly record struct` representing a timed result (ms), DNF (`-1`), or DNS (`-2`). Supports `ToString()`, `FromString()`, and implicit `int` conversion.
-- **Scoring**: `AverageCalculator.CalculateAo5()` — WCA-rules Ao5 average (drops best/worst, DNF if >1 invalid solve).
+- **Scoring**: `AverageCalculator.CalculateAo5()`, `CalculateAo12()`, and `CalculateAo25()` — WCA-style averages (drop best/worst, DNF if too many invalid solves).
 
 ### Application (`src/Application`)
 Business logic via **MediatR** (CQRS). No EF Core dependencies — only repository interfaces.
@@ -116,6 +116,14 @@ Concretely:
 - Pages inspect `result.Success` / `result.IsGeneralError` and route accordingly (add to `ModelState` or set `TempData`).
 - Never `throw` to indicate that a user-facing operation could not be completed.
 
+### English Identifiers Only
+All code identifiers — variables, methods, classes, parameters, properties, fields, namespaces, file names — must be in English. The UI is Polish (the league is Polish-speaking), but the codebase is English-only. Polish words appear **only** in Razor view text content, user-facing string literals, `[Display]` attributes, and CSS/icon labels — never as a symbol name in C# or Razor `@{}` blocks.
+
+Concretely:
+- `roundBadgeClass`, not `kolejkaBadgeClass`.
+- `seasonNumber`, not `numerSezonu`.
+- A Razor block may render the word "Kolejka" as on-screen text, but the C# variable holding that string is named in English.
+
 ## UI Principles
 
 ### Plain, Simple Razor Pages
@@ -154,7 +162,7 @@ Avoid JavaScript by default. Prefer server-side form submissions and page reload
 | `PlayerRanking` entity | `src/Domain/Entities/PlayerRanking.cs` |
 | `User` entity | `src/Domain/Entities/User.cs` |
 | `SolveResult` value object | `src/Domain/ValueObjects/SolveResult.cs` |
-| `AverageCalculator` (Ao5 logic) | `src/Domain/Scoring/AverageCalculator.cs` |
+| `AverageCalculator` (Ao5 / Ao12 / Ao25 logic) | `src/Domain/Scoring/AverageCalculator.cs` |
 | `IIdentifiable` interface | `src/Domain/Interfaces/IIdentifiable.cs` |
 
 ### Application — infrastructure
@@ -168,6 +176,7 @@ Avoid JavaScript by default. Prefer server-side form submissions and page reload
 | `ImportResult` (import aggregate result) | `src/Application/Common/ImportResult.cs` |
 | `ImportRowResult` (per-row import result) | `src/Application/Common/ImportRowResult.cs` |
 | `MatchSolvesProcessor` (shared match logic) | `src/Application/Common/MatchSolvesProcessor.cs` |
+| `StreakCalculator` (shared solve/win streak logic) | `src/Application/Common/StreakCalculator.cs` |
 | `RoundClock` (round timing in configured league TZ) | `src/Application/Common/RoundClock.cs` |
 | `RoundFinalizationOptions` (TZ + cron schedule config) | `src/Application/Common/RoundFinalizationOptions.cs` |
 | `ScrambleDto` (scramble data transfer) | `src/Application/Queries/Rounds/GetScrambles/ScrambleDto.cs` |
@@ -192,6 +201,7 @@ Avoid JavaScript by default. Prefer server-side form submissions and page reload
 | `ILeagueSeasonStandingRepository` | `src/Application/Abstractions/Repositories/ILeagueSeasonStandingRepository.cs` |
 | `IUserRepository` | `src/Application/Abstractions/Repositories/IUserRepository.cs` |
 | `IPlayerRankingRepository` | `src/Application/Abstractions/Repositories/IPlayerRankingRepository.cs` |
+| `IStatisticsRepository` (global statistics projections) | `src/Application/Abstractions/Repositories/IStatisticsRepository.cs` |
 
 ### Application — commands (write operations, by feature)
 
@@ -223,6 +233,7 @@ Avoid JavaScript by default. Prefer server-side form submissions and page reload
 | Active submission query + `ActiveSubmissionDto` | `src/Application/Queries/Matches/GetActiveSubmission/` |
 | Recent finished matches query + `RecentMatchDto` | `src/Application/Queries/Matches/GetRecentFinishedMatches/` |
 | Active round query + `ActiveRoundDto` | `src/Application/Queries/Rounds/GetActiveRound/` |
+| Active round live detail (three-section snapshot) + `ActiveRoundLiveDetailDto`, `LiveRoundRowDto` | `src/Application/Queries/Rounds/GetActiveRoundLiveDetail/` |
 | User queries + DTOs (incl. `LeagueSeasonUserDto` for roster queries) | `src/Application/Queries/Users/` |
 | Player rankings query + DTOs (`SingleRankingDto`, `AverageRankingDto`) | `src/Application/Queries/PlayerRankings/` |
 | Player ranking by user ID | `src/Application/Queries/PlayerRankings/GetByUserId/` |
@@ -230,6 +241,7 @@ Avoid JavaScript by default. Prefer server-side form submissions and page reload
 | User match history | `src/Application/Queries/Users/GetMatchHistory/` |
 | User season history | `src/Application/Queries/Users/GetSeasonHistory/` |
 | User solves (for stats computation) | `src/Application/Queries/Users/GetSolves/` |
+| Global statistics summary + 9 chart/record/streak/leader queries (heatmap, solve durations, score distribution, season records, league records, streak leaders, accuracy leaders, rolling Ao12 leaders, rolling Ao25 leaders) | `src/Application/Queries/Statistics/` |
 
 ### Infrastructure
 
@@ -260,6 +272,7 @@ Avoid JavaScript by default. Prefer server-side form submissions and page reload
 | `SolveFormatHelper` (Ao5 best/worst parentheses formatting) | `src/Web/Helpers/SolveFormatHelper.cs` |
 | `PageModelExtensions` (signed-in user league resolution) | `src/Web/Helpers/PageModelExtensions.cs` |
 | `EnvironmentBadgeOptions` (optional navbar env label) | `src/Web/Options/EnvironmentBadgeOptions.cs` |
+| `LeagueColorHelper` (A–F cycle through icon colors) | `src/Web/Helpers/LeagueColorHelper.cs` |
 | `MatchStatus` enum (Upcoming/InProgress/Finished) | `src/Web/ViewModels/MatchStatus.cs` |
 | ViewModels | `src/Web/ViewModels/` |
 
@@ -269,13 +282,20 @@ Avoid JavaScript by default. Prefer server-side form submissions and page reload
 |---|---|
 | Home / standings index | `src/Web/Pages/Index.cshtml[.cs]` |
 | View league season standings | `src/Web/Pages/Leagues/ViewLeague.cshtml[.cs]` |
-| View round results | `src/Web/Pages/Rounds/ViewRound.cshtml[.cs]` |
+| View round results (finished vs. active branches) | `src/Web/Pages/Rounds/ViewRound.cshtml[.cs]` |
+| Finished-round standings table (partial) | `src/Web/Pages/Rounds/_FinishedRoundStandings.cshtml` |
+| Active-round three-section live table (partial) | `src/Web/Pages/Rounds/_ActiveRoundLiveStandings.cshtml` |
+| Shared identity row for the two no-reveal sections of the live table (partial) | `src/Web/Pages/Rounds/_LiveRoundIdentityRow.cshtml` |
 | Match list | `src/Web/Pages/Matches/MatchList.cshtml[.cs]` |
+| Recent matches grid (21 tiles, public, route `/Matches/Recent`) | `src/Web/Pages/Matches/Recent.cshtml[.cs]` |
+| Recent match tile (partial, used by home page + `/Matches/Recent`) | `src/Web/Pages/Shared/_RecentMatchTile.cshtml` |
 | Match detail | `src/Web/Pages/Matches/ViewMatch.cshtml[.cs]` |
 | Player rankings (single + average) at `/Rankings` | `src/Web/Pages/Rankings/Rankings.cshtml[.cs]` |
 | User list | `src/Web/Pages/Users/UserList.cshtml[.cs]` |
 | User profile | `src/Web/Pages/Users/UserProfile.cshtml[.cs]` |
 | Self-service result submission | `src/Web/Pages/Submit/SubmitResults.cshtml[.cs]` |
+| Global statistics page | `src/Web/Pages/Statistics/Statistics.cshtml[.cs]` |
+| Shared stat tile partial (icon + text card) | `src/Web/Pages/Shared/_StatTile.cshtml` |
 | About / rules | `src/Web/Pages/About/About.cshtml[.cs]` |
 | Season 3 guidelines (current) | `src/Web/Pages/About/Guidelines.cshtml[.cs]` |
 | Season 2 guidelines (archived) | `src/Web/Pages/About/GuidelinesSeason2.cshtml[.cs]` |

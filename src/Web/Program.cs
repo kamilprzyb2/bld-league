@@ -22,13 +22,19 @@ builder.Services.AddBldLeagueApplication(builder.Configuration["MediatR:LicenseK
 
 builder.Services.Configure<EnvironmentBadgeOptions>(builder.Configuration.GetSection("EnvironmentBadge"));
 
+var authOptions = builder.Configuration
+    .GetSection(AuthOptions.SectionName)
+    .Get<AuthOptions>() ?? new AuthOptions();
+
+builder.Services.Configure<AuthOptions>(builder.Configuration.GetSection(AuthOptions.SectionName));
+
 builder.Services.AddAuthentication(options =>
     {
         options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
         options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
         options.DefaultChallengeScheme = "WCA";
     })
-    .AddRefreshingCookie()
+    .AddRefreshingCookie(authOptions)
     .AddWcaOAuth(builder.Configuration.GetSection("WCA"));
 
 var app = builder.Build();

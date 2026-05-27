@@ -10,7 +10,8 @@ public class Login : PageModel
     {
         return Challenge(new AuthenticationProperties
         {
-            RedirectUri = "/"
+            RedirectUri = "/",
+            IsPersistent = true
         }, "WCA");
     }
 }

@@ -18,7 +18,8 @@ public interface IUnitOfWork
     IRoundStandingRepository RoundStandingRepository { get; }
     ILeagueSeasonStandingRepository LeagueSeasonStandingRepository { get; }
     IPlayerRankingRepository PlayerRankingRepository { get; }
-    
+    IStatisticsRepository StatisticsRepository { get; }
+
     /// <summary>
     /// Commits all changes made in the current unit of work as a single transaction asynchronously.
     /// </summary>

@@ -1,0 +1,24 @@
+@page "/Matches/Recent"
+@model BldLeague.Web.Pages.Matches.Recent
+
+<div class="container mt-2">
+    <h2>Ostatnie mecze</h2>
+
+    <hr class="my-4" />
+
+    @if (Model.RecentMatches.Count > 0)
+    {
+        <div class="row g-3">
+            @foreach (var m in Model.RecentMatches)
+            {
+                <div class="col-12 col-sm-6 col-md-4">
+                    <partial name="_RecentMatchTile" model="m" />
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <p>Brak danych.</p>
+    }
+</div>
