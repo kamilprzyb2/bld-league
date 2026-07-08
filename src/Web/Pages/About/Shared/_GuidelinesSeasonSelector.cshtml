@@ -1,13 +1,15 @@
 @model string
 
 @{
+    var isSeason4 = Model == "4";
     var isSeason3 = Model == "3";
     var isSeason2 = Model == "2";
     var isSeason1 = Model == "1";
 
     string currentLabel = Model switch
     {
-        "3" => "Sezon 3",
+        "4" => "Sezon 4",
+        "3" => "Sezon 3 (archiwum)",
         "2" => "Sezon 2 (archiwum)",
         "1" => "Sezon 1 (archiwum)",
         _ => "Zasady"
@@ -20,7 +22,10 @@
     </button>
     <ul class="dropdown-menu">
         <li>
-            <a class="dropdown-item @(isSeason3 ? "active" : "")" asp-page="/About/Guidelines">Sezon 3</a>
+            <a class="dropdown-item @(isSeason4 ? "active" : "")" asp-page="/About/Guidelines">Sezon 4</a>
+        </li>
+        <li>
+            <a class="dropdown-item @(isSeason3 ? "active" : "")" asp-page="/About/GuidelinesSeason3">Sezon 3 (archiwum)</a>
         </li>
         <li>
             <a class="dropdown-item @(isSeason2 ? "active" : "")" asp-page="/About/GuidelinesSeason2">Sezon 2 (archiwum)</a>

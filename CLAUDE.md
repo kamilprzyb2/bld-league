@@ -297,7 +297,8 @@ Avoid JavaScript by default. Prefer server-side form submissions and page reload
 | Global statistics page | `src/Web/Pages/Statistics/Statistics.cshtml[.cs]` |
 | Shared stat tile partial (icon + text card) | `src/Web/Pages/Shared/_StatTile.cshtml` |
 | About / rules | `src/Web/Pages/About/About.cshtml[.cs]` |
-| Season 3 guidelines (current) | `src/Web/Pages/About/Guidelines.cshtml[.cs]` |
+| Season 4 guidelines (current) | `src/Web/Pages/About/Guidelines.cshtml[.cs]` |
+| Season 3 guidelines (archived) | `src/Web/Pages/About/GuidelinesSeason3.cshtml[.cs]` |
 | Season 2 guidelines (archived) | `src/Web/Pages/About/GuidelinesSeason2.cshtml[.cs]` |
 | Season 1 guidelines (archived) | `src/Web/Pages/About/GuidelinesSeason1.cshtml[.cs]` |
 | Guidelines season selector dropdown (partial) | `src/Web/Pages/About/Shared/_GuidelinesSeasonSelector.cshtml` |

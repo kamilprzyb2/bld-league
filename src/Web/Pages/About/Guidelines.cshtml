@@ -43,10 +43,10 @@
     <div class="page-header">
         <div class="d-flex align-items-start justify-content-between flex-wrap gap-2">
             <div>
-                <h2 class="mb-1">Zasady ligi <span class="badge bg-primary fs-6">Sezon 3</span></h2>
-                <p class="text-muted mb-0">Aktualne zasady obowiązujące w sezonie 3</p>
+                <h2 class="mb-1">Zasady ligi <span class="badge bg-primary fs-6">Sezon 4</span></h2>
+                <p class="text-muted mb-0">Aktualne zasady obowiązujące w sezonie 4</p>
             </div>
-            <partial name="Shared/_GuidelinesSeasonSelector" model="@("3")" />
+            <partial name="Shared/_GuidelinesSeasonSelector" model="@("4")" />
         </div>
     </div>
 
@@ -57,24 +57,24 @@
         </div>
         <div class="card-body">
             <ul>
-                <li>Wszyscy zawodnicy są podzieleni poziomem na <strong>5 lig</strong></li>
-                <li>Sezon trwa <strong>10 kolejek</strong> (z wyjątkiem ligi A, gdzie będzie ich 11), kolejki odbywają się w stałych dniach tygodnia:
+                <li>Wszyscy zawodnicy są podzieleni poziomem na <strong>5 lig</strong>.</li>
+                <li>Sezon trwa <strong>13 kolejek w ligach A i E</strong> oraz <strong>14 kolejek w ligach B, C i D</strong>. Kolejki odbywają się w stałych dniach tygodnia:
                     <ul>
                         <li><strong>poniedziałek – środa</strong> – jedna kolejka</li>
                         <li><strong>czwartek – niedziela</strong> – druga kolejka</li>
                     </ul>
                 </li>
-                <li><strong>Liga A</strong> – w sezonie 3 każdy gra po jednym meczu z każdym</li>
-                <li><strong>Liga B i C</strong> – w tych ligach mamy po 8 zawodników; na pierwsze <strong>7 kolejek</strong> mamy z góry przypisanych rywali. Na kolejki 8–10 nastąpi <strong>rozdzielenie</strong> w obrębie każdej ligi:
+                <li><strong>Liga A</strong> – każdy zawodnik toczy po jednym meczu z każdym.</li>
+                <li><strong>Liga B, C i D</strong> – każdy zawodnik toczy 2 mecze z każdym. UWAGA: w lidze D mamy nieparzystą liczbę osób, więc w każdej kolejce jedna osoba nie będzie miała przypisanego rywala.</li>
+                <li><strong>Liga E</strong> – każdy zawodnik toczy 2 mecze z każdym, a po 10. kolejce odbędzie się podział w obrębie ligi:
                     <ul>
-                        <li>miejsca 1–4 będą toczyć rewanże ze sobą</li>
-                        <li>miejsca 5–8 również między sobą nawzajem</li>
+                        <li>miejsca 1–3 stoczą po jednym rewanżu ze sobą nawzajem</li>
+                        <li>miejsca 4–6 stoczą po jednym rewanżu ze sobą nawzajem</li>
                     </ul>
-                    Harmonogram tych pojedynków ukaże się po zakończeniu 7. kolejki.
+                    Harmonogram tych pojedynków ukaże się po zakończeniu 10. kolejki. UWAGA: podobnie jak w lidze D, ze względu na nieparzystą liczbę zawodników jedna osoba będzie miała kolejkę "przerwy".
                 </li>
-                <li><strong>Liga D i E</strong> – w sezonie 3 każdy gra po dwa mecze z każdym</li>
-                <li>Wykonujemy <strong>5 prób</strong> na kolejkę</li>
-                <li>Nie ma potrzeby łączenia się na żywo i równoczesnego układania, możemy wykonywać swoje ułożenia kiedy nam pasuje i wgrywać niezależnie od rywala</li>
+                <li>Wykonujemy <strong>5 prób</strong> na kolejkę.</li>
+                <li>Nie ma potrzeby łączenia się na żywo i równoczesnego układania — możemy wykonywać swoje ułożenia kiedy nam pasuje i wgrywać niezależnie od rywala.</li>
                 <li>Wyniki przesyłamy za pomocą odpowiedniej zakładki meczowej na stronie <strong>bldleague.pl</strong>:
                     <ol type="a">
                         <li>logujemy się na stronie swoim WCA ID</li>
@@ -84,7 +84,8 @@
                         <li>wyniki meczu są widoczne od razu, od chwili kiedy obydwaj zawodnicy wgrali swoje czasy</li>
                     </ol>
                 </li>
-                <li>Gorąco zachęcamy do wykonywania ułożeń za pomocą timera i maty oraz z użyciem pudełka do zakrywania kostki</li>
+                <li>Gorąco zachęcamy do wykonywania ułożeń za pomocą timera i maty oraz z użyciem pudełka do zakrywania kostki.</li>
+                <li>Zawodników z ligi D, jak również ligi E (na końcowym jej etapie), którzy nie mają w danej kolejce przypisanego rywala, również zachęcamy do wykonywania swoich ułożeń — w celu podbicia sumy punktów za drugie kryterium.</li>
             </ul>
         </div>
     </div>
@@ -92,15 +93,12 @@
     <!-- Uwagi -->
     <div class="alert alert-warning">
         <h6 class="alert-heading"><i class="bi bi-exclamation-triangle"></i> UWAGA dot. pierwszego tygodnia</h6>
-        <p class="mb-0">Pierwszy tydzień turnieju odbędzie się wyjątkowo ze zmienionym harmonogramem:<br>
-        <strong>poniedziałek – czwartek</strong> – kolejka nr 1 &nbsp;|&nbsp; <strong>piątek – niedziela</strong> – kolejka nr 2<br>
-        <span class="small">Od drugiego tygodnia obowiązuje standardowy harmonogram (poniedziałek – środa / czwartek – niedziela).</span></p>
-    </div>
-
-    <div class="alert alert-info">
-        <h6 class="alert-heading"><i class="bi bi-exclamation-triangle"></i> UWAGA: Liga A</h6>
-        <p class="mb-2">Ze względu na większą liczebność ligi A w tej lidze odbędzie się <strong>11 kolejek</strong>, a nie 10.</p>
-        <p class="mb-0">Zawodników pozostałych lig zachęcamy do zrobienia i wgrania swych ułożeń w trakcie ostatniej 11 kolejki, również w celu podbicia sumy swoich punktów za drugie kryterium.</p>
+        <p class="mb-2">Z uwagi na Euro 2026 turniej będzie zawieszony od wtorku <strong>14.07</strong> do niedzieli <strong>19.07</strong>. Harmonogram pierwszego tygodnia wygląda wyjątkowo tak:</p>
+        <ul class="mb-2">
+            <li><strong>Kolejka 1:</strong> środa – piątek (<strong>8–10.07</strong>)</li>
+            <li><strong>Kolejka 2:</strong> sobota – poniedziałek (<strong>11–13.07</strong>)</li>
+        </ul>
+        <p class="mb-0"><span class="small">Od 20.07 obowiązuje standardowy harmonogram (poniedziałek – środa / czwartek – niedziela).</span></p>
     </div>
 
     <!-- Punktacja -->
