@@ -13,7 +13,6 @@ public record PlayerComparisonSideDto(
     SolveResult? BestAverage,
     int? AverageRank,
     UserStats Stats,
-    int SeasonsPlayed,
-    string? CurrentLeagueIdentifier,
-    IReadOnlyList<RecentFormEntryDto> RecentForm
+    IReadOnlyList<RecentFormEntryDto> RecentForm,
+    RecentFormStatsDto RecentStats
 );

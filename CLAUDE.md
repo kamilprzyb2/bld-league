@@ -243,7 +243,7 @@ Avoid JavaScript by default. Prefer server-side form submissions and page reload
 | Player ranking by user ID | `src/Application/Queries/PlayerRankings/GetByUserId/` |
 | User round results | `src/Application/Queries/Users/GetRoundResults/` |
 | User match history | `src/Application/Queries/Users/GetMatchHistory/` |
-| Head-to-head comparison + DTOs (`HeadToHeadComparisonDto`, `PlayerComparisonSideDto`, `HeadToHeadMatchDto`, `UpcomingMeetingDto`, `CommonRoundDto`, `RecentFormEntryDto`) | `src/Application/Queries/Users/GetHeadToHeadComparison/` |
+| Head-to-head comparison + DTOs (`HeadToHeadComparisonDto`, `PlayerComparisonSideDto`, `HeadToHeadMatchDto`, `UpcomingMeetingDto`, `CommonRoundDto`, `RecentFormEntryDto`, `RecentFormStatsDto`) | `src/Application/Queries/Users/GetHeadToHeadComparison/` |
 | User season history | `src/Application/Queries/Users/GetSeasonHistory/` |
 | User solves (for stats computation) | `src/Application/Queries/Users/GetSolves/` |
 | Global statistics summary + 9 chart/record/streak/leader queries (heatmap, solve durations, score distribution, season records, league records, streak leaders, accuracy leaders, rolling Ao12 leaders, rolling Ao25 leaders) | `src/Application/Queries/Statistics/` |

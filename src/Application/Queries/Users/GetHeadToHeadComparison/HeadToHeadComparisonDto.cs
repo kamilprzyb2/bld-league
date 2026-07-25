@@ -10,8 +10,5 @@ public record HeadToHeadComparisonDto(
     int SolvePointsB,
     IReadOnlyList<HeadToHeadMatchDto> Meetings,
     UpcomingMeetingDto? UpcomingMeeting,
-    IReadOnlyList<CommonRoundDto> CommonRounds,
-    int CommonRoundWinsA,
-    int CommonRoundWinsB,
-    int CommonRoundTies
+    IReadOnlyList<CommonRoundDto> CommonRounds
 );

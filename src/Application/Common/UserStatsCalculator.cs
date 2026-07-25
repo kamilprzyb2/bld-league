@@ -17,9 +17,8 @@ public static class UserStatsCalculator
         var nonDnsSolves = solves.Where(s => !s.IsDns).ToList();
         var validSolves = nonDnsSolves.Where(s => s.IsValid).ToList();
 
-        SolveResult? averageSingle = validSolves.Count > 0
-            ? SolveResult.FromCentiseconds((int)Math.Round(validSolves.Average(s => (double)s.Centiseconds)))
-            : null;
+        SolveResult? averageSingle = CalculateMean(validSolves);
+        SolveResult? medianSingle = CalculateMedian(validSolves);
 
         int longestSuccessStreak = StreakCalculator.LongestSuccessStreak(solves);
 
@@ -32,6 +31,30 @@ public static class UserStatsCalculator
         int longestWinStreak = StreakCalculator.LongestWinStreak(
             vsOpponent.Select(m => (m.SelfScore, m.OpponentScore)));
 
-        return new UserStats(validSolves.Count, nonDnsSolves.Count, averageSingle, wins, losses, draws, longestSuccessStreak, longestWinStreak);
+        return new UserStats(validSolves.Count, nonDnsSolves.Count, averageSingle, medianSingle, wins, losses, draws, longestSuccessStreak, longestWinStreak);
+    }
+
+    /// <summary>
+    /// Arithmetic mean of the valid solves.
+    /// </summary>
+    public static SolveResult? CalculateMean(IReadOnlyCollection<SolveResult> validSolves)
+        => validSolves.Count > 0
+            ? SolveResult.FromCentiseconds((int)Math.Round(validSolves.Average(s => (double)s.Centiseconds)))
+            : null;
+
+    /// <summary>
+    /// Median of the valid solves; for an even count, the mean of the two middle values.
+    /// </summary>
+    public static SolveResult? CalculateMedian(IReadOnlyCollection<SolveResult> validSolves)
+    {
+        if (validSolves.Count == 0)
+            return null;
+
+        var sorted = validSolves.Select(s => s.Centiseconds).OrderBy(c => c).ToList();
+        int middle = sorted.Count / 2;
+        int median = sorted.Count % 2 != 0
+            ? sorted[middle]
+            : (int)Math.Round((sorted[middle - 1] + sorted[middle]) / 2.0);
+        return SolveResult.FromCentiseconds(median);
     }
 }

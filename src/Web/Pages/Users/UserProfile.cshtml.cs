@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using BldLeague.Application.Common;
 using BldLeague.Application.Queries.PlayerRankings.GetByUserId;
 using BldLeague.Application.Queries.Users.GetAll;
@@ -20,8 +21,8 @@ public class UserProfile(IMediator mediator) : PageModel
     public IReadOnlyCollection<UserRoundResultDto> RoundResults { get; set; } = [];
     public IReadOnlyCollection<UserMatchHistoryDto> MatchHistory { get; set; } = [];
     public IReadOnlyCollection<UserSeasonHistoryDto> SeasonHistory { get; set; } = [];
-    public IReadOnlyCollection<UserSummaryDto> AllUsers { get; set; } = [];
-    public UserStats Stats { get; set; } = new(0, 0, null, 0, 0, 0, 0, 0);
+    public UserStats Stats { get; set; } = new(0, 0, null, null, 0, 0, 0, 0, 0);
+    public Guid? SignedInUserId { get; set; }
 
     public async Task<IActionResult> OnGet(Guid id)
     {
@@ -33,8 +34,11 @@ public class UserProfile(IMediator mediator) : PageModel
         RoundResults = await mediator.Send(new GetUserRoundResultsRequest { UserId = id });
         MatchHistory = await mediator.Send(new GetUserMatchHistoryRequest { UserId = id });
         SeasonHistory = await mediator.Send(new GetUserSeasonHistoryRequest { UserId = id });
-        AllUsers = await mediator.Send(new GetAllUsersRequest());
         var solves = await mediator.Send(new GetUserSolvesRequest { UserId = id });
+
+        SignedInUserId = Guid.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var signedInUserId)
+            ? signedInUserId
+            : null;
 
         Stats = UserStatsCalculator.Calculate(
             solves,

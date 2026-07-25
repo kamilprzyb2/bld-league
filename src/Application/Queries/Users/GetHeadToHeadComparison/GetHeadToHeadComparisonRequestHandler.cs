@@ -10,6 +10,8 @@ namespace BldLeague.Application.Queries.Users.GetHeadToHeadComparison;
 public class GetHeadToHeadComparisonRequestHandler(IUnitOfWork unitOfWork, RoundClock roundClock)
     : IRequestHandler<GetHeadToHeadComparisonRequest, HeadToHeadComparisonDto?>
 {
+    private const int RECENT_FORM_MATCHES = 5;
+
     public async Task<HeadToHeadComparisonDto?> Handle(GetHeadToHeadComparisonRequest request, CancellationToken cancellationToken)
     {
         var userA = await unitOfWork.UserRepository.GetSummaryByIdAsync(request.UserAId);
@@ -68,10 +70,6 @@ public class GetHeadToHeadComparisonRequestHandler(IUnitOfWork unitOfWork, Round
             .ThenBy(c => c.RoundNumber)
             .ToList();
 
-        int commonRoundWinsA = commonRounds.Count(c => AverageBeats(c.AverageA, c.AverageB));
-        int commonRoundWinsB = commonRounds.Count(c => AverageBeats(c.AverageB, c.AverageA));
-        int commonRoundTies = commonRounds.Count - commonRoundWinsA - commonRoundWinsB;
-
         var upcomingMatch = await unitOfWork.MatchRepository.GetUnfinishedMatchBetweenUsersAsync(request.UserAId, request.UserBId, localToday);
         var upcomingMeeting = upcomingMatch == null
             ? null
@@ -82,8 +80,8 @@ public class GetHeadToHeadComparisonRequestHandler(IUnitOfWork unitOfWork, Round
                 roundClock.IsRoundActive(upcomingMatch.Round.StartDate, upcomingMatch.Round.EndDate));
 
         return new HeadToHeadComparisonDto(
-            BuildSide(userA, rankingA, matchesA, solvesA, standingsA),
-            BuildSide(userB, rankingB, matchesB, solvesB, standingsB),
+            await BuildSideAsync(userA, rankingA, matchesA, solvesA),
+            await BuildSideAsync(userB, rankingB, matchesB, solvesB),
             winsA,
             winsB,
             draws,
@@ -91,28 +89,17 @@ public class GetHeadToHeadComparisonRequestHandler(IUnitOfWork unitOfWork, Round
             meetings.Sum(m => m.ScoreB),
             meetings,
             upcomingMeeting,
-            commonRounds,
-            commonRoundWinsA,
-            commonRoundWinsB,
-            commonRoundTies);
+            commonRounds);
     }
 
     private static List<RoundStanding> FilterFinished(IReadOnlyCollection<RoundStanding> standings, DateTime localToday)
         => standings.Where(rs => rs.Round.EndDate < localToday).ToList();
 
-    private static bool AverageBeats(SolveResult average, SolveResult other)
-    {
-        if (!average.IsValid) return false;
-        if (!other.IsValid) return true;
-        return average.Centiseconds < other.Centiseconds;
-    }
-
-    private static PlayerComparisonSideDto BuildSide(
+    private async Task<PlayerComparisonSideDto> BuildSideAsync(
         UserSummaryDto user,
         PlayerRanking? ranking,
         IReadOnlyCollection<Match> matchesNewestFirst,
-        IReadOnlyCollection<SolveResult> solves,
-        IReadOnlyList<RoundStanding> standingsNewestFirst)
+        IReadOnlyCollection<SolveResult> solves)
     {
         var orientedMatches = matchesNewestFirst
             .Select(m => (Match: m, Perspective: MatchPerspective.For(m, user.Id)))
@@ -120,9 +107,12 @@ public class GetHeadToHeadComparisonRequestHandler(IUnitOfWork unitOfWork, Round
 
         var stats = UserStatsCalculator.Calculate(solves, orientedMatches.Select(m => m.Perspective).ToList());
 
-        var recentForm = orientedMatches
+        var recentMatches = orientedMatches
             .Where(m => m.Perspective.OpponentId != null)
-            .Take(5)
+            .Take(RECENT_FORM_MATCHES)
+            .ToList();
+
+        var recentForm = recentMatches
             .Select(m => new RecentFormEntryDto(
                 m.Perspective.SelfScore > m.Perspective.OpponentScore ? MatchOutcome.Win
                     : m.Perspective.SelfScore < m.Perspective.OpponentScore ? MatchOutcome.Loss
@@ -134,6 +124,15 @@ public class GetHeadToHeadComparisonRequestHandler(IUnitOfWork unitOfWork, Round
                 m.Perspective.OpponentFullName!))
             .ToList();
 
+        var recentSolves = await unitOfWork.SolveRepository.GetByUserAndMatchIdsAsync(
+            user.Id, recentMatches.Select(m => m.Match.Id).ToList());
+        var recentNonDnsSolves = recentSolves.Where(s => !s.IsDns).ToList();
+        var recentValidSolves = recentNonDnsSolves.Where(s => s.IsValid).ToList();
+        var recentStats = new RecentFormStatsDto(
+            UserStatsCalculator.CalculateMean(recentValidSolves),
+            recentValidSolves.Count,
+            recentNonDnsSolves.Count);
+
         return new PlayerComparisonSideDto(
             user.Id,
             user.FullName,
@@ -144,8 +143,7 @@ public class GetHeadToHeadComparisonRequestHandler(IUnitOfWork unitOfWork, Round
             ranking?.BestAverage,
             ranking?.AverageRank,
             stats,
-            standingsNewestFirst.Select(rs => rs.Round.Season.SeasonNumber).Distinct().Count(),
-            standingsNewestFirst.Count > 0 ? standingsNewestFirst[0].League.LeagueIdentifier : null,
-            recentForm);
+            recentForm,
+            recentStats);
     }
 }

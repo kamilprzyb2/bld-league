@@ -9,6 +9,7 @@ public record UserStats(
     int ValidSolves,
     int NonDnsSolves,
     SolveResult? AverageSingle,
+    SolveResult? MedianSingle,
     int Wins,
     int Losses,
     int Draws,

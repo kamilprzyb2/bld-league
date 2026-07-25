@@ -1,7 +1,7 @@
 @page "/Compare"
-@using System.Globalization
 @using System.Text.Json
 @using BldLeague.Application.Common
+@using BldLeague.Application.Queries.Users.GetHeadToHeadComparison
 @using BldLeague.Domain.ValueObjects
 @using BldLeague.Web.ViewModels
 @model BldLeague.Web.Pages.Compare.Compare
@@ -62,14 +62,19 @@
                 }
                 <h4 class="mb-1"><a asp-page="/Users/UserProfile" asp-route-id="@playerA.UserId">@playerA.FullName</a></h4>
                 <div class="text-muted">@playerA.WcaId</div>
+                <a class="btn btn-sm btn-outline-secondary mt-2" asp-page="/Compare/Compare"
+                   asp-route-userBId="@playerB.UserId" title="Wybierz innego zawodnika A">
+                    <i class="bi bi-arrow-repeat"></i> Zmień
+                </a>
             </div>
             <div class="col-4 col-md-2">
+                <div class="text-muted text-uppercase small">Bilans spotkań</div>
                 <div class="display-6 fw-bold text-nowrap">@comparison.WinsA : @comparison.WinsB</div>
                 <div class="text-muted small">Remisy: @comparison.Draws</div>
-                <a class="small" asp-page="/Compare/Compare"
-                   asp-route-userAId="@playerB.UserId" asp-route-userBId="@playerA.UserId">
-                    <i class="bi bi-arrow-left-right"></i> Zamień strony
-                </a>
+                <div class="mt-3">
+                    <div class="text-muted text-uppercase small">Bilans punktów</div>
+                    <div class="fw-semibold text-nowrap">@comparison.SolvePointsA : @comparison.SolvePointsB</div>
+                </div>
             </div>
             <div class="col-4 col-md-5">
                 @if (playerB.AvatarThumbnailUrl != null)
@@ -82,6 +87,10 @@
                 }
                 <h4 class="mb-1"><a asp-page="/Users/UserProfile" asp-route-id="@playerB.UserId">@playerB.FullName</a></h4>
                 <div class="text-muted">@playerB.WcaId</div>
+                <a class="btn btn-sm btn-outline-secondary mt-2" asp-page="/Compare/Compare"
+                   asp-route-userAId="@playerA.UserId" title="Wybierz innego zawodnika B">
+                    <i class="bi bi-arrow-repeat"></i> Zmień
+                </a>
             </div>
         </div>
 
@@ -103,72 +112,120 @@
             </div>
         }
 
-        @* 3. Direct record *@
-        <h4>Bilans bezpośredni</h4>
-        if (!comparison.Meetings.Any())
-        {
-            <p class="mb-4">Ci zawodnicy nie grali jeszcze ze sobą.</p>
-        }
-        else
-        {
-            var meetingsCount = comparison.Meetings.Count;
-            var winsAWidth = (100.0 * comparison.WinsA / meetingsCount).ToString("0.##", CultureInfo.InvariantCulture);
-            var drawsWidth = (100.0 * comparison.Draws / meetingsCount).ToString("0.##", CultureInfo.InvariantCulture);
-            var winsBWidth = (100.0 * comparison.WinsB / meetingsCount).ToString("0.##", CultureInfo.InvariantCulture);
-            var biggestWin = comparison.Meetings
-                .Where(m => m.ScoreA != m.ScoreB)
-                .OrderByDescending(m => Math.Abs(m.ScoreA - m.ScoreB))
-                .FirstOrDefault();
+        @* 3. Stats comparison *@
+        <h4>Porównanie statystyk</h4>
+        var statsA = playerA.Stats;
+        var statsB = playerB.Stats;
 
-            <div class="progress mb-3" style="height:1.5rem;">
-                @if (comparison.WinsA > 0)
-                {
-                    <div class="progress-bar bg-success" role="progressbar" style="width:@(winsAWidth)%">@comparison.WinsA</div>
-                }
-                @if (comparison.Draws > 0)
-                {
-                    <div class="progress-bar bg-secondary" role="progressbar" style="width:@(drawsWidth)%">@comparison.Draws</div>
-                }
-                @if (comparison.WinsB > 0)
-                {
-                    <div class="progress-bar bg-danger" role="progressbar" style="width:@(winsBWidth)%">@comparison.WinsB</div>
-                }
-            </div>
-            <table class="table table-sm mb-4" style="max-width:480px;">
+        var comparisonRows = new List<ComparisonRowViewModel>
+        {
+            new("Rekord single",
+                FormatRecord(playerA.BestSingle, playerA.SingleRank),
+                FormatRecord(playerB.BestSingle, playerB.SingleRank),
+                IsLowerBetter(ValidCentiseconds(playerA.BestSingle), ValidCentiseconds(playerB.BestSingle)),
+                IsLowerBetter(ValidCentiseconds(playerB.BestSingle), ValidCentiseconds(playerA.BestSingle))),
+            new("Rekord average",
+                FormatRecord(playerA.BestAverage, playerA.AverageRank),
+                FormatRecord(playerB.BestAverage, playerB.AverageRank),
+                IsLowerBetter(ValidCentiseconds(playerA.BestAverage), ValidCentiseconds(playerB.BestAverage)),
+                IsLowerBetter(ValidCentiseconds(playerB.BestAverage), ValidCentiseconds(playerA.BestAverage))),
+            new("Średni czas",
+                statsA.AverageSingle?.ToString() ?? "–",
+                statsB.AverageSingle?.ToString() ?? "–",
+                IsLowerBetter(ValidCentiseconds(statsA.AverageSingle), ValidCentiseconds(statsB.AverageSingle)),
+                IsLowerBetter(ValidCentiseconds(statsB.AverageSingle), ValidCentiseconds(statsA.AverageSingle))),
+            new("Mediana",
+                statsA.MedianSingle?.ToString() ?? "–",
+                statsB.MedianSingle?.ToString() ?? "–",
+                IsLowerBetter(ValidCentiseconds(statsA.MedianSingle), ValidCentiseconds(statsB.MedianSingle)),
+                IsLowerBetter(ValidCentiseconds(statsB.MedianSingle), ValidCentiseconds(statsA.MedianSingle))),
+            new("Skuteczność",
+                FormatEffectiveness(statsA.ValidSolves, statsA.NonDnsSolves),
+                FormatEffectiveness(statsB.ValidSolves, statsB.NonDnsSolves),
+                IsHigherBetter(EffectivenessPercent(statsA.ValidSolves, statsA.NonDnsSolves), EffectivenessPercent(statsB.ValidSolves, statsB.NonDnsSolves)),
+                IsHigherBetter(EffectivenessPercent(statsB.ValidSolves, statsB.NonDnsSolves), EffectivenessPercent(statsA.ValidSolves, statsA.NonDnsSolves))),
+        };
+
+        <div class="table-responsive mb-4">
+            <table class="table align-middle">
+                <thead>
+                <tr>
+                    <th scope="col" class="text-end">@playerA.FullName</th>
+                    <th scope="col" class="text-center"></th>
+                    <th scope="col">@playerB.FullName</th>
+                </tr>
+                </thead>
                 <tbody>
-                <tr>
-                    <td>Rozegrane mecze</td>
-                    <td class="text-end fw-semibold">@meetingsCount</td>
-                </tr>
-                <tr>
-                    <td>Suma punktów</td>
-                    <td class="text-end fw-semibold">@comparison.SolvePointsA : @comparison.SolvePointsB</td>
-                </tr>
-                <tr>
-                    <td>Największa wygrana</td>
-                    <td class="text-end fw-semibold">
-                        @if (biggestWin == null)
-                        {
-                            <span>–</span>
-                        }
-                        else
-                        {
-                            var winnerName = biggestWin.ScoreA > biggestWin.ScoreB ? playerA.FullName : playerB.FullName;
-                            var winnerScore = Math.Max(biggestWin.ScoreA, biggestWin.ScoreB);
-                            var loserScore = Math.Min(biggestWin.ScoreA, biggestWin.ScoreB);
-                            <span>@winnerName @winnerScore:@loserScore (S@(biggestWin.SeasonNumber) K@(biggestWin.RoundNumber))</span>
-                        }
-                    </td>
-                </tr>
+                @foreach (var comparisonRow in comparisonRows)
+                {
+                    <partial name="_ComparisonRow" model="comparisonRow" />
+                }
                 </tbody>
             </table>
-        }
+        </div>
 
-        @* 4. Meetings history *@
+        @* 4. Recent form *@
+        <h4>Aktualna forma</h4>
+        <div class="row mb-4 g-3">
+            @foreach (var (formPlayer, formEntries, formStats) in new[]
+                      {
+                          (playerA, playerA.RecentForm, playerA.RecentStats),
+                          (playerB, playerB.RecentForm, playerB.RecentStats)
+                      })
+            {
+                <div class="col-12 col-md-6">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <div class="fw-semibold mb-2">@formPlayer.FullName</div>
+                            @if (!formEntries.Any())
+                            {
+                                <span class="text-muted">Brak meczów.</span>
+                            }
+                            else
+                            {
+                                <div class="mb-3">
+                                    @foreach (var formEntry in formEntries)
+                                    {
+                                        var badgeClass = formEntry.Outcome switch
+                                        {
+                                            MatchOutcome.Win => "bg-success",
+                                            MatchOutcome.Draw => "bg-warning text-dark",
+                                            _ => "bg-danger"
+                                        };
+                                        var badgeText = formEntry.Outcome switch
+                                        {
+                                            MatchOutcome.Win => "W",
+                                            MatchOutcome.Draw => "R",
+                                            _ => "P"
+                                        };
+                                        <span class="badge @badgeClass me-1" style="font-size:.9rem;"
+                                              title="S@(formEntry.SeasonNumber) K@(formEntry.RoundNumber) — @formEntry.SelfScore:@formEntry.OpponentScore vs @formEntry.OpponentFullName">@badgeText</span>
+                                    }
+                                </div>
+                                <table class="table table-sm mb-0">
+                                    <tbody>
+                                    <tr>
+                                        <td>Średni czas <span class="text-muted">(ostatnie 5 meczów)</span></td>
+                                        <td class="text-end fw-semibold">@(formStats.AverageSingle?.ToString() ?? "–")</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Skuteczność <span class="text-muted">(ostatnie 5 meczów)</span></td>
+                                        <td class="text-end fw-semibold">@FormatEffectiveness(formStats.ValidSolves, formStats.NonDnsSolves)</td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        @* 5. Meetings history *@
         <h4>Historia spotkań</h4>
         if (!comparison.Meetings.Any())
         {
-            <p class="mb-4">Brak spotkań.</p>
+            <p class="mb-4">Ci zawodnicy nie grali jeszcze ze sobą.</p>
         }
         else
         {
@@ -205,203 +262,10 @@
             </div>
         }
 
-        @* 5. Stats comparison *@
-        <h4>Porównanie statystyk</h4>
-        var statsA = playerA.Stats;
-        var statsB = playerB.Stats;
-        var matchesPlayedA = statsA.Wins + statsA.Losses + statsA.Draws;
-        var matchesPlayedB = statsB.Wins + statsB.Losses + statsB.Draws;
-
-        var comparisonRows = new List<ComparisonRowViewModel>
-        {
-            new("Rekord single",
-                FormatRecord(playerA.BestSingle, playerA.SingleRank),
-                FormatRecord(playerB.BestSingle, playerB.SingleRank),
-                IsLowerBetter(ValidCentiseconds(playerA.BestSingle), ValidCentiseconds(playerB.BestSingle)),
-                IsLowerBetter(ValidCentiseconds(playerB.BestSingle), ValidCentiseconds(playerA.BestSingle))),
-            new("Rekord average",
-                FormatRecord(playerA.BestAverage, playerA.AverageRank),
-                FormatRecord(playerB.BestAverage, playerB.AverageRank),
-                IsLowerBetter(ValidCentiseconds(playerA.BestAverage), ValidCentiseconds(playerB.BestAverage)),
-                IsLowerBetter(ValidCentiseconds(playerB.BestAverage), ValidCentiseconds(playerA.BestAverage))),
-            new("Średni czas",
-                statsA.AverageSingle?.ToString() ?? "–",
-                statsB.AverageSingle?.ToString() ?? "–",
-                IsLowerBetter(ValidCentiseconds(statsA.AverageSingle), ValidCentiseconds(statsB.AverageSingle)),
-                IsLowerBetter(ValidCentiseconds(statsB.AverageSingle), ValidCentiseconds(statsA.AverageSingle))),
-            new("Skuteczność",
-                FormatEffectiveness(statsA),
-                FormatEffectiveness(statsB),
-                IsHigherBetter(EffectivenessPercent(statsA), EffectivenessPercent(statsB)),
-                IsHigherBetter(EffectivenessPercent(statsB), EffectivenessPercent(statsA))),
-            new("Rozegrane mecze",
-                matchesPlayedA.ToString(),
-                matchesPlayedB.ToString(),
-                IsHigherBetter(matchesPlayedA, matchesPlayedB),
-                IsHigherBetter(matchesPlayedB, matchesPlayedA)),
-            new("Bilans W/R/P",
-                $"{statsA.Wins}/{statsA.Draws}/{statsA.Losses}",
-                $"{statsB.Wins}/{statsB.Draws}/{statsB.Losses}",
-                IsHigherBetter(statsA.Wins, statsB.Wins),
-                IsHigherBetter(statsB.Wins, statsA.Wins)),
-            new("Najlepsza passa zwycięstw",
-                statsA.LongestWinStreak.ToString(),
-                statsB.LongestWinStreak.ToString(),
-                IsHigherBetter(statsA.LongestWinStreak, statsB.LongestWinStreak),
-                IsHigherBetter(statsB.LongestWinStreak, statsA.LongestWinStreak)),
-            new("Najwięcej sukcesów z rzędu",
-                statsA.LongestSuccessStreak.ToString(),
-                statsB.LongestSuccessStreak.ToString(),
-                IsHigherBetter(statsA.LongestSuccessStreak, statsB.LongestSuccessStreak),
-                IsHigherBetter(statsB.LongestSuccessStreak, statsA.LongestSuccessStreak)),
-            new("Liczba sezonów",
-                playerA.SeasonsPlayed.ToString(),
-                playerB.SeasonsPlayed.ToString(),
-                false, false),
-            new("Aktualna liga",
-                playerA.CurrentLeagueIdentifier ?? "–",
-                playerB.CurrentLeagueIdentifier ?? "–",
-                false, false),
-        };
-
-        <div class="table-responsive mb-4">
-            <table class="table align-middle">
-                <thead>
-                <tr>
-                    <th scope="col" class="text-end">@playerA.FullName</th>
-                    <th scope="col" class="text-center"></th>
-                    <th scope="col">@playerB.FullName</th>
-                </tr>
-                </thead>
-                <tbody>
-                @foreach (var comparisonRow in comparisonRows)
-                {
-                    <partial name="_ComparisonRow" model="comparisonRow" />
-                }
-                </tbody>
-            </table>
-        </div>
-
-        @* 6. Recent form *@
-        <h4>Forma</h4>
-        <div class="row mb-4">
-            @foreach (var (formPlayer, formEntries) in new[] { (playerA, playerA.RecentForm), (playerB, playerB.RecentForm) })
-            {
-                <div class="col-12 col-md-6 mb-2">
-                    <div class="fw-semibold mb-1">@formPlayer.FullName</div>
-                    @if (!formEntries.Any())
-                    {
-                        <span class="text-muted">Brak meczów.</span>
-                    }
-                    else
-                    {
-                        foreach (var formEntry in formEntries)
-                        {
-                            var badgeClass = formEntry.Outcome switch
-                            {
-                                MatchOutcome.Win => "bg-success",
-                                MatchOutcome.Draw => "bg-secondary",
-                                _ => "bg-danger"
-                            };
-                            var badgeText = formEntry.Outcome switch
-                            {
-                                MatchOutcome.Win => "W",
-                                MatchOutcome.Draw => "R",
-                                _ => "P"
-                            };
-                            <span class="badge @badgeClass me-1" style="font-size:.9rem;"
-                                  title="S@(formEntry.SeasonNumber) K@(formEntry.RoundNumber) — @formEntry.SelfScore:@formEntry.OpponentScore vs @formEntry.OpponentFullName">@badgeText</span>
-                        }
-                    }
-                </div>
-            }
-        </div>
-
-        @* 7. Common rounds *@
-        <h4>Wspólne kolejki</h4>
-        if (!comparison.CommonRounds.Any())
-        {
-            <p class="mb-4">Brak wspólnych kolejek.</p>
-        }
-        else
-        {
-            var commonRoundsCount = comparison.CommonRounds.Count;
-            <p class="text-muted">
-                @if (comparison.CommonRoundWinsA > comparison.CommonRoundWinsB)
-                {
-                    <span>W @comparison.CommonRoundWinsA z @commonRoundsCount wspólnych kolejek lepszą średnią miał @playerA.FullName.</span>
-                }
-                else if (comparison.CommonRoundWinsB > comparison.CommonRoundWinsA)
-                {
-                    <span>W @comparison.CommonRoundWinsB z @commonRoundsCount wspólnych kolejek lepszą średnią miał @playerB.FullName.</span>
-                }
-                else
-                {
-                    <span>Obaj zawodnicy mieli lepszą średnią w tej samej liczbie wspólnych kolejek (po @comparison.CommonRoundWinsA z @commonRoundsCount).</span>
-                }
-            </p>
-            <div class="table-responsive mb-4">
-                <table class="table table-hover align-middle">
-                    <thead>
-                    <tr>
-                        <th scope="col" rowspan="2" class="align-middle">Kolejka</th>
-                        <th scope="col" colspan="3" class="text-center">@playerA.FullName</th>
-                        <th scope="col" colspan="3" class="text-center">@playerB.FullName</th>
-                        <th scope="col" rowspan="2" class="align-middle text-center">Mecz</th>
-                    </tr>
-                    <tr>
-                        <th scope="col">Liga</th>
-                        <th scope="col">Best</th>
-                        <th scope="col">Ao5</th>
-                        <th scope="col">Liga</th>
-                        <th scope="col">Best</th>
-                        <th scope="col">Ao5</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    @foreach (var commonRound in comparison.CommonRounds)
-                    {
-                        var aHasBetterAverage = commonRound.AverageA.IsValid
-                            && (!commonRound.AverageB.IsValid || commonRound.AverageA.Centiseconds < commonRound.AverageB.Centiseconds);
-                        var bHasBetterAverage = commonRound.AverageB.IsValid
-                            && (!commonRound.AverageA.IsValid || commonRound.AverageB.Centiseconds < commonRound.AverageA.Centiseconds);
-                        <tr>
-                            <td class="text-nowrap">S@(commonRound.SeasonNumber) K@(commonRound.RoundNumber)</td>
-                            <td>@commonRound.LeagueIdentifierA</td>
-                            <td>@commonRound.BestA.ToSummaryString()</td>
-                            <td class="@(aHasBetterAverage ? "fw-bold" : "")">
-                                @commonRound.AverageA.ToSummaryString()
-                                @if (aHasBetterAverage)
-                                {
-                                    <i class="bi bi-check-lg text-success" title="Lepsza średnia"></i>
-                                }
-                            </td>
-                            <td>@commonRound.LeagueIdentifierB</td>
-                            <td>@commonRound.BestB.ToSummaryString()</td>
-                            <td class="@(bHasBetterAverage ? "fw-bold" : "")">
-                                @commonRound.AverageB.ToSummaryString()
-                                @if (bHasBetterAverage)
-                                {
-                                    <i class="bi bi-check-lg text-success" title="Lepsza średnia"></i>
-                                }
-                            </td>
-                            <td class="text-center">
-                                @if (commonRound.FacedEachOther)
-                                {
-                                    <i class="bi bi-people-fill" title="Mecz bezpośredni"></i>
-                                }
-                            </td>
-                        </tr>
-                    }
-                    </tbody>
-                </table>
-            </div>
-        }
-
-        @* 8. Progression chart *@
+        @* 6. Progression chart (best single per common round) *@
         <h4>Progresja</h4>
-        var chartPointsA = comparison.CommonRounds.Count(c => c.AverageA.IsValid);
-        var chartPointsB = comparison.CommonRounds.Count(c => c.AverageB.IsValid);
+        var chartPointsA = comparison.CommonRounds.Count(c => c.BestA.IsValid);
+        var chartPointsB = comparison.CommonRounds.Count(c => c.BestB.IsValid);
         if (chartPointsA < 2 || chartPointsB < 2)
         {
             <p class="mb-4">Za mało danych do wyświetlenia wykresu.</p>
@@ -424,13 +288,13 @@
     private static int? ValidCentiseconds(SolveResult? result)
         => result is { IsValid: true } ? result.Value.Centiseconds : null;
 
-    private static string FormatEffectiveness(UserStats stats)
-        => stats.NonDnsSolves > 0
-            ? $"{stats.ValidSolves}/{stats.NonDnsSolves} ({(int)Math.Round(100.0 * stats.ValidSolves / stats.NonDnsSolves)}%)"
+    private static string FormatEffectiveness(int validSolves, int nonDnsSolves)
+        => nonDnsSolves > 0
+            ? $"{validSolves}/{nonDnsSolves} ({(int)Math.Round(100.0 * validSolves / nonDnsSolves)}%)"
             : "–";
 
-    private static double? EffectivenessPercent(UserStats stats)
-        => stats.NonDnsSolves > 0 ? 100.0 * stats.ValidSolves / stats.NonDnsSolves : null;
+    private static double? EffectivenessPercent(int validSolves, int nonDnsSolves)
+        => nonDnsSolves > 0 ? 100.0 * validSolves / nonDnsSolves : null;
 
     private static bool IsLowerBetter(int? value, int? other)
         => value != null && (other == null || value < other);
@@ -443,16 +307,16 @@
     @if (Model.Comparison != null)
     {
         var scriptCommonRounds = Model.Comparison.CommonRounds;
-        var scriptRenderChart = scriptCommonRounds.Count(c => c.AverageA.IsValid) >= 2
-                                && scriptCommonRounds.Count(c => c.AverageB.IsValid) >= 2;
+        var scriptRenderChart = scriptCommonRounds.Count(c => c.BestA.IsValid) >= 2
+                                && scriptCommonRounds.Count(c => c.BestB.IsValid) >= 2;
         if (scriptRenderChart)
         {
             <script src="https://cdn.jsdelivr.net/npm/chart.js@@4"></script>
             <script>
                 (function () {
                     var labels = @Html.Raw(JsonSerializer.Serialize(scriptCommonRounds.Select(c => $"S{c.SeasonNumber} K{c.RoundNumber}").ToArray()));
-                    var avgValuesA = @Html.Raw(JsonSerializer.Serialize(scriptCommonRounds.Select(c => c.AverageA.IsValid ? (double?)Math.Round(c.AverageA.Centiseconds / 100.0, 2) : null).ToArray()));
-                    var avgValuesB = @Html.Raw(JsonSerializer.Serialize(scriptCommonRounds.Select(c => c.AverageB.IsValid ? (double?)Math.Round(c.AverageB.Centiseconds / 100.0, 2) : null).ToArray()));
+                    var bestValuesA = @Html.Raw(JsonSerializer.Serialize(scriptCommonRounds.Select(c => c.BestA.IsValid ? (double?)Math.Round(c.BestA.Centiseconds / 100.0, 2) : null).ToArray()));
+                    var bestValuesB = @Html.Raw(JsonSerializer.Serialize(scriptCommonRounds.Select(c => c.BestB.IsValid ? (double?)Math.Round(c.BestB.Centiseconds / 100.0, 2) : null).ToArray()));
                     var nameA = @Html.Raw(JsonSerializer.Serialize(Model.Comparison.PlayerA.FullName));
                     var nameB = @Html.Raw(JsonSerializer.Serialize(Model.Comparison.PlayerB.FullName));
 
@@ -474,7 +338,7 @@
                             datasets: [
                                 {
                                     label: nameA,
-                                    data: avgValuesA,
+                                    data: bestValuesA,
                                     borderColor: 'rgb(54, 162, 235)',
                                     backgroundColor: 'rgba(54, 162, 235, 0.1)',
                                     tension: 0.3,
@@ -483,7 +347,7 @@
                                 },
                                 {
                                     label: nameB,
-                                    data: avgValuesB,
+                                    data: bestValuesB,
                                     borderColor: 'rgb(255, 99, 132)',
                                     backgroundColor: 'rgba(255, 99, 132, 0.1)',
                                     tension: 0.3,
