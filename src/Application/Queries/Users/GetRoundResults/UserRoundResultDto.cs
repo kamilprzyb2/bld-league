@@ -1,3 +1,4 @@
+using BldLeague.Domain.Enums;
 using BldLeague.Domain.ValueObjects;
 
 namespace BldLeague.Application.Queries.Users.GetRoundResults;
@@ -16,5 +17,7 @@ public record UserRoundResultDto(
     SolveResult Solve2,
     SolveResult Solve3,
     SolveResult Solve4,
-    SolveResult Solve5
+    SolveResult Solve5,
+    RecordLevel BestRecord,
+    RecordLevel AverageRecord
 );

@@ -25,7 +25,9 @@ public class GetUserRoundResultsRequestHandler(IUnitOfWork unitOfWork)
                 rs.Solve2,
                 rs.Solve3,
                 rs.Solve4,
-                rs.Solve5
+                rs.Solve5,
+                rs.BestRecord,
+                rs.AverageRecord
             ))
             .ToList();
     }

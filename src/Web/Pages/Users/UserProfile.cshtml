@@ -133,8 +133,8 @@
                                     </a>
                                 </td>
                                 <td class="text-center">@placeDisplay</td>
-                                <td class="fw-bold">@result.Best</td>
-                                <td>@result.Average</td>
+                                <td class="fw-bold text-nowrap">@result.Best <partial name="_RecordBadge" model="result.BestRecord" /></td>
+                                <td class="text-nowrap">@result.Average <partial name="_RecordBadge" model="result.AverageRecord" /></td>
                                 <td class="font-monospace d-none d-md-table-cell">
                                     @UserProfile.FormatSolveWithParens(result, 0)
                                     @UserProfile.FormatSolveWithParens(result, 1)

@@ -140,7 +140,7 @@ Avoid JavaScript by default. Prefer server-side form submissions and page reload
 - **Season** has no start/end dates — it is just a `SeasonNumber`. "Latest season" (highest `SeasonNumber`) is used as the UI default in AddRound and AddMatch. LeagueSeasons are created manually (not auto-generated).
 - **Match** → 1v1 within a Round + League. Each match has exactly 5 solves (`Match.SOLVES_PER_MATCH`) per player. Scoring: 1 point per solve won + 1 bonus point for best single. Scores are computed and stored at match creation time. Matches have a `MatchStatus` (Upcoming/InProgress/Finished). Round timing uses **local calendar dates** (configured TZ, default `Europe/Warsaw`) via `RoundClock` — a round is active from the start of `StartDate` through the end of `EndDate` inclusive in local time, regardless of UTC offset/DST. A match flips to Finished when the round's local end day has passed *or* `Match.BothSidesSubmitted` is true. Scores and solve details are hidden in the UI until the match is Finished. Players self-submit via `/Submit/SubmitResults`; submission timestamps (`UserASubmittedAt`, `UserBSubmittedAt`) are set on submission. Round standings are refreshed by a daily background service (`RoundStandingsRefreshBackgroundService`) rather than immediately on submission.
 - **Scramble** → one per solve position (1–`Match.SOLVES_PER_MATCH`) per round; shared across all leagues in that round. Field `Notation` holds the move sequence. A round may have 0–5 scrambles.
-- **RoundStanding** — standings per round per league; refreshed on demand via `RefreshRoundStandingsRequest` (single round) or `RefreshAllRoundStandingsRequest` (all finished rounds). Points: place 1–7 → 50–38 (step -2), place 8–44 → 37–1 (step -1).
+- **RoundStanding** — standings per round per league; refreshed on demand via `RefreshRoundStandingsRequest` (single round) or `RefreshAllRoundStandingsRequest` (all finished rounds). Points: place 1–7 → 50–38 (step -2), place 8–44 → 37–1 (step -1). Also stores `BestRecord`/`AverageRecord` (`RecordLevel`: None/Personal/League) — WCA-style PR/LR pills computed historically ("at the time", ties count, LR is site-wide) by `RefreshRecordsRequest`, which runs after every round standings refresh and via the admin Rankings page.
 - **LeagueSeasonStanding** — cumulative season standings; refreshed via `RefreshLeagueSeasonStandingsRequest` (single league season) or `RefreshAllLeagueSeasonStandingsRequest` (all league seasons).
 
 ## File Map
@@ -162,6 +162,7 @@ Avoid JavaScript by default. Prefer server-side form submissions and page reload
 | `PlayerRanking` entity | `src/Domain/Entities/PlayerRanking.cs` |
 | `User` entity | `src/Domain/Entities/User.cs` |
 | `SolveResult` value object | `src/Domain/ValueObjects/SolveResult.cs` |
+| `RecordLevel` enum (None/Personal/League) | `src/Domain/Enums/RecordLevel.cs` |
 | `AverageCalculator` (Ao5 / Ao12 / Ao25 logic) | `src/Domain/Scoring/AverageCalculator.cs` |
 | `IIdentifiable` interface | `src/Domain/Interfaces/IIdentifiable.cs` |
 
@@ -219,6 +220,7 @@ Avoid JavaScript by default. Prefer server-side form submissions and page reload
 | Refresh round standings (single + refresh-all) | `src/Application/Commands/RoundStandings/Refresh/` and `RefreshAll/` |
 | Refresh season standings (single + refresh-all) | `src/Application/Commands/LeagueSeasonStandings/Refresh/` and `RefreshAll/` |
 | Refresh player rankings | `src/Application/Commands/PlayerRankings/Refresh/` |
+| Refresh PR/LR record levels on round standings | `src/Application/Commands/Records/Refresh/` |
 
 ### Application — queries (read operations, by feature)
 
@@ -296,6 +298,7 @@ Avoid JavaScript by default. Prefer server-side form submissions and page reload
 | Self-service result submission | `src/Web/Pages/Submit/SubmitResults.cshtml[.cs]` |
 | Global statistics page | `src/Web/Pages/Statistics/Statistics.cshtml[.cs]` |
 | Shared stat tile partial (icon + text card) | `src/Web/Pages/Shared/_StatTile.cshtml` |
+| Shared PR/LR record pill partial (takes a `RecordLevel`) | `src/Web/Pages/Shared/_RecordBadge.cshtml` |
 | About / rules | `src/Web/Pages/About/About.cshtml[.cs]` |
 | Season 4 guidelines (current) | `src/Web/Pages/About/Guidelines.cshtml[.cs]` |
 | Season 3 guidelines (archived) | `src/Web/Pages/About/GuidelinesSeason3.cshtml[.cs]` |

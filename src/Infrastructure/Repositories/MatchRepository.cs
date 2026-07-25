@@ -73,6 +73,7 @@ public class MatchRepository(AppDbContext context)
                 UserBId = m.UserBId,
                 SeasonId = m.LeagueSeason.SeasonId,
                 LeagueId = m.LeagueSeason.LeagueId,
+                RoundId = m.RoundId,
                 RoundNumber = m.Round.RoundNumber,
                 SeasonName = m.LeagueSeason.Season.SeasonName,
                 LeagueName = m.LeagueSeason.League.LeagueName,

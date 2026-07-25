@@ -1,4 +1,5 @@
 ﻿using BldLeague.Domain.Entities;
+using BldLeague.Domain.Enums;
 using BldLeague.Infrastructure.Converters;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -64,5 +65,13 @@ public class RoundStandingConfiguration : IEntityTypeConfiguration<RoundStanding
         b.Property(rs => rs.Average)
             .HasConversion(new SolveResultConverter())
             .IsRequired();
+
+        b.Property(rs => rs.BestRecord)
+            .IsRequired()
+            .HasDefaultValue(RecordLevel.None);
+
+        b.Property(rs => rs.AverageRecord)
+            .IsRequired()
+            .HasDefaultValue(RecordLevel.None);
     }
 }
