@@ -28,16 +28,32 @@
            rel="nofollow noreferrer noopener" target="_blank">@Model.Profile.WcaId</a>
 
         <div class="d-flex justify-content-center gap-2 mt-3">
-            <a class="btn btn-outline-primary" asp-page="/Compare/Compare" asp-route-userAId="@Model.Profile.Id">
+            <button class="btn btn-primary" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#comparePicker" aria-expanded="false" aria-controls="comparePicker">
                 <i class="bi bi-people"></i> Porównaj
-            </a>
+            </button>
             @if (Model.SignedInUserId is { } signedInUserId && signedInUserId != Model.Profile.Id)
             {
-                <a class="btn btn-outline-primary" asp-page="/Compare/Compare"
+                <a class="btn btn-primary" asp-page="/Compare/Compare"
                    asp-route-userAId="@signedInUserId" asp-route-userBId="@Model.Profile.Id">
                     <i class="bi bi-person-check"></i> Porównaj ze mną
                 </a>
             }
+        </div>
+        <div class="collapse mt-2" id="comparePicker">
+            <form method="get" asp-page="/Compare/Compare" class="d-flex justify-content-center">
+                <div class="input-group" style="max-width:420px;">
+                    <input type="hidden" name="UserAId" value="@Model.Profile.Id" />
+                    <input list="comparisonUsers" name="Opponent" class="form-control" placeholder="Wybierz zawodnika" />
+                    <datalist id="comparisonUsers">
+                        @foreach (var comparisonUser in Model.AllUsers.Where(u => u.Id != Model.Profile.Id))
+                        {
+                            <option value="@($"{comparisonUser.FullName} ({comparisonUser.WcaId})")"></option>
+                        }
+                    </datalist>
+                    <button type="submit" class="btn btn-primary">Porównaj</button>
+                </div>
+            </form>
         </div>
     </div>
 

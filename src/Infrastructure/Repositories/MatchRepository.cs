@@ -185,16 +185,6 @@ public class MatchRepository(AppDbContext context)
                         && m.Round.EndDate >= localToday)
             .FirstOrDefaultAsync();
 
-    public async Task<Match?> GetUnfinishedMatchBetweenUsersAsync(Guid userAId, Guid userBId, DateTime localToday)
-        => await DbSet
-            .Include(m => m.Round).ThenInclude(r => r.Season)
-            .Include(m => m.LeagueSeason).ThenInclude(ls => ls.League)
-            .Where(m => ((m.UserAId == userAId && m.UserBId == userBId)
-                         || (m.UserAId == userBId && m.UserBId == userAId))
-                        && m.Round.EndDate >= localToday)
-            .OrderBy(m => m.Round.StartDate)
-            .FirstOrDefaultAsync();
-
     public async Task<IReadOnlyList<RecentMatchDto>> GetRecentFinishedMatchesAsync(int count, DateTime localToday)
     {
         var candidates = await DbSet

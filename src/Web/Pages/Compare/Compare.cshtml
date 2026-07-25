@@ -62,10 +62,19 @@
                 }
                 <h4 class="mb-1"><a asp-page="/Users/UserProfile" asp-route-id="@playerA.UserId">@playerA.FullName</a></h4>
                 <div class="text-muted">@playerA.WcaId</div>
-                <a class="btn btn-sm btn-outline-secondary mt-2" asp-page="/Compare/Compare"
-                   asp-route-userBId="@playerB.UserId" title="Wybierz innego zawodnika A">
+                <button class="btn btn-sm btn-primary mt-2" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#changePlayerA" aria-expanded="false" aria-controls="changePlayerA">
                     <i class="bi bi-arrow-repeat"></i> Zmień
-                </a>
+                </button>
+                <div class="collapse mt-2" id="changePlayerA">
+                    <form method="get" class="d-flex justify-content-center">
+                        <div class="input-group input-group-sm" style="max-width:280px;">
+                            <input type="hidden" name="UserBId" value="@playerB.UserId" />
+                            <input list="allPlayers" name="PlayerA" class="form-control" placeholder="Nowy zawodnik" />
+                            <button type="submit" class="btn btn-primary">Porównaj</button>
+                        </div>
+                    </form>
+                </div>
             </div>
             <div class="col-4 col-md-2">
                 <div class="text-muted text-uppercase small">Bilans spotkań</div>
@@ -73,7 +82,7 @@
                 <div class="text-muted small">Remisy: @comparison.Draws</div>
                 <div class="mt-3">
                     <div class="text-muted text-uppercase small">Bilans punktów</div>
-                    <div class="fw-semibold text-nowrap">@comparison.SolvePointsA : @comparison.SolvePointsB</div>
+                    <div class="fs-3 fw-semibold text-nowrap">@comparison.SolvePointsA : @comparison.SolvePointsB</div>
                 </div>
             </div>
             <div class="col-4 col-md-5">
@@ -87,32 +96,30 @@
                 }
                 <h4 class="mb-1"><a asp-page="/Users/UserProfile" asp-route-id="@playerB.UserId">@playerB.FullName</a></h4>
                 <div class="text-muted">@playerB.WcaId</div>
-                <a class="btn btn-sm btn-outline-secondary mt-2" asp-page="/Compare/Compare"
-                   asp-route-userAId="@playerA.UserId" title="Wybierz innego zawodnika B">
+                <button class="btn btn-sm btn-primary mt-2" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#changePlayerB" aria-expanded="false" aria-controls="changePlayerB">
                     <i class="bi bi-arrow-repeat"></i> Zmień
-                </a>
+                </button>
+                <div class="collapse mt-2" id="changePlayerB">
+                    <form method="get" class="d-flex justify-content-center">
+                        <div class="input-group input-group-sm" style="max-width:280px;">
+                            <input type="hidden" name="UserAId" value="@playerA.UserId" />
+                            <input list="allPlayers" name="Opponent" class="form-control" placeholder="Nowy zawodnik" />
+                            <button type="submit" class="btn btn-primary">Porównaj</button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
 
-        @* 2. Upcoming meeting *@
-        if (comparison.UpcomingMeeting != null)
-        {
-            var upcoming = comparison.UpcomingMeeting;
-            <div class="alert alert-info d-flex align-items-center gap-2 flex-wrap">
-                <strong>Nadchodzący mecz:</strong>
-                <span>Sezon @upcoming.SeasonNumber, Kolejka @upcoming.RoundNumber, Liga @upcoming.LeagueIdentifier</span>
-                @if (upcoming.IsInProgress)
-                {
-                    <span class="badge text-bg-warning">W trakcie</span>
-                }
-                else
-                {
-                    <span class="badge text-bg-secondary">Planowany</span>
-                }
-            </div>
-        }
+        <datalist id="allPlayers">
+            @foreach (var pickerUser in Model.AllUsers)
+            {
+                <option value="@($"{pickerUser.FullName} ({pickerUser.WcaId})")"></option>
+            }
+        </datalist>
 
-        @* 3. Stats comparison *@
+        @* 2. Stats comparison *@
         <h4>Porównanie statystyk</h4>
         var statsA = playerA.Stats;
         var statsB = playerB.Stats;
@@ -164,7 +171,7 @@
             </table>
         </div>
 
-        @* 4. Recent form *@
+        @* 3. Recent form *@
         <h4>Aktualna forma</h4>
         <div class="row mb-4 g-3">
             @foreach (var (formPlayer, formEntries, formStats) in new[]
@@ -221,7 +228,7 @@
             }
         </div>
 
-        @* 5. Meetings history *@
+        @* 4. Meetings history *@
         <h4>Historia spotkań</h4>
         if (!comparison.Meetings.Any())
         {
@@ -248,9 +255,9 @@
                             <td>@meeting.RoundNumber</td>
                             <td>@meeting.LeagueIdentifier</td>
                             <td class="text-center text-nowrap">
-                                <span class="@(meeting.ScoreA > meeting.ScoreB ? "fw-bold" : "")">@meeting.ScoreA</span>
+                                <span class="@(meeting.ScoreA > meeting.ScoreB ? "fw-bold" : "")">@playerA.FullName @meeting.ScoreA</span>
                                 <span>:</span>
-                                <span class="@(meeting.ScoreB > meeting.ScoreA ? "fw-bold" : "")">@meeting.ScoreB</span>
+                                <span class="@(meeting.ScoreB > meeting.ScoreA ? "fw-bold" : "")">@meeting.ScoreB @playerB.FullName</span>
                             </td>
                             <td>
                                 <a class="btn btn-sm btn-primary" asp-page="/Matches/ViewMatch" asp-route-id="@meeting.MatchId">Zobacz</a>
@@ -262,7 +269,7 @@
             </div>
         }
 
-        @* 6. Progression chart (best single per common round) *@
+        @* 5. Progression chart (best single per common round) *@
         <h4>Progresja</h4>
         var chartPointsA = comparison.CommonRounds.Count(c => c.BestA.IsValid);
         var chartPointsB = comparison.CommonRounds.Count(c => c.BestB.IsValid);
@@ -272,6 +279,7 @@
         }
         else
         {
+            <p class="text-muted small">Wykres pokazuje najlepsze pojedyncze ułożenie (best single) każdego zawodnika w kolejkach, w których obaj brali udział.</p>
             <canvas id="comparisonChart" class="mb-4"></canvas>
         }
     }

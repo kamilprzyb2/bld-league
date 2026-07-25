@@ -26,25 +26,17 @@ public class Compare(IMediator mediator) : PageModel
 
     public async Task<IActionResult> OnGet()
     {
-        bool resolvePlayerA = UserAId == Guid.Empty && !string.IsNullOrWhiteSpace(PlayerA);
-        bool resolveOpponent = UserBId == Guid.Empty && !string.IsNullOrWhiteSpace(Opponent);
+        // Always needed: either for the picker form or for the inline player-change datalist.
+        AllUsers = await mediator.Send(new GetAllUsersRequest());
 
-        if (resolvePlayerA || resolveOpponent)
-        {
-            var users = await mediator.Send(new GetAllUsersRequest());
+        if (UserAId == Guid.Empty && !string.IsNullOrWhiteSpace(PlayerA))
+            UserAId = ResolveUserId(AllUsers, PlayerA!);
 
-            if (resolvePlayerA)
-                UserAId = ResolveUserId(users, PlayerA!);
-
-            if (resolveOpponent)
-                UserBId = ResolveUserId(users, Opponent!);
-        }
+        if (UserBId == Guid.Empty && !string.IsNullOrWhiteSpace(Opponent))
+            UserBId = ResolveUserId(AllUsers, Opponent!);
 
         if (UserAId == Guid.Empty || UserBId == Guid.Empty)
-        {
-            AllUsers = await mediator.Send(new GetAllUsersRequest());
             return Page();
-        }
 
         if (UserAId == UserBId)
             return RedirectToPage("/Users/UserProfile", new { id = UserAId });

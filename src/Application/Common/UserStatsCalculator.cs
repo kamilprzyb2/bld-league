@@ -18,7 +18,7 @@ public static class UserStatsCalculator
         var validSolves = nonDnsSolves.Where(s => s.IsValid).ToList();
 
         SolveResult? averageSingle = CalculateMean(validSolves);
-        SolveResult? medianSingle = CalculateMedian(validSolves);
+        SolveResult? medianSingle = CalculateMedian(nonDnsSolves);
 
         int longestSuccessStreak = StreakCalculator.LongestSuccessStreak(solves);
 
@@ -43,18 +43,28 @@ public static class UserStatsCalculator
             : null;
 
     /// <summary>
-    /// Median of the valid solves; for an even count, the mean of the two middle values.
+    /// Median of the non-DNS solves, with DNF counting as slower than any time —
+    /// more than half DNFs yields a DNF median. For an even count, the mean of the
+    /// two middle values (DNF if either middle value is a DNF).
     /// </summary>
-    public static SolveResult? CalculateMedian(IReadOnlyCollection<SolveResult> validSolves)
+    public static SolveResult? CalculateMedian(IReadOnlyCollection<SolveResult> nonDnsSolves)
     {
-        if (validSolves.Count == 0)
+        if (nonDnsSolves.Count == 0)
             return null;
 
-        var sorted = validSolves.Select(s => s.Centiseconds).OrderBy(c => c).ToList();
+        var sorted = nonDnsSolves
+            .Select(s => s.IsValid ? s.Centiseconds : int.MaxValue)
+            .OrderBy(c => c)
+            .ToList();
         int middle = sorted.Count / 2;
-        int median = sorted.Count % 2 != 0
-            ? sorted[middle]
-            : (int)Math.Round((sorted[middle - 1] + sorted[middle]) / 2.0);
-        return SolveResult.FromCentiseconds(median);
+
+        if (sorted.Count % 2 != 0)
+            return sorted[middle] == int.MaxValue
+                ? SolveResult.Dnf()
+                : SolveResult.FromCentiseconds(sorted[middle]);
+
+        return sorted[middle] == int.MaxValue
+            ? SolveResult.Dnf()
+            : SolveResult.FromCentiseconds((int)Math.Round((sorted[middle - 1] + sorted[middle]) / 2.0));
     }
 }

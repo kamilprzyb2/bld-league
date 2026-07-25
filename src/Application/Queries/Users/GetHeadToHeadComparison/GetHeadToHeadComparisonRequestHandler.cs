@@ -70,15 +70,6 @@ public class GetHeadToHeadComparisonRequestHandler(IUnitOfWork unitOfWork, Round
             .ThenBy(c => c.RoundNumber)
             .ToList();
 
-        var upcomingMatch = await unitOfWork.MatchRepository.GetUnfinishedMatchBetweenUsersAsync(request.UserAId, request.UserBId, localToday);
-        var upcomingMeeting = upcomingMatch == null
-            ? null
-            : new UpcomingMeetingDto(
-                upcomingMatch.Round.Season.SeasonNumber,
-                upcomingMatch.Round.RoundNumber,
-                upcomingMatch.LeagueSeason.League.LeagueIdentifier,
-                roundClock.IsRoundActive(upcomingMatch.Round.StartDate, upcomingMatch.Round.EndDate));
-
         return new HeadToHeadComparisonDto(
             await BuildSideAsync(userA, rankingA, matchesA, solvesA),
             await BuildSideAsync(userB, rankingB, matchesB, solvesB),
@@ -88,7 +79,6 @@ public class GetHeadToHeadComparisonRequestHandler(IUnitOfWork unitOfWork, Round
             meetings.Sum(m => m.ScoreA),
             meetings.Sum(m => m.ScoreB),
             meetings,
-            upcomingMeeting,
             commonRounds);
     }
 
