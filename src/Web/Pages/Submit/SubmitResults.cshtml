@@ -16,6 +16,13 @@
             @if (!string.IsNullOrEmpty(Model.ActiveSubmission.OpponentName))
             {
                 <span>Rywal: @Model.ActiveSubmission.OpponentName</span>
+                @if (Model.ActiveSubmission.OpponentId.HasValue)
+                {
+                    <a class="ms-2" target="_blank" rel="noopener"
+                       asp-page="/Compare/Compare"
+                       asp-route-userAId="@Model.CurrentUserId"
+                       asp-route-userBId="@Model.ActiveSubmission.OpponentId">Porównaj z rywalem</a>
+                }
             }
             else
             {

@@ -14,12 +14,7 @@ public class GetUserMatchHistoryRequestHandler(IUnitOfWork unitOfWork, RoundCloc
         return matches
             .Select(m =>
             {
-                bool isUserA = m.UserAId == request.UserId;
-                string profileUserFullName = isUserA ? m.UserA.FullName : m.UserB!.FullName;
-                string? opponentFullName = isUserA ? m.UserB?.FullName : m.UserA.FullName;
-                int profileUserScore = isUserA ? m.UserAScore : m.UserBScore;
-                int opponentScore = isUserA ? m.UserBScore : m.UserAScore;
-                Guid? opponentId = isUserA ? m.UserBId : m.UserAId;
+                var perspective = MatchPerspective.For(m, request.UserId);
 
                 return new UserMatchHistoryDto(
                     m.Id,
@@ -29,11 +24,11 @@ public class GetUserMatchHistoryRequestHandler(IUnitOfWork unitOfWork, RoundCloc
                     m.Round.RoundName,
                     m.Round.SeasonId,
                     m.LeagueSeason.League.LeagueIdentifier,
-                    profileUserFullName,
-                    opponentFullName,
-                    profileUserScore,
-                    opponentScore,
-                    opponentId
+                    perspective.SelfFullName,
+                    perspective.OpponentFullName,
+                    perspective.SelfScore,
+                    perspective.OpponentScore,
+                    perspective.OpponentId
                 );
             })
             .ToList();

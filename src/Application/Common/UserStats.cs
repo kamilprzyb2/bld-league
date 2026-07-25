@@ -1,8 +1,11 @@
 using BldLeague.Domain.ValueObjects;
 
-namespace BldLeague.Web.ViewModels;
+namespace BldLeague.Application.Common;
 
-public record UserStatsViewModel(
+/// <summary>
+/// Aggregate career statistics for a single user.
+/// </summary>
+public record UserStats(
     int ValidSolves,
     int NonDnsSolves,
     SolveResult? AverageSingle,

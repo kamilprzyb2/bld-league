@@ -103,12 +103,13 @@
                                 Zobacz
                             </a>
                         }
-                        else
+                        else if (matchSummary.UserBId.HasValue)
                         {
-                            <a class="btn btn-sm btn-outline-secondary"
-                               asp-page="/Matches/ViewMatch"
-                               asp-route-id="@matchSummary.MatchId">
-                                Zobacz
+                            <a class="btn btn-sm btn-outline-primary"
+                               asp-page="/Compare/Compare"
+                               asp-route-userAId="@matchSummary.UserAId"
+                               asp-route-userBId="@matchSummary.UserBId">
+                                Porównaj
                             </a>
                         }
                     </td>

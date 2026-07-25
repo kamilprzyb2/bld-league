@@ -177,6 +177,10 @@ Avoid JavaScript by default. Prefer server-side form submissions and page reload
 | `ImportRowResult` (per-row import result) | `src/Application/Common/ImportRowResult.cs` |
 | `MatchSolvesProcessor` (shared match logic) | `src/Application/Common/MatchSolvesProcessor.cs` |
 | `StreakCalculator` (shared solve/win streak logic) | `src/Application/Common/StreakCalculator.cs` |
+| `MatchOutcome` enum (Win/Draw/Loss) | `src/Application/Common/MatchOutcome.cs` |
+| `MatchPerspective` (match oriented from one player's side) | `src/Application/Common/MatchPerspective.cs` |
+| `UserStats` (aggregate career stats record) | `src/Application/Common/UserStats.cs` |
+| `UserStatsCalculator` (shared user stats computation) | `src/Application/Common/UserStatsCalculator.cs` |
 | `RoundClock` (round timing in configured league TZ) | `src/Application/Common/RoundClock.cs` |
 | `RoundFinalizationOptions` (TZ + cron schedule config) | `src/Application/Common/RoundFinalizationOptions.cs` |
 | `ScrambleDto` (scramble data transfer) | `src/Application/Queries/Rounds/GetScrambles/ScrambleDto.cs` |
@@ -239,6 +243,7 @@ Avoid JavaScript by default. Prefer server-side form submissions and page reload
 | Player ranking by user ID | `src/Application/Queries/PlayerRankings/GetByUserId/` |
 | User round results | `src/Application/Queries/Users/GetRoundResults/` |
 | User match history | `src/Application/Queries/Users/GetMatchHistory/` |
+| Head-to-head comparison + DTOs (`HeadToHeadComparisonDto`, `PlayerComparisonSideDto`, `HeadToHeadMatchDto`, `UpcomingMeetingDto`, `CommonRoundDto`, `RecentFormEntryDto`) | `src/Application/Queries/Users/GetHeadToHeadComparison/` |
 | User season history | `src/Application/Queries/Users/GetSeasonHistory/` |
 | User solves (for stats computation) | `src/Application/Queries/Users/GetSolves/` |
 | Global statistics summary + 9 chart/record/streak/leader queries (heatmap, solve durations, score distribution, season records, league records, streak leaders, accuracy leaders, rolling Ao12 leaders, rolling Ao25 leaders) | `src/Application/Queries/Statistics/` |
@@ -293,6 +298,8 @@ Avoid JavaScript by default. Prefer server-side form submissions and page reload
 | Player rankings (single + average) at `/Rankings` | `src/Web/Pages/Rankings/Rankings.cshtml[.cs]` |
 | User list | `src/Web/Pages/Users/UserList.cshtml[.cs]` |
 | User profile | `src/Web/Pages/Users/UserProfile.cshtml[.cs]` |
+| Head-to-head comparison at `/Compare` | `src/Web/Pages/Compare/Compare.cshtml[.cs]` |
+| Comparison stat row (partial) | `src/Web/Pages/Compare/_ComparisonRow.cshtml` |
 | Self-service result submission | `src/Web/Pages/Submit/SubmitResults.cshtml[.cs]` |
 | Global statistics page | `src/Web/Pages/Statistics/Statistics.cshtml[.cs]` |
 | Shared stat tile partial (icon + text card) | `src/Web/Pages/Shared/_StatTile.cshtml` |

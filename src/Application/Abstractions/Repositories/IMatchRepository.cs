@@ -20,5 +20,6 @@ public interface IMatchRepository : IReadWriteRepository<Match>
 
     Task<IReadOnlyCollection<Match>> GetFinishedMatchesByUserIdAsync(Guid userId, DateTime localToday);
     Task<Match?> GetActiveMatchForUserAsync(Guid userId, DateTime localToday);
+    Task<Match?> GetUnfinishedMatchBetweenUsersAsync(Guid userAId, Guid userBId, DateTime localToday);
     Task<IReadOnlyList<RecentMatchDto>> GetRecentFinishedMatchesAsync(int count, DateTime localToday);
 }

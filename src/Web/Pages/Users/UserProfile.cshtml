@@ -26,6 +26,21 @@
         }
         <a href="https://www.worldcubeassociation.org/persons/@Model.Profile.WcaId"
            rel="nofollow noreferrer noopener" target="_blank">@Model.Profile.WcaId</a>
+
+        <form method="get" asp-page="/Compare/Compare" class="d-flex justify-content-center mt-3">
+            <div class="input-group" style="max-width:420px;">
+                <span class="input-group-text">Porównaj z</span>
+                <input type="hidden" name="UserAId" value="@Model.Profile.Id" />
+                <input list="comparisonUsers" name="Opponent" class="form-control" placeholder="Wybierz zawodnika" />
+                <datalist id="comparisonUsers">
+                    @foreach (var comparisonUser in Model.AllUsers.Where(u => u.Id != Model.Profile.Id))
+                    {
+                        <option value="@($"{comparisonUser.FullName} ({comparisonUser.WcaId})")"></option>
+                    }
+                </datalist>
+                <button type="submit" class="btn btn-outline-primary">Porównaj</button>
+            </div>
+        </form>
     </div>
 
     @* Personal Records *@
