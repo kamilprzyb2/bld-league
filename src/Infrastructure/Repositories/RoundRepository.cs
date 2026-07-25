@@ -86,6 +86,12 @@ public class RoundRepository(AppDbContext context) :
             })
             .ToListAsync();
 
+    public async Task<IReadOnlyDictionary<Guid, DateTime>> GetLastRoundEndDateBySeasonAsync()
+        => await DbSet
+            .GroupBy(r => r.SeasonId)
+            .Select(g => new { g.Key, LastEndDate = g.Max(r => r.EndDate) })
+            .ToDictionaryAsync(x => x.Key, x => x.LastEndDate);
+
     public async Task<ActiveRoundLiveDetailDto?> GetActiveRoundLiveDetailAsync(Guid seasonId, int roundNumber)
     {
         var round = await DbSet
