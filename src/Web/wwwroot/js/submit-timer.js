@@ -14,6 +14,9 @@
     const MAX_CS = 100 * 60 * 100;
 
     const HINTS = {
+        connect: 'Kliknij „Połącz”, aby połączyć z urządzeniem.',
+        connecting: 'Trwa łączenie…',
+        dirty: 'Zresetuj timer.',
         idle: 'Przytrzymaj spację lub dotknij pola, aby przygotować timer.',
         arming: 'Trzymaj…',
         ready: 'Puść, aby wystartować.',
@@ -32,6 +35,10 @@
         const cc = String(c).padStart(2, '0');
         return m > 0 ? `${m}:${String(s).padStart(2, '0')}.${cc}` : `${s}.${cc}`;
     }
+
+    // The running display refreshes at most this often — full centisecond
+    // precision, but without the every-frame churn that reads as flicker.
+    const RUNNING_UPDATE_MS = 30;
 
     function dnsWarning(count) {
         if (count === 1) return '1 pusta próba zostanie zapisana jako DNS.';
@@ -54,8 +61,8 @@
         const manualPanel = document.getElementById('manual-panel');
         const timerPanel = document.getElementById('timer-panel');
         const driverSelect = document.getElementById('timer-driver-select');
-        const connectButton = document.getElementById('timer-connect-btn');
         const errorAlert = document.getElementById('timer-error');
+        const timerPad = document.getElementById('timer-pad');
         const attemptNumberEl = document.getElementById('timer-attempt-number');
         const scrambleEl = document.getElementById('timer-scramble');
         const scrambleSource = document.getElementById('timer-scrambles');
@@ -82,6 +89,7 @@
         let activeDriver = null;
         let driverAttached = false;
         let runningStart = 0;
+        let lastDisplayUpdate = 0;
         let rafId = null;
         let hasDeviceTick = false;
         let submitted = false;
@@ -98,6 +106,10 @@
 
         function clearError() {
             errorAlert.classList.add('d-none');
+        }
+
+        function driverNeedsConnect() {
+            return activeDriver && activeDriver.requiresConnect && !connectedDriverIds.has(activeDriver.id);
         }
 
         function firstEmptySlot(startAfter) {
@@ -139,14 +151,26 @@
             phase = next;
             displayEl.classList.toggle('timer-arming', next === 'arming');
             displayEl.classList.toggle('timer-ready', next === 'ready');
+            displayEl.classList.toggle('timer-label', next === 'connect' || next === 'connecting');
             reviewPanel.classList.toggle('d-none', next !== 'review');
-            hintEl.textContent = HINTS[next] || '';
+            const driverHints = activeDriver && activeDriver.hints ? activeDriver.hints : null;
+            hintEl.textContent = (driverHints && driverHints[next]) || HINTS[next] || '';
             refreshSlotButtons();
             refreshAttemptView();
         }
 
+        function enterConnectPrompt() {
+            stopDisplayLoop();
+            displayEl.textContent = 'Połącz';
+            enterPhase('connect');
+        }
+
         function setIdle() {
             stopDisplayLoop();
+            if (driverNeedsConnect()) {
+                enterConnectPrompt();
+                return;
+            }
             displayEl.textContent = '0.00';
             enterPhase('idle');
         }
@@ -166,8 +190,10 @@
                 rafId = null;
                 return;
             }
-            if (!hasDeviceTick) {
-                displayEl.textContent = formatCs(Math.floor((performance.now() - runningStart) / 10));
+            const now = performance.now();
+            if (!hasDeviceTick && now - lastDisplayUpdate >= RUNNING_UPDATE_MS) {
+                lastDisplayUpdate = now;
+                displayEl.textContent = formatCs(Math.floor((now - runningStart) / 10));
             }
             rafId = requestAnimationFrame(displayLoop);
         }
@@ -231,12 +257,26 @@
         const driverCallbacks = {
             onIdle() {
                 if (mode !== 'timer') return;
-                if (phase === 'arming' || phase === 'ready') setIdle();
+                // A physical reset while reviewing confirms the result and
+                // moves on to the next attempt, like clicking „Dalej”.
+                if (phase === 'review') advanceToNextSlot();
+                else if (phase === 'arming' || phase === 'ready' || phase === 'dirty') setIdle();
+            },
+            onDirty(ms) {
+                // The device shows a leftover time from before the session —
+                // mirror it and ask for a reset instead of pretending 0.00.
+                if (mode !== 'timer') return;
+                if (phase !== 'idle' && phase !== 'arming' && phase !== 'dirty') return;
+                displayEl.textContent = formatCs(Math.floor(ms / 10));
+                if (phase !== 'dirty') enterPhase('dirty');
             },
             onArming() {
                 if (mode !== 'timer') return;
                 if (phase === 'review') advanceToNextSlot();
-                if (phase !== 'idle') return;
+                // 'dirty' is allowed through: a solve genuinely starting must
+                // win over a stale-time display (a reset can slip between two
+                // decoded packets and go unnoticed).
+                if (phase !== 'idle' && phase !== 'dirty') return;
                 clearError();
                 displayEl.textContent = '0.00';
                 enterPhase('arming');
@@ -248,6 +288,7 @@
             onStart() {
                 if (mode !== 'timer' || phase !== 'ready') return;
                 runningStart = performance.now();
+                lastDisplayUpdate = 0;
                 hasDeviceTick = false;
                 enterPhase('running');
                 rafId = requestAnimationFrame(displayLoop);
@@ -277,6 +318,21 @@
             },
             onError(message) {
                 showError(message);
+                if (phase === 'connecting' && activeDriver) {
+                    // Connection attempt failed — return to the prompt so the
+                    // user can retry from scratch.
+                    connectedDriverIds.delete(activeDriver.id);
+                    if (driverAttached) {
+                        activeDriver.detach();
+                        driverAttached = false;
+                    }
+                    enterConnectPrompt();
+                }
+            },
+            onConnected() {
+                if (mode !== 'timer' || phase !== 'connecting') return;
+                clearError();
+                setIdle();
             }
         };
 
@@ -313,17 +369,34 @@
             }
             activeDriver = driver;
             localStorage.setItem(DRIVER_STORAGE_KEY, driver.id);
-            if (driver.requiresConnect && !connectedDriverIds.has(driver.id)) {
-                connectButton.classList.remove('d-none');
+            enterPhase(phase); // re-render the hint with the driver's own texts
+            if (driverNeedsConnect()) {
+                enterConnectPrompt();
                 return;
             }
             attachActiveDriver();
         }
 
+        async function beginConnect() {
+            if (!activeDriver) return;
+            clearError();
+            displayEl.textContent = 'Trwa łączenie…';
+            enterPhase('connecting');
+            try {
+                await activeDriver.connect();
+                connectedDriverIds.add(activeDriver.id);
+                // Stay in 'connecting' — the driver reports onConnected once
+                // it actually receives a signal, which flips the pad to 0.00.
+                attachActiveDriver();
+            } catch (error) {
+                showError(error && error.message ? error.message : 'Nie udało się połączyć z urządzeniem.');
+                enterConnectPrompt();
+            }
+        }
+
         function deactivateDriver() {
             if (activeDriver && driverAttached) activeDriver.detach();
             driverAttached = false;
-            connectButton.classList.add('d-none');
             stopDisplayLoop();
         }
 
@@ -427,18 +500,8 @@
             if (mode === 'timer') activateDriver();
         });
 
-        connectButton.addEventListener('click', async function () {
-            this.blur();
-            if (!activeDriver) return;
-            clearError();
-            try {
-                await activeDriver.connect();
-                connectedDriverIds.add(activeDriver.id);
-                connectButton.classList.add('d-none');
-                attachActiveDriver();
-            } catch (error) {
-                showError(error && error.message ? error.message : 'Nie udało się połączyć z urządzeniem.');
-            }
+        timerPad.addEventListener('click', function () {
+            if (phase === 'connect') beginConnect();
         });
 
         dnfButton.addEventListener('click', function () {
@@ -457,7 +520,7 @@
         });
 
         slotButtons.forEach(button => button.addEventListener('click', function () {
-            if (phase === 'arming' || phase === 'ready' || phase === 'running') return;
+            if (phase === 'arming' || phase === 'ready' || phase === 'running' || phase === 'connecting') return;
             const i = Number(this.dataset.slot);
             if (inputs[i].value.trim() !== '') return;
             this.blur();

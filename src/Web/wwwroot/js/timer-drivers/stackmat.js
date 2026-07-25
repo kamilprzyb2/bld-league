@@ -7,12 +7,11 @@
 
     if (typeof window.Stackmat !== 'function') return;
 
-    const DEVICE_STORAGE_KEY = 'bld.stackmatDeviceId';
     const NO_SIGNAL_TIMEOUT_MS = 3000;
 
     const PERMISSION_DENIED_MESSAGE = 'Brak dostępu do mikrofonu. Zezwól stronie na użycie mikrofonu i spróbuj ponownie.';
     const NO_DEVICES_MESSAGE = 'Nie znaleziono żadnego wejścia audio. Podłącz timer do wejścia mikrofonowego i spróbuj ponownie.';
-    const NO_SIGNAL_MESSAGE = 'Brak sygnału z timera. Sprawdź, czy wybrane jest właściwe wejście audio i czy timer jest podłączony i włączony.';
+    const NO_SIGNAL_MESSAGE = 'Brak sygnału z timera. Sprawdź, czy w oknie przeglądarki wybrane jest właściwe wejście audio i czy timer jest podłączony i włączony.';
     const STREAM_FAILED_MESSAGE = 'Nie udało się otworzyć wejścia audio.';
 
     const RUNNING_STATUS = ' '; // PacketStatus.RUNNING in the stackmat library
@@ -23,15 +22,12 @@
     let inverterContext = null; // per-session context producing the inverted stream
     let stream = null;
     let running = false;
+    let lastPacketMs = -1;      // time carried by the previous packet, any status
+    let lastTick = null;        // { deviceMs, at } — most recent running packet
+    let lastTickSentAt = 0;
+    let interpolationFrame = null;
     let signalTimeout = null;
     let attachToken = 0;
-    let deviceRow = null;
-    let deviceSelect = null;
-
-    function selectedDeviceId() {
-        if (deviceSelect && deviceSelect.value) return deviceSelect.value;
-        return localStorage.getItem(DEVICE_STORAGE_KEY);
-    }
 
     function mapStreamError(error) {
         const name = error && error.name;
@@ -57,23 +53,20 @@
         }
     }
 
-    async function requestStream(deviceId) {
-        const audio = {
-            echoCancellation: false,
-            noiseSuppression: false,
-            autoGainControl: false
-        };
-        if (deviceId) audio.deviceId = { exact: deviceId };
+    async function requestStream() {
+        // Which input to open is the browser's job: its permission prompt lets
+        // the user pick the device and remembers the choice per site.
         try {
-            const acquired = await navigator.mediaDevices.getUserMedia({ audio: audio });
+            const acquired = await navigator.mediaDevices.getUserMedia({
+                audio: {
+                    echoCancellation: false,
+                    noiseSuppression: false,
+                    autoGainControl: false
+                }
+            });
             await disableProcessing(acquired);
             return acquired;
         } catch (error) {
-            if (deviceId && (error.name === 'OverconstrainedError' || error.name === 'NotFoundError')) {
-                // The remembered device is gone — fall back to the default input.
-                localStorage.removeItem(DEVICE_STORAGE_KEY);
-                return requestStream(null);
-            }
             throw new Error(mapStreamError(error));
         }
     }
@@ -110,6 +103,39 @@
         else callbacks.onIdle();
     }
 
+    // The library only surfaces ~4-5 device ticks per second (its worklet
+    // buffers ~213ms of audio per decode), which makes the display jump.
+    // Interpolate between device ticks with a local clock so the display is
+    // smooth; the recorded result still comes exclusively from the device
+    // (onStop below always uses the packet time). Ticks are throttled so the
+    // UI is asked to refresh at most every TICK_INTERVAL_MS.
+    const TICK_INTERVAL_MS = 30;
+
+    function interpolateTick() {
+        interpolationFrame = null;
+        if (!callbacks || !running || !lastTick) return;
+        const now = performance.now();
+        if (now - lastTickSentAt >= TICK_INTERVAL_MS) {
+            lastTickSentAt = now;
+            callbacks.onTick(lastTick.deviceMs + (now - lastTick.at));
+        }
+        interpolationFrame = requestAnimationFrame(interpolateTick);
+    }
+
+    function recordDeviceTick(deviceMs) {
+        lastTick = { deviceMs: deviceMs, at: performance.now() };
+        if (interpolationFrame === null) interpolationFrame = requestAnimationFrame(interpolateTick);
+    }
+
+    function stopInterpolation() {
+        if (interpolationFrame !== null) {
+            cancelAnimationFrame(interpolationFrame);
+            interpolationFrame = null;
+        }
+        lastTick = null;
+        lastTickSentAt = 0;
+    }
+
     function isActivePolarity(polarity) {
         return activePolarity === null || activePolarity === polarity;
     }
@@ -142,10 +168,29 @@
                 const loser = polarity === 'normal' ? decoders.inverted : decoders.normal;
                 loser.stop();
                 if (polarity === 'normal') closeInverter();
+                if (callbacks && callbacks.onConnected) callbacks.onConnected();
             }
             clearSignalWatchdog();
-            if (!callbacks || !running) return;
-            if (packet.status === RUNNING_STATUS) callbacks.onTick(packet.timeInMilliseconds);
+            if (!callbacks) return;
+            const ms = packet.timeInMilliseconds;
+            if (running) {
+                if (packet.status === RUNNING_STATUS) recordDeviceTick(ms);
+            } else if (ms === 0 && lastPacketMs > 0) {
+                // The displayed time dropped back to zero outside a solve: the
+                // user pressed reset. The library's own 'reset' event does not
+                // re-fire on timers that already report their stopped state as
+                // idle, so detect it at the packet level.
+                callbacks.onIdle();
+            } else if (ms > 0 && packet.status !== RUNNING_STATUS && callbacks.onDirty) {
+                // Stopped/idle status with a time on the display — a leftover
+                // result from before the session. The core mirrors it and asks
+                // for a reset. Running-status packets are excluded: the first
+                // one of a solve arrives before the library's 'started' event
+                // (packetReceived always fires first), so it must not be
+                // mistaken for a stale time.
+                callbacks.onDirty(ms);
+            }
+            lastPacketMs = ms;
         });
         stackmat.on('leftHandDown', guard(polarity, handleHandsChanged));
         stackmat.on('rightHandDown', guard(polarity, handleHandsChanged));
@@ -155,7 +200,7 @@
             if (!callbacks || running) return;
             callbacks.onReady();
         }));
-        stackmat.on('started', guard(polarity, function () {
+        stackmat.on('started', guard(polarity, function (packet) {
             if (!callbacks) return;
             running = true;
             // Walk the core through its guarded phases so a start is honoured
@@ -163,16 +208,33 @@
             callbacks.onArming();
             callbacks.onReady();
             callbacks.onStart();
+            // Seed the interpolation clock from the packet that triggered the
+            // start, so the display doesn't lag a whole decode buffer behind.
+            recordDeviceTick(packet.timeInMilliseconds);
         }));
         stackmat.on('stopped', guard(polarity, function (packet) {
             if (!callbacks || !running) return;
             running = false;
+            stopInterpolation();
             callbacks.onStop(packet.timeInMilliseconds);
         }));
-        stackmat.on('reset', guard(polarity, function () {
+        stackmat.on('reset', guard(polarity, function (packet) {
             if (!callbacks) return;
+            const wasRunning = running;
             running = false;
-            callbacks.onIdle();
+            stopInterpolation();
+            if (wasRunning && packet.timeInMilliseconds > 0) {
+                // Some timers jump straight to the idle status with the final
+                // time frozen instead of sending a stop packet — that is a
+                // finished solve, not a reset.
+                callbacks.onStop(packet.timeInMilliseconds);
+            } else if (wasRunning) {
+                // A reset mid-solve discards the attempt: the core ignores
+                // onIdle while in its running phase, so abort explicitly.
+                callbacks.onAbort();
+            } else {
+                callbacks.onIdle();
+            }
         }));
         return stackmat;
     }
@@ -198,9 +260,8 @@
 
     function startInstance(stackmat, instanceStream) {
         // The library hardcodes its own getUserMedia constraints (it ignores
-        // deviceId and leaves autoGainControl on) and swallows errors, so hand
-        // it the prepared stream by substituting getUserMedia for the
-        // synchronous duration of start().
+        // autoGainControl) and swallows errors, so hand it the prepared stream
+        // by substituting getUserMedia for the synchronous duration of start().
         const mediaDevices = navigator.mediaDevices;
         const originalGetUserMedia = mediaDevices.getUserMedia;
         mediaDevices.getUserMedia = () => Promise.resolve(instanceStream);
@@ -229,6 +290,8 @@
     function stopDecoder() {
         clearSignalWatchdog();
         running = false;
+        lastPacketMs = -1;
+        stopInterpolation();
         if (decoders) {
             decoders.normal.stop();
             decoders.inverted.stop();
@@ -238,29 +301,11 @@
         releaseStream();
     }
 
-    async function populateDeviceSelect() {
-        if (!deviceSelect) return;
-        const devices = await navigator.mediaDevices.enumerateDevices();
-        const inputs = devices.filter(device => device.kind === 'audioinput');
-        deviceSelect.innerHTML = '';
-        inputs.forEach((device, i) => {
-            const option = document.createElement('option');
-            option.value = device.deviceId;
-            option.textContent = device.label || `Wejście audio ${i + 1}`;
-            deviceSelect.appendChild(option);
-        });
-        const storedId = localStorage.getItem(DEVICE_STORAGE_KEY);
-        const activeTrack = stream ? stream.getAudioTracks()[0] : null;
-        const activeId = activeTrack && activeTrack.getSettings ? activeTrack.getSettings().deviceId : null;
-        if (storedId && inputs.some(device => device.deviceId === storedId)) deviceSelect.value = storedId;
-        else if (activeId) deviceSelect.value = activeId;
-    }
-
     async function startSession(token) {
         let sessionStream = stream; // stream pre-acquired by connect(), if any
         if (!sessionStream) {
             try {
-                sessionStream = await requestStream(selectedDeviceId());
+                sessionStream = await requestStream();
             } catch (error) {
                 if (token === attachToken && callbacks) callbacks.onError(error.message);
                 return;
@@ -272,59 +317,40 @@
             return;
         }
         stream = sessionStream;
-        try {
-            await populateDeviceSelect();
-        } catch (error) {
-            // The device list is best-effort; decoding works without it.
-        }
-        if (token !== attachToken || !callbacks) {
-            stopTracks(sessionStream);
-            if (stream === sessionStream) stream = null;
-            return;
-        }
         startDecoder();
-    }
-
-    function handleDeviceChange() {
-        localStorage.setItem(DEVICE_STORAGE_KEY, deviceSelect.value);
-        if (!callbacks) return;
-        if (running) {
-            running = false;
-            callbacks.onAbort();
-        }
-        stopDecoder();
-        startSession(++attachToken);
     }
 
     (window.BldTimerDrivers = window.BldTimerDrivers || []).push({
         id: 'stackmat',
-        label: 'Stackmat (jack audio)',
+        label: 'Stackmat',
         isSupported: () => !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia && window.isSecureContext),
         unsupportedReason: 'wymaga bezpiecznego połączenia (HTTPS) i dostępu do mikrofonu',
         requiresConnect: true,
+        hints: {
+            connect: 'Kliknij „Połącz”, aby połączyć z timerem.',
+            connecting: 'Czekam na sygnał z timera…',
+            dirty: 'Zresetuj timer, aby rozpocząć próbę.',
+            idle: 'Połóż ręce na timerze, aby przygotować start.',
+            arming: 'Trzymaj ręce na timerze…',
+            ready: 'Puść ręce, aby wystartować.',
+            running: 'Zatrzymaj timer dłońmi, aby zapisać czas.',
+            review: 'Oznacz DNF lub +2, przejdź dalej przyciskiem albo zresetuj timer.'
+        },
         async connect() {
             // Runs from the user's click on „Połącz”, so the permission prompt
             // is tied to a user gesture. Throws a Polish message on failure.
-            stream = await requestStream(selectedDeviceId());
+            stream = await requestStream();
         },
         async disconnect() { },
         attach(cb) {
             callbacks = cb;
             running = false;
-            deviceRow = document.getElementById('stackmat-device-row');
-            deviceSelect = document.getElementById('stackmat-device-select');
-            if (deviceSelect) deviceSelect.addEventListener('change', handleDeviceChange);
-            if (deviceRow) deviceRow.classList.replace('d-none', 'd-flex');
             startSession(++attachToken);
         },
         detach() {
             attachToken++;
             stopDecoder();
-            if (deviceSelect) deviceSelect.removeEventListener('change', handleDeviceChange);
-            if (deviceRow) deviceRow.classList.replace('d-flex', 'd-none');
             callbacks = null;
-            deviceRow = null;
-            deviceSelect = null;
         }
     });
 })();
