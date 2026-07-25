@@ -10,6 +10,8 @@
 
     const TIMER_SERVICE_UUID = '0000fff0-0000-1000-8000-00805f9b34fb';
     const STATE_CHARACTERISTIC_UUID = '0000fff5-0000-1000-8000-00805f9b34fb';
+    // Read-only, 16 bytes: currently displayed time + three previous times.
+    const STORED_TIME_CHARACTERISTIC_UUID = '0000fff2-0000-1000-8000-00805f9b34fb';
 
     // Timer state codes carried in byte 3 of a state packet.
     const STATE_GET_SET = 0x01;   // grace delay expired, ready to start
@@ -32,6 +34,7 @@
     let callbacks = null;
     let device = null;             // page-lifetime: lets re-attach skip the chooser
     let stateCharacteristic = null;
+    let storedTimeCharacteristic = null;
     let running = false;           // a solve is in progress on the device
     let attachToken = 0;
 
@@ -73,7 +76,10 @@
     }
 
     function handleStateNotification(event) {
-        const data = event.target.value;
+        handleStatePacket(event.target.value);
+    }
+
+    function handleStatePacket(data) {
         if (!callbacks || !isValidStatePacket(data)) return;
         switch (data.getUint8(3)) {
             case STATE_HANDS_ON:
@@ -122,6 +128,37 @@
         stateCharacteristic = await service.getCharacteristic(STATE_CHARACTERISTIC_UUID);
         stateCharacteristic.addEventListener('characteristicvaluechanged', handleStateNotification);
         await stateCharacteristic.startNotifications();
+        try {
+            storedTimeCharacteristic = await service.getCharacteristic(STORED_TIME_CHARACTERISTIC_UUID);
+        } catch (error) {
+            storedTimeCharacteristic = null; // model without stored times — dirty detection is off
+        }
+    }
+
+    // The state characteristic only notifies on transitions, so right after a
+    // (re)connection a timer already showing a leftover time — or already held —
+    // would silently pass for a fresh 0.00. Read what the protocol allows: the
+    // stored-time characteristic carries the currently displayed time (dirty
+    // detection), and a readValue() on the state characteristic is attempted
+    // too even though the spec marks it notify-only — harmless when rejected.
+    async function reportInitialState(token) {
+        if (storedTimeCharacteristic) {
+            try {
+                const data = await storedTimeCharacteristic.readValue();
+                if (token !== attachToken || !callbacks) return;
+                const displayedMs = data.byteLength >= 4 ? readTimeMs(data, 0) : 0;
+                if (!running && displayedMs > 0 && callbacks.onDirty) callbacks.onDirty(displayedMs);
+            } catch (error) {
+                // Read failed — keep the clean 0.00 assumption.
+            }
+        }
+        if (!stateCharacteristic) return;
+        try {
+            const data = await stateCharacteristic.readValue();
+            if (token === attachToken) handleStatePacket(data);
+        } catch (error) {
+            // Notify-only firmware — hands-on arrives with the next notification.
+        }
     }
 
     function delay(ms) {
@@ -135,6 +172,7 @@
             try {
                 await openConnection();
                 // Recovered — the error banner clears on the next arming.
+                reportInitialState(token);
                 return;
             } catch (error) {
                 // Try again until the attempts run out.
@@ -147,6 +185,7 @@
         const wasRunning = running;
         running = false;
         stateCharacteristic = null;
+        storedTimeCharacteristic = null;
         if (!callbacks) return; // deliberate detach() disconnect — already handled
         if (wasRunning) callbacks.onAbort();
         callbacks.onError(DISCONNECTED_MESSAGE);
@@ -162,6 +201,7 @@
             if (device.gatt.connected) device.gatt.disconnect();
         }
         stateCharacteristic = null;
+        storedTimeCharacteristic = null;
         device = chosen;
         device.addEventListener('gattserverdisconnected', handleUnexpectedDisconnect);
     }
@@ -172,11 +212,14 @@
         if (!device) return;
         if (device.gatt.connected && stateCharacteristic) {
             if (callbacks && callbacks.onConnected) callbacks.onConnected();
+            reportInitialState(token);
             return;
         }
         try {
             await openConnection();
-            if (token === attachToken && callbacks && callbacks.onConnected) callbacks.onConnected();
+            if (token !== attachToken) return;
+            if (callbacks && callbacks.onConnected) callbacks.onConnected();
+            reportInitialState(token);
         } catch (error) {
             if (token === attachToken && callbacks) callbacks.onError(RECONNECT_FAILED_MESSAGE);
         }
@@ -191,6 +234,7 @@
         hints: {
             connect: 'Kliknij „Połącz”, aby wybrać timer GAN.',
             connecting: 'Trwa łączenie z timerem…',
+            dirty: 'Zresetuj timer przyciskiem z logo GAN, aby rozpocząć próbę.',
             idle: 'Połóż ręce na timerze, aby przygotować start.',
             arming: 'Trzymaj ręce na timerze…',
             ready: 'Puść ręce, aby wystartować.',
@@ -235,6 +279,7 @@
                 stateCharacteristic.removeEventListener('characteristicvaluechanged', handleStateNotification);
                 stateCharacteristic = null;
             }
+            storedTimeCharacteristic = null;
             // Deliberate disconnect: callbacks is already null, so the
             // gattserverdisconnected handler treats it as expected.
             if (device && device.gatt.connected) device.gatt.disconnect();

@@ -22,7 +22,8 @@
         ready: 'Puść, aby wystartować.',
         running: 'Naciśnij dowolny klawisz lub dotknij pola, aby zatrzymać. Esc — przerwij bez zapisu.',
         review: 'Oznacz DNF lub +2, albo przejdź do kolejnej próby.',
-        done: 'Wszystkie próby mają wynik — możesz wgrać wyniki.'
+        done: 'Wszystkie próby mają wynik — możesz wgrać wyniki.',
+        unsupported: 'Wybierz inną metodę wprowadzania.'
     };
 
     const OVERFLOW_MESSAGE = 'Czas przekracza 99:59.99 i nie może zostać zapisany.';
@@ -152,6 +153,7 @@
             displayEl.classList.toggle('timer-arming', next === 'arming');
             displayEl.classList.toggle('timer-ready', next === 'ready');
             displayEl.classList.toggle('timer-label', next === 'connect' || next === 'connecting');
+            displayEl.classList.toggle('timer-message', next === 'unsupported');
             reviewPanel.classList.toggle('d-none', next !== 'review');
             const driverHints = activeDriver && activeDriver.hints ? activeDriver.hints : null;
             hintEl.textContent = (driverHints && driverHints[next]) || HINTS[next] || '';
@@ -163,6 +165,15 @@
             stopDisplayLoop();
             displayEl.textContent = 'Połącz';
             enterPhase('connect');
+        }
+
+        // An unsupported driver stays selectable (a disabled <option> with the
+        // reason appended blows up the select's width); the full explanation is
+        // shown in the timer display instead.
+        function enterUnsupportedPrompt(driver) {
+            stopDisplayLoop();
+            displayEl.textContent = `${driver.label} ${driver.unsupportedReason}.`;
+            enterPhase('unsupported');
         }
 
         function setIdle() {
@@ -341,11 +352,7 @@
             availableDrivers().forEach(driver => {
                 const option = document.createElement('option');
                 option.value = driver.id;
-                const supported = driver.isSupported();
-                option.textContent = supported
-                    ? driver.label
-                    : `${driver.label} — ${driver.unsupportedReason}`;
-                option.disabled = !supported;
+                option.textContent = driver.label;
                 driverSelect.appendChild(option);
             });
             const storedId = localStorage.getItem(DRIVER_STORAGE_KEY);
@@ -363,8 +370,13 @@
 
         function activateDriver() {
             const driver = availableDrivers().find(d => d.id === driverSelect.value);
-            if (!driver || !driver.isSupported()) {
+            if (!driver) {
                 showError('Brak dostępnej metody wprowadzania.');
+                return;
+            }
+            if (!driver.isSupported()) {
+                activeDriver = null;
+                enterUnsupportedPrompt(driver);
                 return;
             }
             activeDriver = driver;
@@ -520,7 +532,7 @@
         });
 
         slotButtons.forEach(button => button.addEventListener('click', function () {
-            if (phase === 'arming' || phase === 'ready' || phase === 'running' || phase === 'connecting') return;
+            if (phase === 'arming' || phase === 'ready' || phase === 'running' || phase === 'connecting' || phase === 'unsupported') return;
             const i = Number(this.dataset.slot);
             if (inputs[i].value.trim() !== '') return;
             this.blur();

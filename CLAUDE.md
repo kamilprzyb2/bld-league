@@ -285,7 +285,7 @@ Avoid JavaScript by default. Prefer server-side form submissions and page reload
 | `src/Web/wwwroot/js/submit-timer.js` | Submission timer core: slot model, state machine, rendering, draft persistence (`localStorage`), `TimerDriver` registry |
 | `src/Web/wwwroot/js/timer-drivers/keyboard.js` | Keyboard/touch `TimerDriver` implementation (space to arm/start/stop, tap pad on mobile) |
 | `src/Web/wwwroot/js/timer-drivers/stackmat.js` | Stackmat (audio jack) `TimerDriver` — decodes the timer signal via the vendored stackmat library, dual-polarity decoding, device choice left to the browser prompt |
-| `src/Web/wwwroot/js/timer-drivers/gan-bluetooth.js` | GAN Smart Timer / GAN Halo `TimerDriver` — hand-rolled Web Bluetooth GATT protocol (no vendored library), Chromium-only, no ticks (core interpolates), recorded time from the STOPPED packet |
+| `src/Web/wwwroot/js/timer-drivers/gan-bluetooth.js` | GAN Smart Timer / GAN Halo `TimerDriver` — hand-rolled Web Bluetooth GATT protocol (no vendored library), Chromium-only, no ticks (core interpolates), recorded time from the STOPPED packet, dirty-timer detection on connect via the read-only stored-time characteristic |
 | `src/Web/wwwroot/lib/stackmat/` | Vendored [stilesdev/stackmat](https://github.com/stilesdev/stackmat) UMD build (MIT) + LICENSE |
 | `src/Web/wwwroot/lib/dseg/` | Vendored [DSEG](https://github.com/keshikan/DSEG) seven-segment font (OFL 1.1) + LICENSE — timer display |
 | `docs/stackmat-timer.md` | Stackmat findings: hardware quirks (polarity, stop-as-idle), library workarounds, browser support, Gen4 test results |

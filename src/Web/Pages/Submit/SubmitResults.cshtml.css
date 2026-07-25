@@ -50,6 +50,14 @@
     font-size: clamp(1.5rem, 6vw, 2.5rem);
 }
 
+.timer-display.timer-message {
+    /* Full-sentence driver messages (e.g. unsupported browser) — regular UI
+       font at a modest size so long text wraps instead of dwarfing the pad. */
+    font-family: var(--bs-body-font-family);
+    font-size: clamp(1rem, 3vw, 1.25rem);
+    color: var(--bs-danger);
+}
+
 .timer-display.timer-arming {
     color: var(--bs-danger);
 }
