@@ -36,10 +36,10 @@
             <thead>
             <tr>
                 <th>Konkurencja</th>
-                <th data-bs-toggle="tooltip" title="Miejsce w rankingu"># (single)</th>
+                <th data-bs-toggle="tooltip" title="Miejsce w rankingu">#</th>
                 <th>Best</th>
                 <th>Średnia</th>
-                <th data-bs-toggle="tooltip" title="Miejsce w rankingu"># (avg)</th>
+                <th data-bs-toggle="tooltip" title="Miejsce w rankingu">#</th>
             </tr>
             </thead>
             <tbody>
@@ -72,7 +72,7 @@
             <table class="table table-bordered align-middle">
                 <thead>
                 <tr>
-                    <th class="text-nowrap">Najlepsze</th>
+                    <th class="text-nowrap">Best</th>
                     <th class="text-nowrap">Średnia</th>
                     <th>
                         <span class="d-none d-md-inline">Sezon/Kolejka</span>
@@ -104,14 +104,11 @@
                             </a>
                         </td>
                         <td class="font-monospace d-none d-md-table-cell">
-                            @if (record.AverageRecord == RecordLevel.League)
-                            {
-                                @UserProfile.FormatSolveWithParens(record, 0)
-                                @UserProfile.FormatSolveWithParens(record, 1)
-                                @UserProfile.FormatSolveWithParens(record, 2)
-                                @UserProfile.FormatSolveWithParens(record, 3)
-                                @UserProfile.FormatSolveWithParens(record, 4)
-                            }
+                            @UserProfile.FormatSolveWithParens(record, 0)
+                            @UserProfile.FormatSolveWithParens(record, 1)
+                            @UserProfile.FormatSolveWithParens(record, 2)
+                            @UserProfile.FormatSolveWithParens(record, 3)
+                            @UserProfile.FormatSolveWithParens(record, 4)
                         </td>
                     </tr>
                 }
