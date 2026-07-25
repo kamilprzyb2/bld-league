@@ -30,16 +30,17 @@
     </div>
 
     @* Personal Records *@
-    <h4>Rekordy osobiste</h4>
-    <div class="table-responsive mb-4">
-        <table class="table table-bordered align-middle">
+    <div class="mx-auto mb-4" style="max-width:700px;">
+        <h4 class="text-center">Rekordy osobiste</h4>
+        <div class="table-responsive">
+            <table class="table table-bordered align-middle">
             <thead>
             <tr>
                 <th>Konkurencja</th>
-                <th data-bs-toggle="tooltip" title="Miejsce w rankingu">#</th>
-                <th>Best</th>
-                <th>Średnia</th>
-                <th data-bs-toggle="tooltip" title="Miejsce w rankingu">#</th>
+                <th class="text-center" style="width:12%;" data-bs-toggle="tooltip" title="Miejsce w rankingu (best)">#</th>
+                <th class="text-center" style="width:15%;">Best</th>
+                <th class="text-center" style="width:15%;">Średnia</th>
+                <th class="text-center" style="width:12%;" data-bs-toggle="tooltip" title="Miejsce w rankingu (średnia)">#</th>
             </tr>
             </thead>
             <tbody>
@@ -48,13 +49,14 @@
                     <img src="/images/333bf.svg" alt="3x3 Bez Patrzenia" style="width:20px;height:20px;vertical-align:middle;" class="me-1 event-icon" />
                     3x3 Bez Patrzenia
                 </td>
-                <td>@(Model.Ranking?.SingleRank?.ToString() ?? "–")</td>
-                <td class="fw-bold">@(Model.Ranking?.BestSingle?.ToString() ?? "–")</td>
-                <td class="fw-bold">@(Model.Ranking?.BestAverage?.ToString() ?? "–")</td>
-                <td>@(Model.Ranking?.AverageRank?.ToString() ?? "–")</td>
+                <td class="text-center">@(Model.Ranking?.SingleRank?.ToString() ?? "–")</td>
+                <td class="text-center fw-bold">@(Model.Ranking?.BestSingle?.ToString() ?? "–")</td>
+                <td class="text-center fw-bold">@(Model.Ranking?.BestAverage?.ToString() ?? "–")</td>
+                <td class="text-center">@(Model.Ranking?.AverageRank?.ToString() ?? "–")</td>
             </tr>
             </tbody>
-        </table>
+            </table>
+        </div>
     </div>
 
     @* Site record history *@
