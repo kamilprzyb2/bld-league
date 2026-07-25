@@ -26,6 +26,8 @@
         <form method="post">
             <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
+            <input type="hidden" asp-for="MatchId" />
+
             @for (var i = 0; i < Match.SOLVES_PER_MATCH; i++)
             {
                 var scramble = i < Model.ActiveSubmission.Scrambles.Count

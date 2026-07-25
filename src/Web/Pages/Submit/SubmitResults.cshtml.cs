@@ -16,6 +16,9 @@ public class SubmitResults(IMediator mediator) : PageModel
     public ActiveSubmissionDto? ActiveSubmission { get; set; }
 
     [BindProperty]
+    public Guid MatchId { get; set; }
+
+    [BindProperty]
     public List<SubmitSolveDto> Solves { get; set; } = Enumerable
         .Range(0, Match.SOLVES_PER_MATCH)
         .Select(_ => new SubmitSolveDto())
@@ -37,6 +40,8 @@ public class SubmitResults(IMediator mediator) : PageModel
         if (ActiveSubmission.HasSubmitted)
             return RedirectToPage("/Matches/ViewMatch", new { id = ActiveSubmission.MatchId });
 
+        MatchId = ActiveSubmission.MatchId;
+
         return Page();
     }
 
@@ -50,7 +55,7 @@ public class SubmitResults(IMediator mediator) : PageModel
             return Page();
         }
 
-        var result = await mediator.Send(new SubmitMatchSolvesRequest(userId, Solves));
+        var result = await mediator.Send(new SubmitMatchSolvesRequest(userId, MatchId, Solves));
 
         if (!result.Success)
         {
