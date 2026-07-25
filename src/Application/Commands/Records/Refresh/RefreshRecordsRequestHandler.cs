@@ -8,7 +8,7 @@ using MediatR;
 namespace BldLeague.Application.Commands.Records.Refresh;
 
 /// <summary>
-/// Handles recomputing PR (personal record) and LR (site-wide record) levels on all round standings.
+/// Handles recomputing PR (personal record) and site-record levels on all round standings.
 /// Sweeps rounds chronologically by (SeasonNumber, RoundNumber); results within one round are simultaneous,
 /// ties (&lt;=) count, and only valid results can earn or hold a record.
 /// </summary>
@@ -35,7 +35,7 @@ public class RefreshRecordsRequestHandler(IUnitOfWork unitOfWork)
         {
             var rows = roundGroup.ToList();
 
-            // Fallback records for the no-prior-record case: only the round's best result(s) (+ties) earn LR.
+            // Fallback records for the no-prior-record case: only the round's best result(s) (+ties) earn the site record.
             int? roundBestSingle = rows
                 .Where(rs => rs.Best.IsValid)
                 .Select(rs => (int?)rs.Best.Centiseconds)
@@ -92,7 +92,7 @@ public class RefreshRecordsRequestHandler(IUnitOfWork unitOfWork)
         await unitOfWork.SaveAsync();
         await unitOfWork.CommitTransactionAsync();
 
-        return CommandResult.Ok("Zaktualizowano rekordy (PR/LR)");
+        return CommandResult.Ok("Zaktualizowano rekordy (PR/rekordy strony)");
     }
 
     private static RecordLevel ComputeRecordLevel(SolveResult result, int? personalBest, int? globalBest, int? roundBest)

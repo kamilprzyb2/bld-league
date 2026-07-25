@@ -1,5 +1,6 @@
 @page "/Users/{id:guid}"
 @using BldLeague.Application.Queries.Users.GetRoundResults
+@using BldLeague.Domain.Enums
 @using System.Text.Json
 @model BldLeague.Web.Pages.Users.UserProfile
 
@@ -35,10 +36,10 @@
             <thead>
             <tr>
                 <th>Konkurencja</th>
-                <th data-bs-toggle="tooltip" title="Rekord ligi">LR (single)</th>
+                <th data-bs-toggle="tooltip" title="Miejsce w rankingu"># (single)</th>
                 <th>Best</th>
                 <th>Średnia</th>
-                <th data-bs-toggle="tooltip" title="Rekord ligi">LR (avg)</th>
+                <th data-bs-toggle="tooltip" title="Miejsce w rankingu"># (avg)</th>
             </tr>
             </thead>
             <tbody>
@@ -55,6 +56,69 @@
             </tbody>
         </table>
     </div>
+
+    @* Site record history *@
+    @{
+        var siteRecordResults = Model.RoundResults
+            .Where(r => r.BestRecord == RecordLevel.League || r.AverageRecord == RecordLevel.League)
+            .OrderByDescending(r => r.SeasonNumber)
+            .ThenByDescending(r => r.RoundNumber)
+            .ToList();
+    }
+    @if (siteRecordResults.Any())
+    {
+        <h4>Rekordy strony</h4>
+        <div class="table-responsive mb-4">
+            <table class="table table-bordered align-middle">
+                <thead>
+                <tr>
+                    <th class="text-nowrap">Najlepsze</th>
+                    <th class="text-nowrap">Średnia</th>
+                    <th>
+                        <span class="d-none d-md-inline">Sezon/Kolejka</span>
+                        <span class="d-inline d-md-none">S/K</span>
+                    </th>
+                    <th class="d-none d-md-table-cell">Ułożenia</th>
+                </tr>
+                </thead>
+                <tbody>
+                @foreach (var record in siteRecordResults)
+                {
+                    <tr>
+                        <td class="fw-bold text-nowrap">
+                            @if (record.BestRecord == RecordLevel.League)
+                            {
+                                @record.Best
+                            }
+                        </td>
+                        <td class="fw-bold text-nowrap">
+                            @if (record.AverageRecord == RecordLevel.League)
+                            {
+                                @record.Average
+                            }
+                        </td>
+                        <td>
+                            <a asp-page="/Rounds/ViewRound" asp-route-SeasonId="@record.SeasonId" asp-route-RoundNumber="@record.RoundNumber">
+                                <span class="d-none d-md-inline">@record.SeasonName @record.RoundName</span>
+                                <span class="d-inline d-md-none">S@(record.SeasonNumber) K@(record.RoundNumber)</span>
+                            </a>
+                        </td>
+                        <td class="font-monospace d-none d-md-table-cell">
+                            @if (record.AverageRecord == RecordLevel.League)
+                            {
+                                @UserProfile.FormatSolveWithParens(record, 0)
+                                @UserProfile.FormatSolveWithParens(record, 1)
+                                @UserProfile.FormatSolveWithParens(record, 2)
+                                @UserProfile.FormatSolveWithParens(record, 3)
+                                @UserProfile.FormatSolveWithParens(record, 4)
+                            }
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    }
 
     @* Tabs *@
     <ul class="nav nav-tabs mb-3" id="profileTabs" role="tablist">
