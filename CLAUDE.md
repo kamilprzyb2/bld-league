@@ -132,6 +132,8 @@ Keep the UI straightforward: standard Razor Pages with Bootstrap. Avoid custom C
 ### Minimise JavaScript
 Avoid JavaScript by default. Prefer server-side form submissions and page reloads. Only introduce JavaScript (including AJAX) when a feature genuinely cannot be built without it — for example, cascading dropdowns that would require an unreasonable number of round-trips or hidden fields. When JS is necessary, keep it inline on the page and as small as possible.
 
+**Exception — the submission timer.** The built-in timer on `/Submit/SubmitResults` is a deliberate carve-out: its JavaScript lives in `wwwroot/js/submit-timer.js` (not inline), is dependency-free ES2020 with no build step, and hardware input methods are added as self-registering `TimerDriver` implementations under `wwwroot/js/timer-drivers/` (they push onto `window.BldTimerDrivers`) rather than by growing the core. The timer is pure frontend: it only fills the existing `Solves[i].Result` inputs, and the page degrades to the plain manual form when JS is unavailable.
+
 ## Domain Concepts
 
 - **Season** → contains **Rounds** and belongs to multiple **LeagueSeasons**.
@@ -276,6 +278,13 @@ Avoid JavaScript by default. Prefer server-side form submissions and page reload
 | `MatchStatus` enum (Upcoming/InProgress/Finished) | `src/Web/ViewModels/MatchStatus.cs` |
 | ViewModels | `src/Web/ViewModels/` |
 
+### Web — client-side JS
+
+| File | Purpose |
+|---|---|
+| `src/Web/wwwroot/js/submit-timer.js` | Submission timer core: slot model, state machine, rendering, draft persistence (`localStorage`), `TimerDriver` registry |
+| `src/Web/wwwroot/js/timer-drivers/keyboard.js` | Keyboard/touch `TimerDriver` implementation (space to arm/start/stop, tap pad on mobile) |
+
 ### Web — public pages
 
 | Page | Files |
@@ -293,7 +302,7 @@ Avoid JavaScript by default. Prefer server-side form submissions and page reload
 | Player rankings (single + average) at `/Rankings` | `src/Web/Pages/Rankings/Rankings.cshtml[.cs]` |
 | User list | `src/Web/Pages/Users/UserList.cshtml[.cs]` |
 | User profile | `src/Web/Pages/Users/UserProfile.cshtml[.cs]` |
-| Self-service result submission | `src/Web/Pages/Submit/SubmitResults.cshtml[.cs]` |
+| Self-service result submission (manual + built-in timer modes; scoped styles in `SubmitResults.cshtml.css`) | `src/Web/Pages/Submit/SubmitResults.cshtml[.cs]` |
 | Global statistics page | `src/Web/Pages/Statistics/Statistics.cshtml[.cs]` |
 | Shared stat tile partial (icon + text card) | `src/Web/Pages/Shared/_StatTile.cshtml` |
 | About / rules | `src/Web/Pages/About/About.cshtml[.cs]` |

@@ -26,28 +26,85 @@
         <form method="post">
             <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
-            @for (var i = 0; i < Match.SOLVES_PER_MATCH; i++)
-            {
-                var scramble = i < Model.ActiveSubmission.Scrambles.Count
-                    ? Model.ActiveSubmission.Scrambles[i]
-                    : null;
+            <div id="timer-root"
+                 data-match-id="@Model.ActiveSubmission.MatchId"
+                 data-no-scramble-text="Brak ułożenia dla tej próby.">
 
-                <div class="mb-3">
-                    <label class="form-label fw-semibold">Ułożenie @(i + 1)</label>
-                    @if (scramble != null)
-                    {
-                        <div class="font-monospace text-muted mb-1 small">@scramble.Notation</div>
-                    }
-                    <input asp-for="Solves[i].Result"
-                           class="form-control"
-                           placeholder="np. 12.34 lub DNF" />
-                    <span asp-validation-for="Solves[i].Result" class="text-danger"></span>
+                <div id="mode-toggle" class="btn-group mb-3 d-none" role="group" aria-label="Sposób wprowadzania wyników">
+                    <button type="button" id="mode-manual-btn" class="btn btn-outline-primary active">Wpisz ręcznie</button>
+                    <button type="button" id="mode-timer-btn" class="btn btn-outline-primary">Timer</button>
                 </div>
-            }
 
-            <button type="submit" class="btn btn-primary"
-                    onclick="return confirm('Czy na pewno chcesz wgrać wyniki? Tej operacji nie można cofnąć.');">Wgraj wyniki</button>
+                <div id="manual-panel">
+                    @for (var i = 0; i < Match.SOLVES_PER_MATCH; i++)
+                    {
+                        var scramble = i < Model.ActiveSubmission.Scrambles.Count
+                            ? Model.ActiveSubmission.Scrambles[i]
+                            : null;
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Ułożenie @(i + 1)</label>
+                            @if (scramble != null)
+                            {
+                                <div class="font-monospace text-muted mb-1 small">@scramble.Notation</div>
+                            }
+                            <input asp-for="Solves[i].Result"
+                                   class="form-control"
+                                   placeholder="np. 12.34 lub DNF"
+                                   data-solve-index="@i" />
+                            <span asp-validation-for="Solves[i].Result" class="text-danger"></span>
+                        </div>
+                    }
+                </div>
+
+                <div id="timer-panel" class="d-none mb-3">
+                    <div class="d-flex align-items-center flex-wrap gap-2 mb-3">
+                        <label class="form-label mb-0" for="timer-driver-select">Metoda wprowadzania:</label>
+                        <select id="timer-driver-select" class="form-select w-auto"></select>
+                        <button type="button" id="timer-connect-btn" class="btn btn-outline-primary d-none">Połącz</button>
+                    </div>
+
+                    <div id="timer-error" class="alert alert-danger d-none"></div>
+
+                    <p class="fw-semibold mb-1">Próba <span id="timer-attempt-number">1</span> z @Match.SOLVES_PER_MATCH</p>
+                    <div id="timer-scramble" class="font-monospace text-muted small mb-3"></div>
+                    <div id="timer-scrambles" hidden>
+                        @for (var i = 0; i < Model.ActiveSubmission.Scrambles.Count; i++)
+                        {
+                            <span data-solve-index="@i">@Model.ActiveSubmission.Scrambles[i].Notation</span>
+                        }
+                    </div>
+
+                    <div id="timer-pad" class="timer-pad border rounded text-center mb-3">
+                        <div id="timer-display" class="timer-display">0.00</div>
+                        <div id="timer-hint" class="text-muted small mt-2">Przytrzymaj spację lub dotknij pola, aby przygotować timer.</div>
+                    </div>
+
+                    <div id="timer-review" class="d-none mb-3">
+                        <div class="d-flex align-items-center gap-2">
+                            <button type="button" id="timer-dnf-btn" class="btn btn-outline-danger">DNF</button>
+                            <button type="button" id="timer-plus2-btn" class="btn btn-outline-warning">+2</button>
+                            <button type="button" id="timer-next-btn" class="btn btn-primary ms-auto">Dalej <i class="bi bi-arrow-right"></i></button>
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-center flex-wrap gap-2">
+                        <span class="fw-semibold">Wyniki:</span>
+                        @for (var i = 0; i < Match.SOLVES_PER_MATCH; i++)
+                        {
+                            <button type="button" class="btn btn-sm btn-outline-secondary" data-slot="@i">@(i + 1): —</button>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Wgraj wyniki</button>
             <a asp-page="/Index" class="btn btn-outline-secondary ms-2">Anuluj</a>
         </form>
     }
 </div>
+
+@section Scripts {
+    <script src="~/js/submit-timer.js" asp-append-version="true"></script>
+    <script src="~/js/timer-drivers/keyboard.js" asp-append-version="true"></script>
+}

@@ -1,0 +1,22 @@
+.timer-pad {
+    padding: 3rem 1rem;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+    cursor: pointer;
+}
+
+.timer-display {
+    font-size: clamp(2.5rem, 10vw, 4.5rem);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.1;
+}
+
+.timer-display.timer-arming {
+    color: var(--bs-danger);
+}
+
+.timer-display.timer-ready {
+    color: var(--bs-success);
+}
