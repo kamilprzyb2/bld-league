@@ -114,3 +114,7 @@ dotnet ef migrations add MigrationName --project src/Infrastructure --startup-pr
 dotnet build BldLeague.slnx
 dotnet run --project src/Web
 ```
+
+## Dependencies
+
+- [stackmat](https://github.com/stilesdev/stackmat) (MIT) — decodes the audio-jack signal of a Stackmat/SpeedStacks timer in the browser; powers the Stackmat input method of the result submission timer. Vendored under `src/Web/wwwroot/lib/stackmat/`.

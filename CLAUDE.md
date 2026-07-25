@@ -284,6 +284,8 @@ Avoid JavaScript by default. Prefer server-side form submissions and page reload
 |---|---|
 | `src/Web/wwwroot/js/submit-timer.js` | Submission timer core: slot model, state machine, rendering, draft persistence (`localStorage`), `TimerDriver` registry |
 | `src/Web/wwwroot/js/timer-drivers/keyboard.js` | Keyboard/touch `TimerDriver` implementation (space to arm/start/stop, tap pad on mobile) |
+| `src/Web/wwwroot/js/timer-drivers/stackmat.js` | Stackmat (audio jack) `TimerDriver` — decodes the timer signal via the vendored stackmat library, offers an audio-input device selector |
+| `src/Web/wwwroot/lib/stackmat/` | Vendored [stilesdev/stackmat](https://github.com/stilesdev/stackmat) UMD build (MIT) + LICENSE |
 
 ### Web — public pages
 
