@@ -289,6 +289,7 @@ Avoid JavaScript by default. Prefer server-side form submissions and page reload
 | `src/Web/wwwroot/lib/stackmat/` | Vendored [stilesdev/stackmat](https://github.com/stilesdev/stackmat) UMD build (MIT) + LICENSE |
 | `src/Web/wwwroot/lib/dseg/` | Vendored [DSEG](https://github.com/keshikan/DSEG) seven-segment font (OFL 1.1) + LICENSE — timer display |
 | `docs/stackmat-timer.md` | Stackmat findings: hardware quirks (polarity, stop-as-idle), library workarounds, browser support, Gen4 test results |
+| `docs/gan-timer.md` | GAN timer findings: GATT protocol (state/stored-time characteristics, packet layout), notify-only limitations, dirty detection, browser support |
 
 ### Web — public pages
 
