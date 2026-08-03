@@ -4,5 +4,7 @@ public record UserSeasonHistoryDto(
     int SeasonNumber,
     string SeasonName,
     string LeagueName,
-    int Place
+    int Place,
+    bool IsSeasonFinished,
+    int MatchesPlayed
 );

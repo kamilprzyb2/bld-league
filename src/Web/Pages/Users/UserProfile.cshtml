@@ -1,5 +1,7 @@
 @page "/Users/{id:guid}"
 @using BldLeague.Application.Queries.Users.GetRoundResults
+@using BldLeague.Domain.Enums
+@using BldLeague.Web.ViewModels
 @using System.Text.Json
 @model BldLeague.Web.Pages.Users.UserProfile
 
@@ -26,19 +28,44 @@
         }
         <a href="https://www.worldcubeassociation.org/persons/@Model.Profile.WcaId"
            rel="nofollow noreferrer noopener" target="_blank">@Model.Profile.WcaId</a>
+
+        <div class="d-flex justify-content-center gap-2 mt-3">
+            <button class="btn btn-primary" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#comparePicker" aria-expanded="false" aria-controls="comparePicker">
+                <i class="bi bi-people"></i> Porównaj
+            </button>
+            @if (Model.SignedInUserId is { } signedInUserId && signedInUserId != Model.Profile.Id)
+            {
+                <a class="btn btn-primary" asp-page="/Compare/Compare"
+                   asp-route-userAId="@signedInUserId" asp-route-userBId="@Model.Profile.Id">
+                    <i class="bi bi-person-check"></i> Porównaj ze mną
+                </a>
+            }
+        </div>
+        <div class="collapse mt-2" id="comparePicker">
+            <form method="get" asp-page="/Compare/Compare" class="d-flex justify-content-center">
+                <div class="input-group" style="max-width:420px;">
+                    <input type="hidden" name="UserAId" value="@Model.Profile.Id" />
+                    <input list="comparisonUsers" name="Opponent" class="form-control" placeholder="Wybierz zawodnika" />
+                    <partial name="_UserDatalist" model='new UserDatalistViewModel("comparisonUsers", Model.AllUsers.Where(u => u.Id != Model.Profile.Id))' />
+                    <button type="submit" class="btn btn-primary">Porównaj</button>
+                </div>
+            </form>
+        </div>
     </div>
 
     @* Personal Records *@
-    <h4>Rekordy osobiste</h4>
-    <div class="table-responsive mb-4">
-        <table class="table table-bordered align-middle">
+    <div class="mx-auto mb-4" style="max-width:700px;">
+        <h4 class="text-center">Rekordy osobiste</h4>
+        <div class="table-responsive">
+            <table class="table table-bordered align-middle">
             <thead>
             <tr>
                 <th>Konkurencja</th>
-                <th data-bs-toggle="tooltip" title="Rekord ligi">LR (single)</th>
-                <th>Best</th>
-                <th>Średnia</th>
-                <th data-bs-toggle="tooltip" title="Rekord ligi">LR (avg)</th>
+                <th class="text-center" style="width:12%;" data-bs-toggle="tooltip" title="Miejsce w rankingu (best)">#</th>
+                <th class="text-center" style="width:15%;">Best</th>
+                <th class="text-center" style="width:15%;">Średnia</th>
+                <th class="text-center" style="width:12%;" data-bs-toggle="tooltip" title="Miejsce w rankingu (średnia)">#</th>
             </tr>
             </thead>
             <tbody>
@@ -47,14 +74,77 @@
                     <img src="/images/333bf.svg" alt="3x3 Bez Patrzenia" style="width:20px;height:20px;vertical-align:middle;" class="me-1 event-icon" />
                     3x3 Bez Patrzenia
                 </td>
-                <td>@(Model.Ranking?.SingleRank?.ToString() ?? "–")</td>
-                <td class="fw-bold">@(Model.Ranking?.BestSingle?.ToString() ?? "–")</td>
-                <td class="fw-bold">@(Model.Ranking?.BestAverage?.ToString() ?? "–")</td>
-                <td>@(Model.Ranking?.AverageRank?.ToString() ?? "–")</td>
+                <td class="text-center">@(Model.Ranking?.SingleRank?.ToString() ?? "–")</td>
+                <td class="text-center fw-bold">@(Model.Ranking?.BestSingle?.ToString() ?? "–")</td>
+                <td class="text-center fw-bold">@(Model.Ranking?.BestAverage?.ToString() ?? "–")</td>
+                <td class="text-center">@(Model.Ranking?.AverageRank?.ToString() ?? "–")</td>
             </tr>
             </tbody>
-        </table>
+            </table>
+        </div>
     </div>
+
+    @* Site record history *@
+    @{
+        var siteRecordResults = Model.RoundResults
+            .Where(r => r.BestRecord == RecordLevel.League || r.AverageRecord == RecordLevel.League)
+            .OrderByDescending(r => r.SeasonNumber)
+            .ThenByDescending(r => r.RoundNumber)
+            .ToList();
+    }
+    @if (siteRecordResults.Any())
+    {
+        <div class="mx-auto mb-4" style="max-width:700px;">
+        <h4 class="text-center">Rekordy strony</h4>
+        <div class="table-responsive">
+            <table class="table table-bordered align-middle">
+                <thead>
+                <tr>
+                    <th class="text-nowrap">Best</th>
+                    <th class="text-nowrap">Średnia</th>
+                    <th>
+                        <span class="d-none d-md-inline">Sezon/Kolejka</span>
+                        <span class="d-inline d-md-none">S/K</span>
+                    </th>
+                    <th class="d-none d-md-table-cell">Ułożenia</th>
+                </tr>
+                </thead>
+                <tbody>
+                @foreach (var record in siteRecordResults)
+                {
+                    <tr>
+                        <td class="fw-bold text-nowrap">
+                            @if (record.BestRecord == RecordLevel.League)
+                            {
+                                @record.Best
+                            }
+                        </td>
+                        <td class="fw-bold text-nowrap">
+                            @if (record.AverageRecord == RecordLevel.League)
+                            {
+                                @record.Average
+                            }
+                        </td>
+                        <td>
+                            <a asp-page="/Rounds/ViewRound" asp-route-SeasonId="@record.SeasonId" asp-route-RoundNumber="@record.RoundNumber">
+                                <span class="d-none d-md-inline">@record.SeasonName @record.RoundName</span>
+                                <span class="d-inline d-md-none">S@(record.SeasonNumber) K@(record.RoundNumber)</span>
+                            </a>
+                        </td>
+                        <td class="font-monospace d-none d-md-table-cell">
+                            @UserProfile.FormatSolveWithParens(record, 0)
+                            @UserProfile.FormatSolveWithParens(record, 1)
+                            @UserProfile.FormatSolveWithParens(record, 2)
+                            @UserProfile.FormatSolveWithParens(record, 3)
+                            @UserProfile.FormatSolveWithParens(record, 4)
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+        </div>
+    }
 
     @* Tabs *@
     <ul class="nav nav-tabs mb-3" id="profileTabs" role="tablist">
@@ -133,8 +223,8 @@
                                     </a>
                                 </td>
                                 <td class="text-center">@placeDisplay</td>
-                                <td class="fw-bold">@result.Best</td>
-                                <td>@result.Average</td>
+                                <td class="fw-bold text-nowrap">@result.Best <partial name="_RecordBadge" model="result.BestRecord" /></td>
+                                <td class="text-nowrap">@result.Average <partial name="_RecordBadge" model="result.AverageRecord" /></td>
                                 <td class="font-monospace d-none d-md-table-cell">
                                     @UserProfile.FormatSolveWithParens(result, 0)
                                     @UserProfile.FormatSolveWithParens(result, 1)
@@ -238,22 +328,39 @@
                         foreach (var history in Model.SeasonHistory)
                         {
                             <tr>
-                                <td>@history.SeasonName</td>
+                                <td>
+                                    @history.SeasonName
+                                    @if (!history.IsSeasonFinished)
+                                    {
+                                        <span class="badge text-bg-secondary ms-1">W toku</span>
+                                    }
+                                </td>
                                 <td>@history.LeagueName</td>
                                 <td class="text-center text-nowrap">
-                                    @if (history.Place == 1)
+                                    @if (history.MatchesPlayed == 0)
                                     {
-                                        <i class="bi bi-trophy-fill text-warning me-1"></i>
+                                        <span class="text-body-secondary">&mdash;</span>
                                     }
-                                    else if (history.Place == 2)
+                                    else if (!history.IsSeasonFinished)
                                     {
-                                        <i class="bi bi-trophy-fill me-1" style="color:#c0c0c0;"></i>
+                                        @history.Place
                                     }
-                                    else if (history.Place == 3)
+                                    else
                                     {
-                                        <i class="bi bi-trophy-fill me-1" style="color:#cd7f32;"></i>
+                                        @if (history.Place == 1)
+                                        {
+                                            <i class="bi bi-trophy-fill text-warning me-1"></i>
+                                        }
+                                        else if (history.Place == 2)
+                                        {
+                                            <i class="bi bi-trophy-fill me-1" style="color:#c0c0c0;"></i>
+                                        }
+                                        else if (history.Place == 3)
+                                        {
+                                            <i class="bi bi-trophy-fill me-1" style="color:#cd7f32;"></i>
+                                        }
+                                        @history.Place
                                     }
-                                    @history.Place
                                 </td>
                             </tr>
                         }
@@ -311,6 +418,10 @@
                         <tr>
                             <td>Średni czas</td>
                             <td class="text-end fw-semibold">@(Model.Stats.AverageSingle?.ToString() ?? "–")</td>
+                        </tr>
+                        <tr>
+                            <td>Mediana</td>
+                            <td class="text-end fw-semibold">@(Model.Stats.MedianSingle?.ToString() ?? "–")</td>
                         </tr>
                         <tr>
                             <td>Najwięcej sukcesów z rzędu</td>
@@ -383,7 +494,7 @@
     }
     @if (validChartPoints.Count >= 2)
     {
-        <script src="https://cdn.jsdelivr.net/npm/chart.js@@4"></script>
+        <script src="~/lib/chartjs/chart.umd.min.js"></script>
         <script>
             (function () {
                 var labels = @Html.Raw(JsonSerializer.Serialize(validChartPoints.Select(r => $"S{r.SeasonNumber} K{r.RoundNumber}").ToArray()));

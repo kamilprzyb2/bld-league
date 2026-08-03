@@ -1,5 +1,6 @@
 using BldLeague.Application.Queries.Matches.GetMatchSummaries;
 using BldLeague.Application.Queries.Rounds.GetScrambles;
+using BldLeague.Domain.Enums;
 using BldLeague.Domain.ValueObjects;
 
 namespace BldLeague.Application.Queries.Matches.GetMatchDetailsById;
@@ -11,6 +12,7 @@ public class MatchDetailsDto : MatchSummaryDto
 {
     public Guid SeasonId { get; set; }
     public Guid LeagueId { get; set; }
+    public Guid RoundId { get; set; }
     public int RoundNumber { get; set; }
     public required string SeasonName { get; set; }
     public required string LeagueName { get; set; }
@@ -24,4 +26,8 @@ public class MatchDetailsDto : MatchSummaryDto
     public List<ScrambleDto> Scrambles { get; set; } = new List<ScrambleDto>();
     public DateTime? UserASubmittedAt { get; set; }
     public DateTime? UserBSubmittedAt { get; set; }
+    public RecordLevel UserABestRecord { get; set; }
+    public RecordLevel UserAAverageRecord { get; set; }
+    public RecordLevel UserBBestRecord { get; set; }
+    public RecordLevel UserBAverageRecord { get; set; }
 }

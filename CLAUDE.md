@@ -132,15 +132,18 @@ Keep the UI straightforward: standard Razor Pages with Bootstrap. Avoid custom C
 ### Minimise JavaScript
 Avoid JavaScript by default. Prefer server-side form submissions and page reloads. Only introduce JavaScript (including AJAX) when a feature genuinely cannot be built without it — for example, cascading dropdowns that would require an unreasonable number of round-trips or hidden fields. When JS is necessary, keep it inline on the page and as small as possible.
 
+**Exception — the submission timer.** The built-in timer on `/Submit/SubmitResults` is a deliberate carve-out: its JavaScript lives in `wwwroot/js/submit-timer.js` (not inline), is dependency-free ES2020 with no build step, and hardware input methods are added as self-registering `TimerDriver` implementations under `wwwroot/js/timer-drivers/` (they push onto `window.BldTimerDrivers`) rather than by growing the core. The timer is pure frontend: it only fills the existing `Solves[i].Result` inputs, and the page degrades to the plain manual form when JS is unavailable.
+
 ## Domain Concepts
 
 - **Season** → contains **Rounds** and belongs to multiple **LeagueSeasons**.
 - **League** → a division (e.g., "Liga A"). Multiple leagues run simultaneously within a season.
 - **LeagueSeason** → junction of League + Season; holds the roster (`LeagueSeasonUser`). Users can be assigned a `SubleagueGroup` (integer) on their `LeagueSeasonUser` record to split the league into subleagues during a revenge period. Has `PromotionCount`, `RelegationCount`, `PlayoffPromotionCount`, and `PlayoffRelegationCount` (all int, default 0) — when non-zero, the public standings view renders zone icons: filled green ↑ (Awans), outlined yellow ↑ (Baraż), outlined yellow ↓ (Baraż), filled red ↓ (Spadek). Purely visual.
 - **Season** has no start/end dates — it is just a `SeasonNumber`. "Latest season" (highest `SeasonNumber`) is used as the UI default in AddRound and AddMatch. LeagueSeasons are created manually (not auto-generated).
+- **Season status is derived, not persisted.** There is no `IsFinished`/status column: a season is *finished* when it has at least one round and its latest round's `EndDate` has passed per `RoundClock.IsRoundFinished` (local-calendar-date semantics); a season with no rounds, or any round whose end day has not passed, is *in progress*. The latest round end date per season comes from `IRoundRepository.GetLastRoundEndDateBySeasonAsync()` (seasons without rounds are absent from the dictionary). This status is presentation-only — it gates the trophy icons / `W toku` badge on the profile Klasyfikacja tab; it never affects standings computation.
 - **Match** → 1v1 within a Round + League. Each match has exactly 5 solves (`Match.SOLVES_PER_MATCH`) per player. Scoring: 1 point per solve won + 1 bonus point for best single. Scores are computed and stored at match creation time. Matches have a `MatchStatus` (Upcoming/InProgress/Finished). Round timing uses **local calendar dates** (configured TZ, default `Europe/Warsaw`) via `RoundClock` — a round is active from the start of `StartDate` through the end of `EndDate` inclusive in local time, regardless of UTC offset/DST. A match flips to Finished when the round's local end day has passed *or* `Match.BothSidesSubmitted` is true. Scores and solve details are hidden in the UI until the match is Finished. Players self-submit via `/Submit/SubmitResults`; submission timestamps (`UserASubmittedAt`, `UserBSubmittedAt`) are set on submission. Round standings are refreshed by a daily background service (`RoundStandingsRefreshBackgroundService`) rather than immediately on submission.
 - **Scramble** → one per solve position (1–`Match.SOLVES_PER_MATCH`) per round; shared across all leagues in that round. Field `Notation` holds the move sequence. A round may have 0–5 scrambles.
-- **RoundStanding** — standings per round per league; refreshed on demand via `RefreshRoundStandingsRequest` (single round) or `RefreshAllRoundStandingsRequest` (all finished rounds). Points: place 1–7 → 50–38 (step -2), place 8–44 → 37–1 (step -1).
+- **RoundStanding** — standings per round per league; refreshed on demand via `RefreshRoundStandingsRequest` (single round) or `RefreshAllRoundStandingsRequest` (all finished rounds). Points: place 1–7 → 50–38 (step -2), place 8–44 → 37–1 (step -1). Also stores `BestRecord`/`AverageRecord` (`RecordLevel`: None/Personal/League) — WCA-style PR/site-record pills ("rekord strony") computed historically ("at the time", ties count, site record is global across leagues) by `RefreshRecordsRequest`, which runs after every round standings refresh and via the admin Rankings page.
 - **LeagueSeasonStanding** — cumulative season standings; refreshed via `RefreshLeagueSeasonStandingsRequest` (single league season) or `RefreshAllLeagueSeasonStandingsRequest` (all league seasons).
 
 ## File Map
@@ -162,6 +165,7 @@ Avoid JavaScript by default. Prefer server-side form submissions and page reload
 | `PlayerRanking` entity | `src/Domain/Entities/PlayerRanking.cs` |
 | `User` entity | `src/Domain/Entities/User.cs` |
 | `SolveResult` value object | `src/Domain/ValueObjects/SolveResult.cs` |
+| `RecordLevel` enum (None/Personal/League) | `src/Domain/Enums/RecordLevel.cs` |
 | `AverageCalculator` (Ao5 / Ao12 / Ao25 logic) | `src/Domain/Scoring/AverageCalculator.cs` |
 | `IIdentifiable` interface | `src/Domain/Interfaces/IIdentifiable.cs` |
 
@@ -177,6 +181,10 @@ Avoid JavaScript by default. Prefer server-side form submissions and page reload
 | `ImportRowResult` (per-row import result) | `src/Application/Common/ImportRowResult.cs` |
 | `MatchSolvesProcessor` (shared match logic) | `src/Application/Common/MatchSolvesProcessor.cs` |
 | `StreakCalculator` (shared solve/win streak logic) | `src/Application/Common/StreakCalculator.cs` |
+| `MatchOutcome` enum (Win/Draw/Loss) | `src/Application/Common/MatchOutcome.cs` |
+| `MatchPerspective` (match oriented from one player's side) | `src/Application/Common/MatchPerspective.cs` |
+| `UserStats` (aggregate career stats record) | `src/Application/Common/UserStats.cs` |
+| `UserStatsCalculator` (shared user stats computation) | `src/Application/Common/UserStatsCalculator.cs` |
 | `RoundClock` (round timing in configured league TZ) | `src/Application/Common/RoundClock.cs` |
 | `RoundFinalizationOptions` (TZ + cron schedule config) | `src/Application/Common/RoundFinalizationOptions.cs` |
 | `ScrambleDto` (scramble data transfer) | `src/Application/Queries/Rounds/GetScrambles/ScrambleDto.cs` |
@@ -219,6 +227,7 @@ Avoid JavaScript by default. Prefer server-side form submissions and page reload
 | Refresh round standings (single + refresh-all) | `src/Application/Commands/RoundStandings/Refresh/` and `RefreshAll/` |
 | Refresh season standings (single + refresh-all) | `src/Application/Commands/LeagueSeasonStandings/Refresh/` and `RefreshAll/` |
 | Refresh player rankings | `src/Application/Commands/PlayerRankings/Refresh/` |
+| Refresh PR/site-record levels on round standings | `src/Application/Commands/Records/Refresh/` |
 
 ### Application — queries (read operations, by feature)
 
@@ -239,6 +248,7 @@ Avoid JavaScript by default. Prefer server-side form submissions and page reload
 | Player ranking by user ID | `src/Application/Queries/PlayerRankings/GetByUserId/` |
 | User round results | `src/Application/Queries/Users/GetRoundResults/` |
 | User match history | `src/Application/Queries/Users/GetMatchHistory/` |
+| Head-to-head comparison + DTOs (`HeadToHeadComparisonDto`, `PlayerComparisonSideDto`, `HeadToHeadMatchDto`, `CommonRoundDto`, `RecentFormEntryDto`, `RecentFormStatsDto`) | `src/Application/Queries/Users/GetHeadToHeadComparison/` |
 | User season history | `src/Application/Queries/Users/GetSeasonHistory/` |
 | User solves (for stats computation) | `src/Application/Queries/Users/GetSolves/` |
 | Global statistics summary + 9 chart/record/streak/leader queries (heatmap, solve durations, score distribution, season records, league records, streak leaders, accuracy leaders, rolling Ao12 leaders, rolling Ao25 leaders) | `src/Application/Queries/Statistics/` |
@@ -276,6 +286,19 @@ Avoid JavaScript by default. Prefer server-side form submissions and page reload
 | `MatchStatus` enum (Upcoming/InProgress/Finished) | `src/Web/ViewModels/MatchStatus.cs` |
 | ViewModels | `src/Web/ViewModels/` |
 
+### Web — client-side JS
+
+| File | Purpose |
+|---|---|
+| `src/Web/wwwroot/js/submit-timer.js` | Submission timer core: slot model, state machine, rendering, draft persistence (`localStorage`), `TimerDriver` registry |
+| `src/Web/wwwroot/js/timer-drivers/keyboard.js` | Keyboard/touch `TimerDriver` implementation (space to arm/start/stop, tap pad on mobile) |
+| `src/Web/wwwroot/js/timer-drivers/stackmat.js` | Stackmat (audio jack) `TimerDriver` — decodes the timer signal via the vendored stackmat library, dual-polarity decoding, device choice left to the browser prompt |
+| `src/Web/wwwroot/js/timer-drivers/gan-bluetooth.js` | GAN Smart Timer / GAN Halo `TimerDriver` — hand-rolled Web Bluetooth GATT protocol (no vendored library), Chromium-only, no ticks (core interpolates), recorded time from the STOPPED packet, dirty-timer detection on connect via the read-only stored-time characteristic |
+| `src/Web/wwwroot/lib/stackmat/` | Vendored [stilesdev/stackmat](https://github.com/stilesdev/stackmat) UMD build (MIT) + LICENSE |
+| `src/Web/wwwroot/lib/dseg/` | Vendored [DSEG](https://github.com/keshikan/DSEG) seven-segment font (OFL 1.1) + LICENSE — timer display |
+| `docs/stackmat-timer.md` | Stackmat findings: hardware quirks (polarity, stop-as-idle), library workarounds, browser support, Gen4 test results |
+| `docs/gan-timer.md` | GAN timer findings: GATT protocol (state/stored-time characteristics, packet layout), notify-only limitations, dirty detection, browser support |
+
 ### Web — public pages
 
 | Page | Files |
@@ -293,9 +316,13 @@ Avoid JavaScript by default. Prefer server-side form submissions and page reload
 | Player rankings (single + average) at `/Rankings` | `src/Web/Pages/Rankings/Rankings.cshtml[.cs]` |
 | User list | `src/Web/Pages/Users/UserList.cshtml[.cs]` |
 | User profile | `src/Web/Pages/Users/UserProfile.cshtml[.cs]` |
-| Self-service result submission | `src/Web/Pages/Submit/SubmitResults.cshtml[.cs]` |
+| Head-to-head comparison at `/Compare` | `src/Web/Pages/Compare/Compare.cshtml[.cs]` |
+| Comparison stat row (partial) | `src/Web/Pages/Compare/_ComparisonRow.cshtml` |
+| Self-service result submission (manual + built-in timer modes; scoped styles in `SubmitResults.cshtml.css`) | `src/Web/Pages/Submit/SubmitResults.cshtml[.cs]` |
 | Global statistics page | `src/Web/Pages/Statistics/Statistics.cshtml[.cs]` |
 | Shared stat tile partial (icon + text card) | `src/Web/Pages/Shared/_StatTile.cshtml` |
+| Shared PR/site-record pill partial (takes a `RecordLevel`) | `src/Web/Pages/Shared/_RecordBadge.cshtml` |
+| Shared user datalist partial (takes a `UserDatalistViewModel`) | `src/Web/Pages/Shared/_UserDatalist.cshtml` |
 | About / rules | `src/Web/Pages/About/About.cshtml[.cs]` |
 | Season 4 guidelines (current) | `src/Web/Pages/About/Guidelines.cshtml[.cs]` |
 | Season 3 guidelines (archived) | `src/Web/Pages/About/GuidelinesSeason3.cshtml[.cs]` |

@@ -1,0 +1,7 @@
+@model BldLeague.Web.ViewModels.ComparisonRowViewModel
+
+<tr>
+    <td class="text-end @(Model.HighlightA ? "fw-bold" : "")">@Model.ValueA</td>
+    <td class="text-center text-muted">@Model.Label</td>
+    <td class="@(Model.HighlightB ? "fw-bold" : "")">@Model.ValueB</td>
+</tr>

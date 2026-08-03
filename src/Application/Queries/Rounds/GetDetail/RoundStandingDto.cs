@@ -1,3 +1,4 @@
+using BldLeague.Domain.Enums;
 using BldLeague.Domain.ValueObjects;
 
 namespace BldLeague.Application.Queries.Rounds.GetDetail;
@@ -17,6 +18,8 @@ public class RoundStandingDto
     public SolveResult Solve5 { get; set; }
     public SolveResult Best { get; set; }
     public SolveResult Average { get; set; }
+    public RecordLevel BestRecord { get; set; }
+    public RecordLevel AverageRecord { get; set; }
     public int? Place { get; set; }
     public int Points { get; set; }
 }

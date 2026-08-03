@@ -95,10 +95,10 @@
                 }
                 <tr>
                     <td class="text-center">Best</td>
-                    <td class="fw-bold text-center">@Model.MatchDetails.UserABest</td>
+                    <td class="fw-bold text-center">@Model.MatchDetails.UserABest <partial name="_RecordBadge" model="Model.MatchDetails.UserABestRecord" /></td>
                     @if (!string.IsNullOrEmpty(Model.MatchDetails.UserBFullName))
                     {
-                        <td class="fw-bold text-center">@Model.MatchDetails.UserBBest</td>
+                        <td class="fw-bold text-center">@Model.MatchDetails.UserBBest <partial name="_RecordBadge" model="Model.MatchDetails.UserBBestRecord" /></td>
                     }
                     @if (Model.MatchDetails.IsRoundFinished)
                     {
@@ -107,10 +107,10 @@
                 </tr>
                 <tr>
                     <td class="text-center">Ao5</td>
-                    <td class="fw-bold text-center">@Model.MatchDetails.UserAAverage</td>
+                    <td class="fw-bold text-center">@Model.MatchDetails.UserAAverage <partial name="_RecordBadge" model="Model.MatchDetails.UserAAverageRecord" /></td>
                     @if (!string.IsNullOrEmpty(Model.MatchDetails.UserBFullName))
                     {
-                        <td class="fw-bold text-center">@Model.MatchDetails.UserBAverage</td>
+                        <td class="fw-bold text-center">@Model.MatchDetails.UserBAverage <partial name="_RecordBadge" model="Model.MatchDetails.UserBAverageRecord" /></td>
                     }
                     @if (Model.MatchDetails.IsRoundFinished)
                     {

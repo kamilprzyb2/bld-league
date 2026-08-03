@@ -36,8 +36,8 @@
                 <td class="text-center">@standing.Place</td>
                 <td><a asp-page="/Users/UserProfile" asp-route-id="@standing.UserId">@standing.UserFullName</a></td>
                 <td class="d-none d-md-table-cell">@standing.LeagueIdentifier</td>
-                <td class="fw-bold">@standing.Best</td>
-                <td>@standing.Average</td>
+                <td class="fw-bold">@standing.Best <partial name="_RecordBadge" model="standing.BestRecord" /></td>
+                <td>@standing.Average <partial name="_RecordBadge" model="standing.AverageRecord" /></td>
                 <td class="d-none d-md-table-cell">@standing.Solve1</td>
                 <td class="d-none d-md-table-cell">@standing.Solve2</td>
                 <td class="d-none d-md-table-cell">@standing.Solve3</td>

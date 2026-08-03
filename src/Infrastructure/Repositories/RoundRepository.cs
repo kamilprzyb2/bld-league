@@ -66,6 +66,8 @@ public class RoundRepository(AppDbContext context) :
                         Solve5 = rs.Solve5,
                         Best = rs.Best,
                         Average = rs.Average,
+                        BestRecord = rs.BestRecord,
+                        AverageRecord = rs.AverageRecord,
                         Place = rs.Place == int.MaxValue ? null : rs.Place,
                         Points = rs.Points
                     })
@@ -85,6 +87,12 @@ public class RoundRepository(AppDbContext context) :
                 EndDate = r.EndDate,
             })
             .ToListAsync();
+
+    public async Task<IReadOnlyDictionary<Guid, DateTime>> GetLastRoundEndDateBySeasonAsync()
+        => await DbSet
+            .GroupBy(r => r.SeasonId)
+            .Select(g => new { g.Key, LastEndDate = g.Max(r => r.EndDate) })
+            .ToDictionaryAsync(x => x.Key, x => x.LastEndDate);
 
     public async Task<ActiveRoundLiveDetailDto?> GetActiveRoundLiveDetailAsync(Guid seasonId, int roundNumber)
     {

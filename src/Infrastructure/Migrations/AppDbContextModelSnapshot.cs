@@ -382,9 +382,21 @@ namespace BldLeague.Infrastructure.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("average");
 
+                    b.Property<int>("AverageRecord")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0)
+                        .HasColumnName("average_record");
+
                     b.Property<int>("Best")
                         .HasColumnType("integer")
                         .HasColumnName("best");
+
+                    b.Property<int>("BestRecord")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0)
+                        .HasColumnName("best_record");
 
                     b.Property<Guid>("LeagueId")
                         .HasColumnType("uuid")

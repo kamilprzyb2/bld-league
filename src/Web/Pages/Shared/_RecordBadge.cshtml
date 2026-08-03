@@ -1,0 +1,10 @@
+@using BldLeague.Domain.Enums
+@model RecordLevel
+@if (Model == RecordLevel.League)
+{
+    <span class="badge rounded-pill text-bg-warning" style="font-size:.65rem;" title="Rekord strony"><i class="bi bi-trophy-fill"></i></span>
+}
+else if (Model == RecordLevel.Personal)
+{
+    <span class="badge rounded-pill text-bg-success" style="font-size:.65rem;" title="Rekord życiowy">PR</span>
+}

@@ -14,6 +14,10 @@ namespace BldLeague.Web.Pages.Submit;
 public class SubmitResults(IMediator mediator) : PageModel
 {
     public ActiveSubmissionDto? ActiveSubmission { get; set; }
+    public Guid CurrentUserId { get; set; }
+
+    [BindProperty]
+    public Guid MatchId { get; set; }
 
     [BindProperty]
     public List<SubmitSolveDto> Solves { get; set; } = Enumerable
@@ -26,6 +30,7 @@ public class SubmitResults(IMediator mediator) : PageModel
     public async Task<IActionResult> OnGetAsync()
     {
         var userId = GetUserId();
+        CurrentUserId = userId;
         ActiveSubmission = await mediator.Send(new GetActiveSubmissionRequest(userId));
 
         if (ActiveSubmission == null)
@@ -37,12 +42,15 @@ public class SubmitResults(IMediator mediator) : PageModel
         if (ActiveSubmission.HasSubmitted)
             return RedirectToPage("/Matches/ViewMatch", new { id = ActiveSubmission.MatchId });
 
+        MatchId = ActiveSubmission.MatchId;
+
         return Page();
     }
 
     public async Task<IActionResult> OnPostAsync()
     {
         var userId = GetUserId();
+        CurrentUserId = userId;
 
         if (!ModelState.IsValid)
         {
@@ -50,7 +58,7 @@ public class SubmitResults(IMediator mediator) : PageModel
             return Page();
         }
 
-        var result = await mediator.Send(new SubmitMatchSolvesRequest(userId, Solves));
+        var result = await mediator.Send(new SubmitMatchSolvesRequest(userId, MatchId, Solves));
 
         if (!result.Success)
         {

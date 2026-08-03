@@ -65,4 +65,13 @@ public class RoundStandingRepository(AppDbContext context)
             .OrderByDescending(rs => rs.Round.Season.SeasonNumber)
             .ThenByDescending(rs => rs.Round.RoundNumber)
             .ToListAsync();
+
+    public async Task<IReadOnlyCollection<RoundStanding>> GetAllWithRoundAsync()
+        => await DbSet
+            .Include(rs => rs.Round).ThenInclude(r => r.Season)
+            .ToListAsync();
+
+    public async Task<RoundStanding?> GetByRoundAndUserAsync(Guid roundId, Guid userId)
+        => await DbSet
+            .FirstOrDefaultAsync(rs => rs.RoundId == roundId && rs.UserId == userId);
 }
