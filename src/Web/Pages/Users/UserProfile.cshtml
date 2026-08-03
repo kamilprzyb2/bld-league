@@ -1,5 +1,6 @@
 @page "/Users/{id:guid}"
 @using BldLeague.Application.Queries.Users.GetRoundResults
+@using BldLeague.Domain.Enums
 @using System.Text.Json
 @model BldLeague.Web.Pages.Users.UserProfile
 
@@ -58,16 +59,17 @@
     </div>
 
     @* Personal Records *@
-    <h4>Rekordy osobiste</h4>
-    <div class="table-responsive mb-4">
-        <table class="table table-bordered align-middle">
+    <div class="mx-auto mb-4" style="max-width:700px;">
+        <h4 class="text-center">Rekordy osobiste</h4>
+        <div class="table-responsive">
+            <table class="table table-bordered align-middle">
             <thead>
             <tr>
                 <th>Konkurencja</th>
-                <th data-bs-toggle="tooltip" title="Rekord ligi">LR (single)</th>
-                <th>Best</th>
-                <th>Średnia</th>
-                <th data-bs-toggle="tooltip" title="Rekord ligi">LR (avg)</th>
+                <th class="text-center" style="width:12%;" data-bs-toggle="tooltip" title="Miejsce w rankingu (best)">#</th>
+                <th class="text-center" style="width:15%;">Best</th>
+                <th class="text-center" style="width:15%;">Średnia</th>
+                <th class="text-center" style="width:12%;" data-bs-toggle="tooltip" title="Miejsce w rankingu (średnia)">#</th>
             </tr>
             </thead>
             <tbody>
@@ -76,14 +78,77 @@
                     <img src="/images/333bf.svg" alt="3x3 Bez Patrzenia" style="width:20px;height:20px;vertical-align:middle;" class="me-1 event-icon" />
                     3x3 Bez Patrzenia
                 </td>
-                <td>@(Model.Ranking?.SingleRank?.ToString() ?? "–")</td>
-                <td class="fw-bold">@(Model.Ranking?.BestSingle?.ToString() ?? "–")</td>
-                <td class="fw-bold">@(Model.Ranking?.BestAverage?.ToString() ?? "–")</td>
-                <td>@(Model.Ranking?.AverageRank?.ToString() ?? "–")</td>
+                <td class="text-center">@(Model.Ranking?.SingleRank?.ToString() ?? "–")</td>
+                <td class="text-center fw-bold">@(Model.Ranking?.BestSingle?.ToString() ?? "–")</td>
+                <td class="text-center fw-bold">@(Model.Ranking?.BestAverage?.ToString() ?? "–")</td>
+                <td class="text-center">@(Model.Ranking?.AverageRank?.ToString() ?? "–")</td>
             </tr>
             </tbody>
-        </table>
+            </table>
+        </div>
     </div>
+
+    @* Site record history *@
+    @{
+        var siteRecordResults = Model.RoundResults
+            .Where(r => r.BestRecord == RecordLevel.League || r.AverageRecord == RecordLevel.League)
+            .OrderByDescending(r => r.SeasonNumber)
+            .ThenByDescending(r => r.RoundNumber)
+            .ToList();
+    }
+    @if (siteRecordResults.Any())
+    {
+        <div class="mx-auto mb-4" style="max-width:700px;">
+        <h4 class="text-center">Rekordy strony</h4>
+        <div class="table-responsive">
+            <table class="table table-bordered align-middle">
+                <thead>
+                <tr>
+                    <th class="text-nowrap">Best</th>
+                    <th class="text-nowrap">Średnia</th>
+                    <th>
+                        <span class="d-none d-md-inline">Sezon/Kolejka</span>
+                        <span class="d-inline d-md-none">S/K</span>
+                    </th>
+                    <th class="d-none d-md-table-cell">Ułożenia</th>
+                </tr>
+                </thead>
+                <tbody>
+                @foreach (var record in siteRecordResults)
+                {
+                    <tr>
+                        <td class="fw-bold text-nowrap">
+                            @if (record.BestRecord == RecordLevel.League)
+                            {
+                                @record.Best
+                            }
+                        </td>
+                        <td class="fw-bold text-nowrap">
+                            @if (record.AverageRecord == RecordLevel.League)
+                            {
+                                @record.Average
+                            }
+                        </td>
+                        <td>
+                            <a asp-page="/Rounds/ViewRound" asp-route-SeasonId="@record.SeasonId" asp-route-RoundNumber="@record.RoundNumber">
+                                <span class="d-none d-md-inline">@record.SeasonName @record.RoundName</span>
+                                <span class="d-inline d-md-none">S@(record.SeasonNumber) K@(record.RoundNumber)</span>
+                            </a>
+                        </td>
+                        <td class="font-monospace d-none d-md-table-cell">
+                            @UserProfile.FormatSolveWithParens(record, 0)
+                            @UserProfile.FormatSolveWithParens(record, 1)
+                            @UserProfile.FormatSolveWithParens(record, 2)
+                            @UserProfile.FormatSolveWithParens(record, 3)
+                            @UserProfile.FormatSolveWithParens(record, 4)
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+        </div>
+    }
 
     @* Tabs *@
     <ul class="nav nav-tabs mb-3" id="profileTabs" role="tablist">
@@ -162,8 +227,8 @@
                                     </a>
                                 </td>
                                 <td class="text-center">@placeDisplay</td>
-                                <td class="fw-bold">@result.Best</td>
-                                <td>@result.Average</td>
+                                <td class="fw-bold text-nowrap">@result.Best <partial name="_RecordBadge" model="result.BestRecord" /></td>
+                                <td class="text-nowrap">@result.Average <partial name="_RecordBadge" model="result.AverageRecord" /></td>
                                 <td class="font-monospace d-none d-md-table-cell">
                                     @UserProfile.FormatSolveWithParens(result, 0)
                                     @UserProfile.FormatSolveWithParens(result, 1)

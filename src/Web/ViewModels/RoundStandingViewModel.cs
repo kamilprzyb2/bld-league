@@ -1,4 +1,5 @@
 using BldLeague.Application.Queries.Rounds.GetDetail;
+using BldLeague.Domain.Enums;
 
 namespace BldLeague.Web.ViewModels;
 
@@ -14,6 +15,8 @@ public class RoundStandingViewModel
     public required string Solve5 { get; set; }
     public required string Best { get; set; }
     public required string Average { get; set; }
+    public RecordLevel BestRecord { get; set; }
+    public RecordLevel AverageRecord { get; set; }
     public required string Place { get; set; }
     public int Points { get; set; }
 
@@ -31,6 +34,8 @@ public class RoundStandingViewModel
             Solve5 = dto.Solve5.ToString(),
             Best = dto.Best.ToSummaryString(),
             Average = dto.Average.ToSummaryString(),
+            BestRecord = dto.BestRecord,
+            AverageRecord = dto.AverageRecord,
             Place = dto.Place.HasValue ? dto.Place.Value.ToString() : "-",
             Points = dto.Points
         };

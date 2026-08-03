@@ -12,6 +12,27 @@ public class GetMatchDetailsByIdRequestHandler(IUnitOfWork unitOfWork)
 {
     public async Task<MatchDetailsDto?> Handle(GetMatchDetailsByIdRequest request, CancellationToken cancellationToken)
     {
-        return await unitOfWork.MatchRepository.GetMatchDetailsByIdAsync(request.Id);
+        var details = await unitOfWork.MatchRepository.GetMatchDetailsByIdAsync(request.Id);
+        if (details == null)
+            return null;
+
+        var standingA = await unitOfWork.RoundStandingRepository.GetByRoundAndUserAsync(details.RoundId, details.UserAId);
+        if (standingA != null)
+        {
+            details.UserABestRecord = standingA.BestRecord;
+            details.UserAAverageRecord = standingA.AverageRecord;
+        }
+
+        if (details.UserBId.HasValue)
+        {
+            var standingB = await unitOfWork.RoundStandingRepository.GetByRoundAndUserAsync(details.RoundId, details.UserBId.Value);
+            if (standingB != null)
+            {
+                details.UserBBestRecord = standingB.BestRecord;
+                details.UserBAverageRecord = standingB.AverageRecord;
+            }
+        }
+
+        return details;
     }
 }

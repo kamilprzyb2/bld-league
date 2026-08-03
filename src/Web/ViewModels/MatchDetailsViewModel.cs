@@ -1,6 +1,7 @@
 using BldLeague.Application.Common;
 using BldLeague.Application.Queries.Matches.GetMatchDetailsById;
 using BldLeague.Domain.Entities;
+using BldLeague.Domain.Enums;
 
 namespace BldLeague.Web.ViewModels;
 
@@ -21,6 +22,11 @@ public class MatchDetailsViewModel : MatchSummaryViewModel
     public required string UserBBest { get; set; }
     public required string UserAAverage { get; set; }
     public required string UserBAverage { get; set; }
+
+    public RecordLevel UserABestRecord { get; set; }
+    public RecordLevel UserAAverageRecord { get; set; }
+    public RecordLevel UserBBestRecord { get; set; }
+    public RecordLevel UserBAverageRecord { get; set; }
 
     /// <summary>
     /// Scramble notations indexed 0 to <see cref="Match.SOLVES_PER_MATCH"/>-1.
@@ -56,6 +62,10 @@ public class MatchDetailsViewModel : MatchSummaryViewModel
             UserBBest = dto.UserBBest.ToSummaryString(),
             UserAAverage = dto.UserAAverage.ToSummaryString(),
             UserBAverage = dto.UserBAverage.ToSummaryString(),
+            UserABestRecord = dto.UserABestRecord,
+            UserAAverageRecord = dto.UserAAverageRecord,
+            UserBBestRecord = dto.UserBBestRecord,
+            UserBAverageRecord = dto.UserBAverageRecord,
             Scrambles = Enumerable.Range(1, Match.SOLVES_PER_MATCH)
                 .Select(i => dto.Scrambles.FirstOrDefault(s => s.ScrambleNumber == i)?.Notation)
                 .ToList(),

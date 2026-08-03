@@ -1,4 +1,5 @@
-﻿using BldLeague.Domain.Interfaces;
+﻿using BldLeague.Domain.Enums;
+using BldLeague.Domain.Interfaces;
 using BldLeague.Domain.ValueObjects;
 
 namespace BldLeague.Domain.Entities;
@@ -85,6 +86,16 @@ public class RoundStanding : IIdentifiable
     /// User's average in the round.
     /// </summary>
     public SolveResult Average { get; set; }
+
+    /// <summary>
+    /// Record level of <see cref="Best"/> at the time of the round.
+    /// </summary>
+    public RecordLevel BestRecord { get; set; }
+
+    /// <summary>
+    /// Record level of <see cref="Average"/> at the time of the round.
+    /// </summary>
+    public RecordLevel AverageRecord { get; set; }
 
     /// <summary>
     /// Factory method for creating a new <see cref="RoundStanding"/>.

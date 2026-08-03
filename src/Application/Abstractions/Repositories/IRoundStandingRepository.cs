@@ -14,4 +14,8 @@ public interface IRoundStandingRepository : IReadWriteRepository<RoundStanding>
     Task<IReadOnlyCollection<BestAveragePerUserDto>> GetBestAveragePerUserAsync();
 
     Task<IReadOnlyCollection<RoundStanding>> GetByUserIdWithDetailsAsync(Guid userId);
+
+    Task<IReadOnlyCollection<RoundStanding>> GetAllWithRoundAsync();
+
+    Task<RoundStanding?> GetByRoundAndUserAsync(Guid roundId, Guid userId);
 }
