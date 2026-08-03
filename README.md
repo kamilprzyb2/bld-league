@@ -140,3 +140,7 @@ Versions live in the `.csproj` files; this list is package + purpose only.
 - [EFCore.NamingConventions](https://github.com/efcore/EFCore.NamingConventions) (Infrastructure) — snake_case table/column naming for PostgreSQL.
 - Microsoft.Extensions.Hosting.Abstractions + Microsoft.Extensions.Options.ConfigurationExtensions (Infrastructure) — hosted-service and options wiring for the round-standings refresh background service.
 - Microsoft.EntityFrameworkCore.Design (Web) — design-time support for `dotnet ef migrations`.
+
+## License
+
+[MIT](LICENSE)
