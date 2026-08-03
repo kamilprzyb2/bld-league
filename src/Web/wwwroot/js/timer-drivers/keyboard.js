@@ -116,6 +116,7 @@
         isSupported: () => true,
         unsupportedReason: '',
         requiresConnect: false,
+        requiresReset: false,
         async connect() { },
         async disconnect() { },
         attach(cb) {

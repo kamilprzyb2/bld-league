@@ -231,15 +231,14 @@
         isSupported: () => !!navigator.bluetooth && window.isSecureContext,
         unsupportedReason: 'wymaga przeglądarki z Web Bluetooth (np. Chrome lub Edge; niedostępne na iOS) i połączenia HTTPS',
         requiresConnect: true,
+        requiresReset: true,
         hints: {
             connect: 'Kliknij „Połącz”, aby wybrać timer GAN.',
             connecting: 'Trwa łączenie z timerem…',
-            dirty: 'Zresetuj timer przyciskiem z logo GAN, aby rozpocząć próbę.',
-            idle: 'Połóż ręce na timerze, aby przygotować start.',
+            idle: 'Połóż ręce na timerze, aby wystartować.',
             arming: 'Trzymaj ręce na timerze…',
             ready: 'Puść ręce, aby wystartować.',
-            running: 'Zatrzymaj timer dłońmi, aby zapisać czas.',
-            review: 'Oznacz DNF lub +2, przejdź dalej przyciskiem albo zresetuj timer.'
+            running: 'Zatrzymaj timer dłońmi, aby zapisać czas.'
         },
         async connect() {
             // Runs from the user's click on „Połącz” — Web Bluetooth requires

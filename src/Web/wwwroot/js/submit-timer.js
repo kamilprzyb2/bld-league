@@ -16,13 +16,12 @@
     const HINTS = {
         connect: 'Kliknij „Połącz”, aby połączyć z urządzeniem.',
         connecting: 'Trwa łączenie…',
-        dirty: 'Zresetuj timer.',
-        idle: 'Przytrzymaj spację lub dotknij pola, aby przygotować timer.',
+        dirty: 'Zresetuj timer, aby rozpocząć kolejną próbę.',
+        idle: 'Przytrzymaj spację lub dotknij pola, aby wystartować timer.',
         arming: 'Trzymaj…',
         ready: 'Puść, aby wystartować.',
         running: 'Naciśnij dowolny klawisz lub dotknij pola, aby zatrzymać. Esc — przerwij bez zapisu.',
-        review: 'Oznacz DNF lub +2, albo przejdź do kolejnej próby.',
-        done: 'Wszystkie próby mają wynik — możesz wgrać wyniki.',
+        done: 'Wszystkie próby zakończone — możesz wgrać wyniki.',
         unsupported: 'Wybierz inną metodę wprowadzania.'
     };
 
@@ -72,7 +71,6 @@
         const reviewPanel = document.getElementById('timer-review');
         const dnfButton = document.getElementById('timer-dnf-btn');
         const plusTwoButton = document.getElementById('timer-plus2-btn');
-        const nextButton = document.getElementById('timer-next-btn');
         const slotButtons = Array.from(root.querySelectorAll('button[data-slot]'));
 
         const inputs = Array.from(root.querySelectorAll('input[data-solve-index]'))
@@ -85,8 +83,12 @@
         const connectedDriverIds = new Set();
 
         let mode = 'manual';
-        let phase = 'idle'; // idle | arming | ready | running | review | done
+        let phase = 'idle'; // idle | arming | ready | running | done (+ connect | connecting | dirty | unsupported)
         let currentSlot = 0;
+        // The most recently timed slot: after a stop the timer advances to the
+        // next attempt immediately (csTimer-style — no confirmation step), but
+        // DNF/+2 keep applying to this slot until the next solve starts.
+        let lastRecordedSlot = null;
         let activeDriver = null;
         let driverAttached = false;
         let runningStart = 0;
@@ -154,7 +156,9 @@
             displayEl.classList.toggle('timer-ready', next === 'ready');
             displayEl.classList.toggle('timer-label', next === 'connect' || next === 'connecting');
             displayEl.classList.toggle('timer-message', next === 'unsupported');
-            reviewPanel.classList.toggle('d-none', next !== 'review');
+            const reviewVisible = lastRecordedSlot !== null
+                && (next === 'idle' || next === 'done' || next === 'dirty');
+            reviewPanel.classList.toggle('d-none', !reviewVisible);
             const driverHints = activeDriver && activeDriver.hints ? activeDriver.hints : null;
             hintEl.textContent = (driverHints && driverHints[next]) || HINTS[next] || '';
             refreshSlotButtons();
@@ -229,7 +233,8 @@
         }
 
         function refreshReviewView() {
-            const slot = slots[currentSlot] || { baseCs: null, penalty: null };
+            if (lastRecordedSlot === null) return;
+            const slot = slots[lastRecordedSlot] || { baseCs: null, penalty: null };
             dnfButton.classList.toggle('active', slot.penalty === 'dnf');
             plusTwoButton.classList.toggle('active', slot.penalty === 'plus2');
             if (slot.baseCs === null) return;
@@ -243,8 +248,9 @@
         }
 
         function applyPenaltyToggle(kind) {
-            if (phase !== 'review') return;
-            const slot = slots[currentSlot];
+            if (phase !== 'idle' && phase !== 'done' && phase !== 'dirty') return;
+            if (lastRecordedSlot === null) return;
+            const slot = slots[lastRecordedSlot];
             if (!slot || slot.baseCs === null) return;
             const next = slot.penalty === kind ? null : kind;
             if (next === 'plus2' && slot.baseCs + PLUS_TWO_CS >= MAX_CS) {
@@ -256,34 +262,29 @@
             if (next === 'dnf') value = 'DNF';
             else if (next === 'plus2') value = formatCs(slot.baseCs + PLUS_TWO_CS);
             else value = formatCs(slot.baseCs);
-            writeSlotValue(currentSlot, value);
+            writeSlotValue(lastRecordedSlot, value);
             refreshReviewView();
-        }
-
-        function advanceToNextSlot() {
-            currentSlot = firstEmptySlot(currentSlot);
-            resetTimerState();
         }
 
         const driverCallbacks = {
             onIdle() {
                 if (mode !== 'timer') return;
-                // A physical reset while reviewing confirms the result and
-                // moves on to the next attempt, like clicking „Dalej”.
-                if (phase === 'review') advanceToNextSlot();
-                else if (phase === 'arming' || phase === 'ready' || phase === 'dirty') setIdle();
+                if (phase === 'arming' || phase === 'ready' || phase === 'dirty') setIdle();
             },
             onDirty(ms) {
                 // The device shows a leftover time from before the session —
                 // mirror it and ask for a reset instead of pretending 0.00.
                 if (mode !== 'timer') return;
                 if (phase !== 'idle' && phase !== 'arming' && phase !== 'dirty') return;
+                // The frozen display of the solve that was just recorded is not
+                // a dirty timer (a stopped Stackmat keeps streaming its final
+                // time) — keep showing the result with its penalty formatting.
+                if (lastRecordedSlot !== null && slots[lastRecordedSlot].baseCs === Math.floor(ms / 10)) return;
                 displayEl.textContent = formatCs(Math.floor(ms / 10));
                 if (phase !== 'dirty') enterPhase('dirty');
             },
             onArming() {
                 if (mode !== 'timer') return;
-                if (phase === 'review') advanceToNextSlot();
                 // 'dirty' is allowed through: a solve genuinely starting must
                 // win over a stale-time display (a reset can slip between two
                 // decoded packets and go unnoticed).
@@ -298,6 +299,9 @@
             },
             onStart() {
                 if (mode !== 'timer' || phase !== 'ready') return;
+                // The penalty window for the previous solve closes for good
+                // the moment the next one starts.
+                lastRecordedSlot = null;
                 runningStart = performance.now();
                 lastDisplayUpdate = 0;
                 hasDeviceTick = false;
@@ -319,7 +323,16 @@
                     return;
                 }
                 recordTime(currentSlot, cs);
-                enterPhase('review');
+                // Advance immediately: the next scramble is shown and the timer
+                // is ready to start, while the display keeps the finished
+                // result and DNF/+2 still target it. Hardware that must be
+                // reset before the next solve parks in 'dirty' ("Zresetuj
+                // timer") until the driver reports the reset via onIdle.
+                lastRecordedSlot = currentSlot;
+                currentSlot = firstEmptySlot(currentSlot);
+                if (currentSlot === -1) enterPhase('done');
+                else if (activeDriver && activeDriver.requiresReset) enterPhase('dirty');
+                else enterPhase('idle');
                 refreshReviewView();
             },
             onAbort() {
@@ -526,11 +539,6 @@
             applyPenaltyToggle('plus2');
         });
 
-        nextButton.addEventListener('click', function () {
-            this.blur();
-            if (phase === 'review') advanceToNextSlot();
-        });
-
         slotButtons.forEach(button => button.addEventListener('click', function () {
             if (phase === 'arming' || phase === 'ready' || phase === 'running' || phase === 'connecting' || phase === 'unsupported') return;
             const i = Number(this.dataset.slot);
@@ -543,6 +551,8 @@
         inputs.forEach((input, i) => input.addEventListener('input', function () {
             slots[i] = { baseCs: null, penalty: null };
             delete input.dataset.baseCs;
+            // Manual edits detach the slot from the timer's penalty buttons.
+            if (i === lastRecordedSlot) lastRecordedSlot = null;
             refreshSlotButtons();
             scheduleDraftSave();
         }));

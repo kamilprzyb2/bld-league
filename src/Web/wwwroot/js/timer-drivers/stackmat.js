@@ -326,15 +326,14 @@
         isSupported: () => !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia && window.isSecureContext),
         unsupportedReason: 'wymaga bezpiecznego połączenia (HTTPS) i dostępu do mikrofonu',
         requiresConnect: true,
+        requiresReset: true,
         hints: {
             connect: 'Kliknij „Połącz”, aby połączyć z timerem.',
             connecting: 'Czekam na sygnał z timera…',
-            dirty: 'Zresetuj timer, aby rozpocząć próbę.',
-            idle: 'Połóż ręce na timerze, aby przygotować start.',
+            idle: 'Połóż ręce na timerze, aby wystartować.',
             arming: 'Trzymaj ręce na timerze…',
             ready: 'Puść ręce, aby wystartować.',
-            running: 'Zatrzymaj timer dłońmi, aby zapisać czas.',
-            review: 'Oznacz DNF lub +2, przejdź dalej przyciskiem albo zresetuj timer.'
+            running: 'Zatrzymaj timer dłońmi, aby zapisać czas.'
         },
         async connect() {
             // Runs from the user's click on „Połącz”, so the permission prompt

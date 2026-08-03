@@ -57,8 +57,11 @@ State codes (byte 3 of a state packet):
   grace delay → back to idle.
 - The recorded result comes **exclusively** from the STOPPED packet — never
   from a local clock.
-- Resetting the timer while a result is under review confirms it and
-  advances to the next attempt (same convention as the Stackmat driver).
+- After a stop the page advances straight to the next attempt (next scramble
+  shown) and asks for a reset („Zresetuj timer”); the
+  finished time stays on the display and DNF/+2 keep targeting it until the
+  next solve starts. The IDLE notification (logo button pressed) returns the
+  display to `0.00` with the normal start hint.
 - Leftover-time ("dirty") detection **at connect time**: after every
   (re)connection the driver reads `fff2`; a non-zero displayed time flips the
   UI into its dirty state (leftover time mirrored, "Zresetuj timer" hint)

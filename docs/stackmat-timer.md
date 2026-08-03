@@ -29,8 +29,13 @@ device-selection pitfalls (see below).
 - Leftover-time detection: if the timer still displays a result from before
   the session, the page mirrors it and asks for a reset instead of showing
   a fake `0.00`.
-- Resetting the timer while a result is under review confirms it and
-  advances to the next attempt.
+- After a stop the page advances straight to the next attempt (next scramble
+  shown) and asks for a reset („Zresetuj timer”); the finished time stays on
+  the display and DNF/+2 keep targeting it until the next solve starts. Once
+  the reset is detected (the displayed time drops back to zero at packet
+  level) the display returns to `0.00` with the normal start hint. The frozen
+  final time the stopped device keeps streaming is recognised and never
+  overwrites the result's penalty formatting.
 
 ## What does not work (and why)
 
