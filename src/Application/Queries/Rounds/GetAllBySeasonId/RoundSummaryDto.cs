@@ -17,13 +17,21 @@ public static class RoundSummaryDtoExtensions
 {
     /// <summary>
     /// Returns the default round to display when the user hasn't picked one.
-    /// Assumes <paramref name="rounds"/> is ordered by RoundNumber ascending (as returned by the repository).
     ///
-    /// Returns the currently active round if one exists; otherwise falls back to the round with the highest RoundNumber.
+    /// Selection chain: the currently active round if one exists; otherwise the finished round
+    /// with the highest RoundNumber; otherwise (no round has finished yet, i.e. the season
+    /// hasn't started) the round with the lowest RoundNumber.
     /// </summary>
     public static RoundSummaryDto GetDefaultRound(this IReadOnlyCollection<RoundSummaryDto> rounds, RoundClock clock)
     {
         var active = rounds.FirstOrDefault(r => clock.IsRoundActive(r.StartDate, r.EndDate));
-        return active ?? rounds.Last();
+        if (active != null)
+            return active;
+
+        var lastFinished = rounds
+            .Where(r => clock.IsRoundFinished(r.EndDate))
+            .MaxBy(r => r.RoundNumber);
+
+        return lastFinished ?? rounds.MinBy(r => r.RoundNumber)!;
     }
 }
