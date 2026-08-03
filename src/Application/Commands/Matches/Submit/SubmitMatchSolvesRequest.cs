@@ -7,6 +7,7 @@ namespace BldLeague.Application.Commands.Matches.Submit;
 
 public record SubmitMatchSolvesRequest(
     Guid UserId,
+    Guid MatchId,
     List<SubmitSolveDto> Solves
 ) : IRequest<CommandResult>;
 

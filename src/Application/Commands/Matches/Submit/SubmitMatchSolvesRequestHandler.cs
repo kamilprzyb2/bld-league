@@ -22,6 +22,10 @@ public class SubmitMatchSolvesRequestHandler(IUnitOfWork unitOfWork, RoundClock 
         if (match.HasUserSubmitted(request.UserId))
             return CommandResult.FailGeneral("Wyniki dla tego meczu zostały już wgrane.");
 
+        if (match.Id != request.MatchId)
+            return CommandResult.FailGeneral(
+                "Aktywna kolejka zmieniła się od momentu otwarcia formularza. Odśwież stronę i wpisz wyniki ponownie.");
+
         if (request.Solves.Count != Match.SOLVES_PER_MATCH)
             return CommandResult.FailGeneral(
                 $"Podano nieprawidłową liczbę wyników: {request.Solves.Count}. Oczekiwana wartość to {Match.SOLVES_PER_MATCH}.");
