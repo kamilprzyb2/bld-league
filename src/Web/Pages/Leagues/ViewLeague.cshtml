@@ -50,6 +50,7 @@
             @if (Model.LeagueSeason.Standings.Any())
             {
                 var hasMultipleGroups = Model.LeagueSeason.Standings.Select(s => s.SubleagueGroup).Distinct().Count() > 1;
+                var hasAnyResults = Model.LeagueSeason.Standings.Any(s => s.MatchesPlayed > 0);
                 int? previousGroup = null;
                 foreach (var standing in Model.LeagueSeason.Standings)
                 {
@@ -58,8 +59,9 @@
                         <tr style="border-top: 2px solid var(--bs-secondary-color);"><td colspan="12" class="p-0"></td></tr>
                     }
                     previousGroup = standing.SubleagueGroup;
+                    var placeDisplay = hasAnyResults ? standing.Place.ToString() : "—";
                     <tr class="js-detail-row"
-                        data-place="@standing.Place"
+                        data-place="@placeDisplay"
                         data-name="@standing.UserFullName"
                         data-m="@standing.MatchesPlayed"
                         data-z="@standing.MatchesWon"
@@ -71,22 +73,22 @@
                         data-ps="@standing.SmallPointsLost"
                         data-rp="@standing.SmallPointsBalance"
                         data-best="@standing.Best">
-                        <td class="text-center">@standing.Place</td>
+                        <td class="text-center">@placeDisplay</td>
                         <td>
                             <a asp-page="/Users/UserProfile" asp-route-id="@standing.UserId">@standing.UserFullName</a>
-                            @if (Model.LeagueSeason.PromotionCount > 0 && standing.Place <= Model.LeagueSeason.PromotionCount)
+                            @if (hasAnyResults && Model.LeagueSeason.PromotionCount > 0 && standing.Place <= Model.LeagueSeason.PromotionCount)
                             {
                                 <i class="bi bi-arrow-up-circle-fill text-success ms-1" data-bs-toggle="tooltip" title="Awans"></i>
                             }
-                            @if (Model.LeagueSeason.PlayoffPromotionCount > 0 && standing.Place > Model.LeagueSeason.PromotionCount && standing.Place <= Model.LeagueSeason.PromotionCount + Model.LeagueSeason.PlayoffPromotionCount)
+                            @if (hasAnyResults && Model.LeagueSeason.PlayoffPromotionCount > 0 && standing.Place > Model.LeagueSeason.PromotionCount && standing.Place <= Model.LeagueSeason.PromotionCount + Model.LeagueSeason.PlayoffPromotionCount)
                             {
                                 <i class="bi bi-arrow-up-circle text-warning ms-1" data-bs-toggle="tooltip" title="Baraż"></i>
                             }
-                            @if (Model.LeagueSeason.PlayoffRelegationCount > 0 && standing.Place <= Model.LeagueSeason.Standings.Count - Model.LeagueSeason.RelegationCount && standing.Place > Model.LeagueSeason.Standings.Count - Model.LeagueSeason.RelegationCount - Model.LeagueSeason.PlayoffRelegationCount)
+                            @if (hasAnyResults && Model.LeagueSeason.PlayoffRelegationCount > 0 && standing.Place <= Model.LeagueSeason.Standings.Count - Model.LeagueSeason.RelegationCount && standing.Place > Model.LeagueSeason.Standings.Count - Model.LeagueSeason.RelegationCount - Model.LeagueSeason.PlayoffRelegationCount)
                             {
                                 <i class="bi bi-arrow-down-circle text-warning ms-1" data-bs-toggle="tooltip" title="Baraż"></i>
                             }
-                            @if (Model.LeagueSeason.RelegationCount > 0 && standing.Place > Model.LeagueSeason.Standings.Count - Model.LeagueSeason.RelegationCount)
+                            @if (hasAnyResults && Model.LeagueSeason.RelegationCount > 0 && standing.Place > Model.LeagueSeason.Standings.Count - Model.LeagueSeason.RelegationCount)
                             {
                                 <i class="bi bi-arrow-down-circle-fill text-danger ms-1" data-bs-toggle="tooltip" title="Spadek"></i>
                             }

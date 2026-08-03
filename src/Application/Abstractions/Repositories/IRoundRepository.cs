@@ -16,4 +16,10 @@ public interface IRoundRepository : IReadWriteRepository<Round>
     Task<RoundDetailDto?> GetRoundDetailAsync(Guid seasonId, int roundNumber);
     Task<IReadOnlyCollection<ActiveRoundSummaryDto>> GetRoundsActiveOnDateAsync(DateTime localToday);
     Task<ActiveRoundLiveDetailDto?> GetActiveRoundLiveDetailAsync(Guid seasonId, int roundNumber);
+
+    /// <summary>
+    /// Returns the latest round <c>EndDate</c> per season ID.
+    /// Seasons with no rounds are absent from the dictionary.
+    /// </summary>
+    Task<IReadOnlyDictionary<Guid, DateTime>> GetLastRoundEndDateBySeasonAsync();
 }
