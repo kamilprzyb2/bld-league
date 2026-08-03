@@ -66,6 +66,8 @@ public class RoundRepository(AppDbContext context) :
                         Solve5 = rs.Solve5,
                         Best = rs.Best,
                         Average = rs.Average,
+                        BestRecord = rs.BestRecord,
+                        AverageRecord = rs.AverageRecord,
                         Place = rs.Place == int.MaxValue ? null : rs.Place,
                         Points = rs.Points
                     })
