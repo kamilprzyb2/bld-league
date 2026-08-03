@@ -1,0 +1,67 @@
+.timer-pad {
+    padding: 3rem 1rem;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+    cursor: pointer;
+}
+
+@font-face {
+    font-family: 'DSEG7 Classic';
+    src: url('/lib/dseg/fonts/DSEG7Classic-Regular.woff2') format('woff2');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'DSEG7 Classic';
+    src: url('/lib/dseg/fonts/DSEG7Classic-Bold.woff2') format('woff2');
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+
+.timer-display {
+    /* Seven-segment display font: every digit has the same width, so the
+       running time doesn't jitter as digits change. */
+    font-family: 'DSEG7 Classic', monospace;
+    font-size: clamp(2rem, 8vw, 3.5rem);
+    font-weight: 400;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.1;
+}
+
+.timer-hand {
+    width: clamp(2.25rem, 7vw, 3.75rem);
+    height: clamp(2.25rem, 7vw, 3.75rem);
+    flex-shrink: 0;
+}
+
+.timer-hand-right {
+    /* The symbol is a left hand (thumb inward); mirror it for the right pad. */
+    transform: scaleX(-1);
+}
+
+.timer-display.timer-label {
+    /* Connect prompt / progress text — Polish diacritics don't exist in the
+       seven-segment font, so fall back to the regular UI font. */
+    font-family: var(--bs-body-font-family);
+    font-size: clamp(1.5rem, 6vw, 2.5rem);
+}
+
+.timer-display.timer-message {
+    /* Full-sentence driver messages (e.g. unsupported browser) — regular UI
+       font at a modest size so long text wraps instead of dwarfing the pad. */
+    font-family: var(--bs-body-font-family);
+    font-size: clamp(1rem, 3vw, 1.25rem);
+    color: var(--bs-danger);
+}
+
+.timer-display.timer-arming {
+    color: var(--bs-danger);
+}
+
+.timer-display.timer-ready {
+    color: var(--bs-success);
+}
