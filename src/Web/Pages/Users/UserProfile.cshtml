@@ -1,6 +1,7 @@
 @page "/Users/{id:guid}"
 @using BldLeague.Application.Queries.Users.GetRoundResults
 @using BldLeague.Domain.Enums
+@using BldLeague.Web.ViewModels
 @using System.Text.Json
 @model BldLeague.Web.Pages.Users.UserProfile
 
@@ -46,12 +47,7 @@
                 <div class="input-group" style="max-width:420px;">
                     <input type="hidden" name="UserAId" value="@Model.Profile.Id" />
                     <input list="comparisonUsers" name="Opponent" class="form-control" placeholder="Wybierz zawodnika" />
-                    <datalist id="comparisonUsers">
-                        @foreach (var comparisonUser in Model.AllUsers.Where(u => u.Id != Model.Profile.Id))
-                        {
-                            <option value="@($"{comparisonUser.FullName} ({comparisonUser.WcaId})")"></option>
-                        }
-                    </datalist>
+                    <partial name="_UserDatalist" model='new UserDatalistViewModel("comparisonUsers", Model.AllUsers.Where(u => u.Id != Model.Profile.Id))' />
                     <button type="submit" class="btn btn-primary">Porównaj</button>
                 </div>
             </form>
@@ -498,7 +494,7 @@
     }
     @if (validChartPoints.Count >= 2)
     {
-        <script src="https://cdn.jsdelivr.net/npm/chart.js@@4"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
         <script>
             (function () {
                 var labels = @Html.Raw(JsonSerializer.Serialize(validChartPoints.Select(r => $"S{r.SeasonNumber} K{r.RoundNumber}").ToArray()));

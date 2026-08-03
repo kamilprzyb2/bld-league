@@ -119,3 +119,4 @@ dotnet run --project src/Web
 
 - [stackmat](https://github.com/stilesdev/stackmat) (MIT) — decodes the audio-jack signal of a Stackmat/SpeedStacks timer in the browser; powers the Stackmat input method of the result submission timer. Vendored under `src/Web/wwwroot/lib/stackmat/`.
 - [DSEG](https://github.com/keshikan/DSEG) (SIL OFL 1.1) — seven-segment display font used for the submission timer's time display. Vendored under `src/Web/wwwroot/lib/dseg/`.
+- [Chart.js](https://www.chartjs.org/) (MIT) — renders the Progresja charts on the user profile, statistics, and player comparison pages. Loaded from the jsdelivr CDN, pinned to 4.4.4 on every page; if the CDN is unreachable the charts are skipped but the pages still work.

@@ -52,8 +52,11 @@
 
         const form = root.closest('form');
         const matchId = root.dataset.matchId;
+        const userId = root.dataset.userId;
         const noScrambleText = root.dataset.noScrambleText || '';
-        const draftKey = DRAFT_KEY_PREFIX + matchId;
+        // Keyed by user as well as match — both opponents share the match id,
+        // so on a shared browser one player's draft must not prefill the other's form.
+        const draftKey = DRAFT_KEY_PREFIX + userId + '.' + matchId;
 
         const modeToggle = document.getElementById('mode-toggle');
         const modeManualButton = document.getElementById('mode-manual-btn');

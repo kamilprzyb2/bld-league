@@ -322,6 +322,7 @@ Avoid JavaScript by default. Prefer server-side form submissions and page reload
 | Global statistics page | `src/Web/Pages/Statistics/Statistics.cshtml[.cs]` |
 | Shared stat tile partial (icon + text card) | `src/Web/Pages/Shared/_StatTile.cshtml` |
 | Shared PR/site-record pill partial (takes a `RecordLevel`) | `src/Web/Pages/Shared/_RecordBadge.cshtml` |
+| Shared user datalist partial (takes a `UserDatalistViewModel`) | `src/Web/Pages/Shared/_UserDatalist.cshtml` |
 | About / rules | `src/Web/Pages/About/About.cshtml[.cs]` |
 | Season 4 guidelines (current) | `src/Web/Pages/About/Guidelines.cshtml[.cs]` |
 | Season 3 guidelines (archived) | `src/Web/Pages/About/GuidelinesSeason3.cshtml[.cs]` |

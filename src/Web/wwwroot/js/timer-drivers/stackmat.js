@@ -262,6 +262,9 @@
         // The library hardcodes its own getUserMedia constraints (it ignores
         // autoGainControl) and swallows errors, so hand it the prepared stream
         // by substituting getUserMedia for the synchronous duration of start().
+        // This relies on the vendored stackmat v1.1.1 calling getUserMedia
+        // synchronously inside start() — do not upgrade lib/stackmat without
+        // re-testing this substitution against real timer hardware.
         const mediaDevices = navigator.mediaDevices;
         const originalGetUserMedia = mediaDevices.getUserMedia;
         mediaDevices.getUserMedia = () => Promise.resolve(instanceStream);

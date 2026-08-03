@@ -1,0 +1,8 @@
+@model BldLeague.Web.ViewModels.UserDatalistViewModel
+
+<datalist id="@Model.Id">
+    @foreach (var pickerUser in Model.Users)
+    {
+        <option value="@($"{pickerUser.FullName} ({pickerUser.WcaId})")"></option>
+    }
+</datalist>
