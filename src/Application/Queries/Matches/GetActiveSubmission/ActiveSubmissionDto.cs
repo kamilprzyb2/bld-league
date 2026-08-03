@@ -9,6 +9,7 @@ public class ActiveSubmissionDto
     public string RoundName { get; init; } = string.Empty;
     public string LeagueIdentifier { get; init; } = string.Empty;
     public string OpponentName { get; init; } = string.Empty;
+    public Guid? OpponentId { get; init; }
     public bool HasSubmitted { get; init; }
     public DateTime? SubmittedAt { get; init; }
     public IReadOnlyList<ScrambleDto> Scrambles { get; init; } = [];

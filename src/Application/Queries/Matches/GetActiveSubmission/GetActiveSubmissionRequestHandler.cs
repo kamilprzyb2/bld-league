@@ -14,9 +14,8 @@ public class GetActiveSubmissionRequestHandler(IUnitOfWork unitOfWork, RoundCloc
         if (match == null)
             return null;
 
-        var opponentName = match.UserAId == request.UserId
-            ? match.UserB?.FullName ?? string.Empty
-            : match.UserA.FullName;
+        var perspective = MatchPerspective.For(match, request.UserId);
+        var opponentName = perspective.OpponentFullName ?? string.Empty;
 
         var scrambles = match.Round.Scrambles
             .OrderBy(s => s.ScrambleNumber)
@@ -45,6 +44,7 @@ public class GetActiveSubmissionRequestHandler(IUnitOfWork unitOfWork, RoundCloc
             RoundName = roundName,
             LeagueIdentifier = match.LeagueSeason.League.LeagueIdentifier,
             OpponentName = opponentName,
+            OpponentId = perspective.OpponentId,
             HasSubmitted = hasSubmitted,
             SubmittedAt = submittedAt,
             Scrambles = scrambles,
