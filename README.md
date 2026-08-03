@@ -117,6 +117,26 @@ dotnet run --project src/Web
 
 ## Dependencies
 
-- [stackmat](https://github.com/stilesdev/stackmat) (MIT) — decodes the audio-jack signal of a Stackmat/SpeedStacks timer in the browser; powers the Stackmat input method of the result submission timer. Vendored under `src/Web/wwwroot/lib/stackmat/`.
-- [DSEG](https://github.com/keshikan/DSEG) (SIL OFL 1.1) — seven-segment display font used for the submission timer's time display. Vendored under `src/Web/wwwroot/lib/dseg/`.
-- [Chart.js](https://www.chartjs.org/) (MIT) — renders the Progresja charts on the user profile, statistics, and player comparison pages. Loaded from the jsdelivr CDN, pinned to 4.4.4 on every page; if the CDN is unreachable the charts are skipped but the pages still work.
+### Frontend
+
+Vendored under `src/Web/wwwroot/lib/` — the files are checked into the repo, so no npm or other frontend tooling is needed:
+
+- [Bootstrap](https://getbootstrap.com/) (MIT) — the only CSS framework; also provides the JS for dropdowns, collapses, tabs, and tooltips.
+- [Bootstrap Icons](https://icons.getbootstrap.com/) (MIT) — icon font used across all pages.
+- [jQuery](https://jquery.com/) (MIT) + [jquery-validation](https://jqueryvalidation.org/) / [jquery-validation-unobtrusive](https://github.com/aspnet/jquery-validation-unobtrusive) (MIT) — client-side validation of Razor Pages forms.
+- [stackmat](https://github.com/stilesdev/stackmat) (MIT) — decodes the audio-jack signal of a Stackmat/SpeedStacks timer in the browser; powers the Stackmat input method of the result submission timer. Do not upgrade without re-testing against real hardware (see the comment in `src/Web/wwwroot/js/timer-drivers/stackmat.js`).
+- [DSEG](https://github.com/keshikan/DSEG) (SIL OFL 1.1) — seven-segment display font used for the submission timer's time display.
+- [Chart.js](https://www.chartjs.org/) (MIT) — renders the Progresja charts on the user profile, statistics, and player comparison pages.
+- [Tom Select](https://tom-select.js.org/) (Apache-2.0) — searchable user picker on the admin league-season roster page.
+
+No dependency is loaded from a CDN — the site is fully self-contained.
+
+### NuGet
+
+Versions live in the `.csproj` files; this list is package + purpose only.
+
+- [MediatR](https://github.com/jbogard/MediatR) (Application) — CQRS request/handler dispatch between the Web and Application layers.
+- [Microsoft.EntityFrameworkCore](https://learn.microsoft.com/ef/core/) + [Npgsql.EntityFrameworkCore.PostgreSQL](https://www.npgsql.org/efcore/) (Infrastructure) — ORM and its PostgreSQL provider.
+- [EFCore.NamingConventions](https://github.com/efcore/EFCore.NamingConventions) (Infrastructure) — snake_case table/column naming for PostgreSQL.
+- Microsoft.Extensions.Hosting.Abstractions + Microsoft.Extensions.Options.ConfigurationExtensions (Infrastructure) — hosted-service and options wiring for the round-standings refresh background service.
+- Microsoft.EntityFrameworkCore.Design (Web) — design-time support for `dotnet ef migrations`.
